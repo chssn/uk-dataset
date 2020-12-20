@@ -76,6 +76,8 @@ def enr41(table):
         ## Set the navaid type correctly
         if name[1] == "VORDME":
             name[1] = "VOR"
+        elif name[1] == "DME":
+            name[1] = "VOR"
 
         ## Construct the element
         xmlC = xtree.SubElement(xmlIntersections, 'Point')
@@ -126,13 +128,13 @@ for row in listAerodromeList:
     if getAerodrome is not None:
         fullAerodromeList.add(getAerodrome)
 
-## Find out how big the list is
+## Find out how many areodromes are in the list
 numberOfAerodromes = len(fullAerodromeList)
 
-## Place a full list of runways into a set
-fullRunwayList = {"EGLL-26L", "EGLL-26R"}
 with alive_bar(numberOfAerodromes + 2) as bar:
     for aerodrome in fullAerodromeList:
+        ## Place a full list of runways into a set
+        fullRunwayList = {"EGLL-26L", "EGLL-26R"}
         ## list all aerodrome runways
         bar() # progress the progress bar
         getRunways = getAiracTable("EG-AD-2."+ aerodrome +"-en-GB.html")
@@ -144,14 +146,15 @@ with alive_bar(numberOfAerodromes + 2) as bar:
             aerodromeRunways = getRunways.find(id=aerodrome + "-AD-2.12")
 
             for rwy in aerodromeRunways:
-                addRunway = rwy.find_all(string=re.compile("^[0-3]{1}[0-9]{1}[L|R|C]?$"))
+                addRunway = rwy.find_all(string=re.compile("(RWY)\s[0-3]{1}[0-9]{1}[L|R|C]?$"))
                 for a in addRunway:
                     if a is not None:
-                        fullRunwayList.add(aerodrome + "-" + a)
+                        rwyDes = a.split()
+                        fullRunwayList.add(aerodrome + "-" + rwyDes[1])
                         ## Add to XML construct
                         xmlRunway = xtree.SubElement(xmlAerodrome, 'Runway')
-                        xmlRunway.set('Name', a)
-                        xmlRunway.set('DataRunway', a)
+                        xmlRunway.set('Name', rwyDes[1])
+                        xmlRunway.set('DataRunway', rwyDes[1])
                         xmlAerodrome.extend(xmlRunway)
         else:
             print(Fore.RED + "Aerodrome " + aerodrome + " does not exist" + Style.RESET_ALL)
@@ -183,5 +186,4 @@ with alive_bar(numberOfAerodromes + 2) as bar:
 ## Close everything off and export                                                                      ##
 ##########################################################################################################
 tree = xtree.ElementTree(xmlAirspace)
-
 tree.write('export.xml', encoding="utf-8", xml_declaration=True)
