@@ -183,6 +183,32 @@ with alive_bar(numberOfAerodromes + 2) as bar:
     bar() # progress the progress bar
 
 ##########################################################################################################
+## Define the XML sub tag 'SIDSTARs' - https://virtualairtrafficsystem.com/docs/dpk/#sidstars           ##
+##########################################################################################################
+# IDEA: This is currently scraping the *.ese file from VATSIM-UK. Need to find a better way of doing this. Too much hard code here and it's lazy!
+    xmlSidStar = xtree.SubElement(xmlAirspace, 'SIDSTARs')
+
+    ese = open("UK.ese", "r")
+    for line in ese:
+        ## Pull out all SIDs
+        if line.startswith("SID"):
+            element = line.split(":")
+            areodrome = element[1]
+            runway = element[2]
+            sid = element[3]
+            route = element[4]
+
+            ## Add to XML construct
+            xmlSid = xtree.SubElement(xmlSidStar, 'SID')
+            xmlSid.set('Name', sid)
+            xmlSid.set('Airport', areodrome)
+            xmlRoute = xtree.SubElement(xmlSid, "Route")
+            xmlRoute.set("Runway", runway)
+            xmlRoute.text = route
+            xmlSid.extend(xmlRoute)
+        xmlSidStar.extend(xmlSid)
+
+##########################################################################################################
 ## Close everything off and export                                                                      ##
 ##########################################################################################################
 tree = xtree.ElementTree(xmlAirspace)
