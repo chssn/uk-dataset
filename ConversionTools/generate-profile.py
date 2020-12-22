@@ -88,16 +88,6 @@ def enr41(table):
         sql = "INSERT INTO navaids (name, type, coords) SELECT * FROM (SELECT '"+ str(name[2]) +"' AS srcName, '"+ str(name[1]) +"' AS srcType, '"+ str(fullCoord) +"' AS srcCoord) AS tmp WHERE NOT EXISTS (SELECT name FROM navaids WHERE name =  '"+ str(name[2]) +"' AND type =  '"+ str(name[1]) +"' AND coords = '"+ str(fullCoord) +"') LIMIT 1"
         mysqlExec(sql, "insertUpdate")
 
-        ## Construct the element
-        xmlC = xtree.SubElement(xmlIntersections, 'Point')
-        xmlC.set('Name', name[2])
-        xmlC.set('Type', 'Navaid')
-        xmlC.set('NavaidType', name[1])
-        xmlC.text = fullCoord
-        children.append(xmlC)
-
-    return children
-
 def enr44(table):
     ## For every row that is found, do...
     children = []
@@ -112,15 +102,6 @@ def enr44(table):
         sql = "INSERT INTO fixes (name, coords) SELECT * FROM (SELECT '"+ str(name[1]) +"' AS srcName, '"+ str(fullCoord) +"' AS srcCoord) AS tmp WHERE NOT EXISTS (SELECT name FROM fixes WHERE name =  '"+ str(name[1]) +"' AND coords = '"+ str(fullCoord) +"') LIMIT 1"
         mysqlExec(sql, "insertUpdate")
 
-        ## Construct the element
-        xmlC = xtree.SubElement(xmlIntersections, 'Point')
-        xmlC.set('Name', name[1])
-        xmlC.set('Type', 'Fix')
-        xmlC.text = fullCoord
-        children.append(xmlC)
-
-    return children
-
 def mysqlExec(sql, type):
     try:
         if type == "insertUpdate":
@@ -134,6 +115,7 @@ def mysqlExec(sql, type):
             return cursor.fetchall()
     except mysql.connector.Error as err:
         print(err)
+        exit()
 
 def plusMinus(arg):
     if arg == "N" or arg == "E":
@@ -258,7 +240,7 @@ class Profile():
         tree.write('Airspace.xml', encoding="utf-8", xml_declaration=True)
     # BUG: Probably read the whole XML through and run this regex (Runways=")([0-9]{2}[L|R|C]?)([0-9]{2}[L|R|C]?)(") and replace $1$2,$3$4
     def clearDatabase():
-        print(Fore.RED + "WARNING!" + Style.RESET_ALL)
+        print(Fore.RED + "!!!WARNING!!!" + Style.RESET_ALL)
         print("This will truncate (delete) the contents of all tables in this database.")
         print("Are you sure you wish to contine? Please type 'confirm' to continue: ")
         confirmation = input()
@@ -280,20 +262,23 @@ class Profile():
             cursor.execute(sqlG)
         else:
             print("No data has been deleted. We think...")
-            exit()
+            exit()  ## Clear the database
+
+    def processAd06Data():
+        print("Processing EG-AD-0.6 data to obtain ICAO designators...")
+        getAerodromeList = getAiracTable("EG-AD-0.6-en-GB.html")
+        listAerodromeList = getAerodromeList.find_all("tr") # IDEA: Think there is a more efficient way of parsing this data
+        for row in listAerodromeList:
+            getAerodrome = row.find(string=re.compile("^(EG)[A-Z]{2}$"))
+            if getAerodrome is not None:
+                ## Place each aerodrome into the DB
+                sql = "INSERT INTO aerodromes (icao_designator, verified, location) VALUES ('"+ getAerodrome +"' , 0, 0)"
+                mysqlExec(sql, "insertUpdate")  ## Process data from AD 0.6
 
 ## Truncate all tables in the database. After all, this should only be run once per AIRAC cycle...
 Profile.clearDatabase()
 ## Get AD2 aerodrome list from AD0.6 table
-print("Processing EG-AD-0.6 data to obtain ICAO designators...")
-getAerodromeList = getAiracTable("EG-AD-0.6-en-GB.html")
-listAerodromeList = getAerodromeList.find_all("tr") # IDEA: Think there is a more efficient way of parsing this data
-for row in listAerodromeList:
-    getAerodrome = row.find(string=re.compile("^(EG)[A-Z]{2}$"))
-    if getAerodrome is not None:
-        ## Place each aerodrome into the DB
-        sql = "INSERT INTO aerodromes (icao_designator, verified, location) VALUES ('"+ getAerodrome +"' , 0, 0)"
-        mysqlExec(sql, "insertUpdate")
+Profile.processAd06Data()
 
 ## Count the number of ICAO designators (may not actually be a verified aerodrome)
 sql = "SELECT COUNT(icao_designator) AS NumberofAerodromes FROM aerodromes"
@@ -304,7 +289,7 @@ with alive_bar(numberofAerodromes[0]) as bar: ## Define the progress bar
     sql = "SELECT id, icao_designator FROM aerodromes"
     tableAerodrome = mysqlExec(sql, "selectMany")
 
-    for aerodrome in tableAerodrome:
+    for aerodrome in tableAerodrome:    ## AD 2 data
         ## list all aerodrome runways
         bar() # progress the progress bar
         getRunways = getAiracTable("EG-AD-2."+ aerodrome[1] +"-en-GB.html") ## Try and find all information for this aerodrome
@@ -330,8 +315,6 @@ with alive_bar(numberofAerodromes[0]) as bar: ## Define the progress bar
             aerodromeLat = re.search('(Lat: )(<span class="SD" id="ID_[0-9]{7}">)([0-9]{6})([N|S]{1})', str(aerodromeLocation))
             aerodromeLon = re.search(r"(Long: )(<span class=\"SD\" id=\"ID_[0-9]{7}\">)([0-9]{7})([E|W]{1})", str(aerodromeLocation))
 
-            print(aerodromeLat)
-
             if aerodromeLat:
                 latPM = plusMinus(aerodromeLat.group(4))
             else:
@@ -356,15 +339,17 @@ with alive_bar(numberofAerodromes[0]) as bar: ## Define the progress bar
 ## Define the XML sub tag 'Intersections' - https://virtualairtrafficsystem.com/docs/dpk/#intersections ##
 ##########################################################################################################
     ## Get ENR-4.1 data from the defined website
-    print("Processing EG-ENR-4.1 Data...")
+    print("Processing EG-ENR-4.1 Data (RADIO NAVIGATION AIDS - EN-ROUTE)...")
     getENR41 = getAiracTable("EG-ENR-4.1-en-GB.html")
     listENR41 = getENR41.find_all("tr", class_ = "Table-row-type-3")
+    enr41(listENR41)
     bar() # progress the progress bar
 
     ## Get ENR-4.4 data from the defined website
-    print("Processing EG-ENR-4.4 Data...")
+    print("Processing EG-ENR-4.4 Data (NAME-CODE DESIGNATORS FOR SIGNIFICANT POINTS)...")
     getENR44 = getAiracTable("EG-ENR-4.4-en-GB.html")
     listENR44 = getENR44.find_all("tr", class_ = "Table-row-type-3")
+    enr44(listENR44)
     bar() # progress the progress bar
 
 ##########################################################################################################
