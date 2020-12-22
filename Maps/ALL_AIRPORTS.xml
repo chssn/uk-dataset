@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Maps>
-  <Map Type="System2" Name="ALL_AIRPORTS" Priority="2" Center="-2380.8+13390.1">
+  <Map Type="System2" Name="ALL_AIRPORTS" Priority="2" Center="+53.7-1.5">
     <Label HasLeader="true" LabelOrientation="NW">
       <Point>EGAA</Point>
       <Point>EGAB</Point>
