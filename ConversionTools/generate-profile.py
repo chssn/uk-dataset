@@ -279,8 +279,6 @@ class Profile():
                 sql = "INSERT INTO aerodromes (icao_designator, verified, location, elevation) VALUES ('"+ getAerodrome +"' , 0, 0, 0)"
                 mysqlExec(sql, "insertUpdate")  ## Process data from AD 0.6
 
-Profile.constructXml()
-exit()
 ## Truncate all tables in the database. After all, this should only be run once per AIRAC cycle...
 Profile.clearDatabase()
 ## Get AD2 aerodrome list from AD0.6 table
@@ -332,7 +330,7 @@ with alive_bar(numberofAerodromes[0]) as bar: ## Define the progress bar
             else:
                 lonPM = "-" # BUG: Lazy fail option
 
-            fullLocation = latPM + aerodromeLat.group(3) + lonPM + aerodromeLon.group(3)
+            fullLocation = latPM + aerodromeLat.group(3) + ".0" + lonPM + aerodromeLon.group(3) + ".0"
 
             sql = "UPDATE aerodromes SET location = '"+ str(fullLocation) +"', elevation = '"+ aerodromeElev[2] +"' WHERE id = '"+ str(aerodrome[0]) +"'"
             mysqlExec(sql, "insertUpdate")
