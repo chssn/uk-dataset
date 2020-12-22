@@ -7,6 +7,7 @@ import xml.etree.ElementTree as xtree
 import urllib3
 import mysql.connector
 import mysqlconnect ## mysql connection details
+from datetime import datetime
 from bs4 import BeautifulSoup
 from colorama import Fore, Back, Style
 from time import time, ctime
@@ -134,140 +135,167 @@ def mysqlExec(sql, type):
     except mysql.connector.Error as err:
         print(err)
 
-class AirspaceXml():
-    ## Define XML top level tag
-    xmlAirspace = xmlRoot('Airspace')
+def plusMinus(arg):
+    if arg == "N" or arg == "E":
+        return "+"
+    elif arg == "S" or arg == "W":
+        return "-"
 
-    ## Define subtag SystemRunways - https://virtualairtrafficsystem.com/docs/dpk/#systemrunways
-    xmlSystemRunways = xtree.SubElement(xmlAirspace, 'SystemRunways')
-    xmlSidStar = xtree.SubElement(xmlAirspace, 'SIDSTARs')
-    xmlIntersections = xtree.SubElement(xmlAirspace, 'Intersections')
+class Profile():
+    def constructXml():    ## Define XML top level tag
+        xmlAirspace = xmlRoot('Airspace')
+        now = datetime.now()
+        checkID = datetime.timestamp(now) ## generate unix timestamp to help verify if a row has already been added
+        ## Define subtag SystemRunways - https://virtualairtrafficsystem.com/docs/dpk/#systemrunways
+        xmlSystemRunways = xtree.SubElement(xmlAirspace, 'SystemRunways')
+        xmlSidStar = xtree.SubElement(xmlAirspace, 'SIDSTARs')
+        xmlIntersections = xtree.SubElement(xmlAirspace, 'Intersections')
 
-    ## Construct the XML element as per https://virtualairtrafficsystem.com/docs/dpk/#systemrunways
-    ## List all the verified aerodromes
-    #sql = "SELECT * FROM aerodromes WHERE verified = '1' AND icao_designator = 'EGKK'"
-    sql = "SELECT * FROM aerodromes WHERE verified = '1'"
-    listAerodromes = mysqlExec(sql, "selectMany")
-    for aerodrome in listAerodromes:
-        ## Set airport name
-        xmlAerodrome = xtree.SubElement(xmlSystemRunways, 'Airport')
-        xmlAerodrome.set('Name', aerodrome[1])
-        print(Fore.BLUE + "Constructing XML for " + aerodrome[1] + " ("+ str(aerodrome[0]) +")" + Style.RESET_ALL)
+        ## Construct the XML element as per https://virtualairtrafficsystem.com/docs/dpk/#systemrunways
+        ## List all the verified aerodromes
+        #sql = "SELECT * FROM aerodromes WHERE verified = '1' AND icao_designator = 'EGKK'"
+        sql = "SELECT * FROM aerodromes WHERE verified = '1'"
+        listAerodromes = mysqlExec(sql, "selectMany")
+        for aerodrome in listAerodromes:
+            ## Set airport name
+            xmlAerodrome = xtree.SubElement(xmlSystemRunways, 'Airport')
+            xmlAerodrome.set('Name', aerodrome[1])
+            print(Fore.BLUE + "Constructing XML for " + aerodrome[1] + " ("+ str(aerodrome[0]) +")" + Style.RESET_ALL)
 
-        ## Now for the runways that form part of the aerodrome
-        sqlA = "SELECT * FROM aerodrome_runways WHERE aerodrome_id = '"+ str(aerodrome[0]) +"'"
-        listRunways = mysqlExec(sqlA, "selectMany")
-        for runway in listRunways:
-            xmlRunway = xtree.SubElement(xmlAerodrome, 'Runway')
-            xmlRunway.set('Name', runway[2])
-            xmlRunway.set('DataRunway', runway[2])
-            print("-- Constructing XML for runway " + runway[2])
+            ## Now for the runways that form part of the aerodrome
+            sqlA = "SELECT * FROM aerodrome_runways WHERE aerodrome_id = '"+ str(aerodrome[0]) +"'"
+            listRunways = mysqlExec(sqlA, "selectMany")
+            for runway in listRunways:
+                xmlRunway = xtree.SubElement(xmlAerodrome, 'Runway')
+                xmlRunway.set('Name', runway[2])
+                xmlRunway.set('DataRunway', runway[2])
+                print("-- Constructing XML for runway " + runway[2])
 
-            ## Now the SIDs for that runway
-            sqlB = "SELECT * FROM aerodrome_runways_sid WHERE runway_id = '"+ str(runway[0]) +"'"
-            try:
-                listSids = mysqlExec(sqlB, "selectMany")
-                for sid in listSids:
-                    xmlSid = xtree.SubElement(xmlRunway, 'SID')
-                    xmlSid.set('Name', sid[2])
-                    print("---- Constructing XML for SID " + sid[2])
+                ## Now the SIDs for that runway
+                sqlB = "SELECT * FROM aerodrome_runways_sid WHERE runway_id = '"+ str(runway[0]) +"' AND buildcheck != '"+ str(checkID) +"'"
+                try:
+                    listSids = mysqlExec(sqlB, "selectMany")
+                    for sid in listSids:
+                        xmlSid = xtree.SubElement(xmlRunway, 'SID')
+                        xmlSid.set('Name', sid[2])
+                        print("---- Constructing XML for SID " + sid[2])
 
-                    ## Build in the extra bits for the SIDSTARs section - https://virtualairtrafficsystem.com/docs/dpk/#sidstars
-                    ## Check to see if multiple runways are using the same SID
-                    sqlC = "SELECT aerodrome_runways.runway FROM aerodrome_runways INNER JOIN aerodrome_runways_sid ON aerodrome_runways.id = aerodrome_runways_sid.runway_id WHERE aerodrome_runways_sid.sid = '"+ sid[2] +"'"
-                    runwaySid = mysqlExec(sqlC, "selectMany")
-                    runwaySelect = ''
-                    #print(Fore.GREEN + "------ " + str(runwaySid) + Style.RESET_ALL)
-                    xmlSidStarSid = xtree.SubElement(xmlSidStar, 'SID')
+                        ## Build in the extra bits for the SIDSTARs section - https://virtualairtrafficsystem.com/docs/dpk/#sidstars
+                        ## Check to see if multiple runways are using the same SID
+                        sqlC = "SELECT aerodrome_runways.runway, aerodrome_runways_sid.id FROM aerodrome_runways INNER JOIN aerodrome_runways_sid ON aerodrome_runways.id = aerodrome_runways_sid.runway_id WHERE aerodrome_runways_sid.sid = '"+ sid[2] +"' AND buildcheck != '"+ str(checkID) +"'"
+                        runwaySid = mysqlExec(sqlC, "selectMany")
+                        runwaySelect = ''
+                        xmlSidStarSid = xtree.SubElement(xmlSidStar, 'SID')
 
-                    for rS in runwaySid:
-                        xmlRoute = xtree.SubElement(xmlSidStarSid, 'Route')
-                        xmlRoute.set('Runway', str(rS[0]))
-                        xmlRoute.text = sid[3]
-                        runwaySelect += str(rS[0])
-                        print("------ Constructing XML for SID " + sid[2] + " on runway " + str(rS[0]))
+                        for rS in runwaySid:
+                            xmlRoute = xtree.SubElement(xmlSidStarSid, 'Route')
+                            xmlRoute.set('Runway', str(rS[0]))
+                            xmlRoute.text = sid[3]
+                            runwaySelect += str(rS[0])
+                            print("------ Constructing XML for SID " + sid[2] + " on runway " + str(rS[0]))
 
-                    xmlSidStarSid.set('Name', sid[2])
-                    xmlSidStarSid.set('Airport', aerodrome[1])
-                    xmlSidStarSid.set('Runways', runwaySelect)
+                            ## update the database SID entry with the checkID
+                            sqlU = "UPDATE aerodrome_runways_sid SET buildcheck = '"+ str(checkID) +"' WHERE id = '"+ str(rS[1]) +"'"
+                            mysqlExec(sqlU, "insertUpdate")
 
-                    #xmlTransition = xtree.SubElement(xmlSidStarSid, 'Transition')
-                    #trans = sid[3].split() ## get the start of the STAR route
-                    #xmlTransition.set('Name', trans[0]) # BUG: Don't think this is the correct bit for the transition
-                    #xmlTransition.text = trans[0] # BUG: Same as line above
-            except mysql.connector.Error as err:
-                print(err)
+                        xmlSidStarSid.set('Name', sid[2])
+                        xmlSidStarSid.set('Airport', aerodrome[1])
+                        xmlSidStarSid.set('Runways', runwaySelect)
 
-            ## Now the STARs for that runway
-            sqlD = "SELECT * FROM aerodrome_runways_star WHERE runway_id = '"+ str(runway[0]) +"'"
-            try:
-                listStars = mysqlExec(sqlD, "selectMany")
-                for star in listStars:
-                    xmlStar = xtree.SubElement(xmlRunway, 'STAR')
-                    xmlStar.set('Name', star[2])
-                    print("---- Constructing XML for STAR " + star[2])
+                        #xmlTransition = xtree.SubElement(xmlSidStarSid, 'Transition')
+                        #trans = sid[3].split() ## get the start of the STAR route
+                        #xmlTransition.set('Name', trans[0]) # BUG: Don't think this is the correct bit for the transition
+                        #xmlTransition.text = trans[0] # BUG: Same as line above
+                except mysql.connector.Error as err:
+                    print(err)
 
-                    ## Build in the extra bits for the SIDSTARs section - https://virtualairtrafficsystem.com/docs/dpk/#sidstars
-                    xmlSidStarStar = xtree.SubElement(xmlSidStar, 'STAR')
-                    xmlSidStarStar.set('Name', star[2])
-                    xmlSidStarStar.set('Airport', aerodrome[1])
-                    xmlSidStarStar.set('Runways', runway[2])
+                ## Now the STARs for that runway
+                sqlD = "SELECT * FROM aerodrome_runways_star WHERE runway_id = '"+ str(runway[0]) +"'"
+                try:
+                    listStars = mysqlExec(sqlD, "selectMany")
+                    for star in listStars:
+                        xmlStar = xtree.SubElement(xmlRunway, 'STAR')
+                        xmlStar.set('Name', star[2])
+                        print("---- Constructing XML for STAR " + star[2])
 
-                    #xmlTransition = xtree.SubElement(xmlSidStarStar, 'Transition')
-                    #trans = star[3].split() ## get the start of the STAR route
-                    #xmlTransition.set('Name', trans[0]) # BUG: Don't think this is the correct bit for the transition
-                    #xmlTransition.text = trans[0] # BUG: Same as line above
+                        ## Build in the extra bits for the SIDSTARs section - https://virtualairtrafficsystem.com/docs/dpk/#sidstars
+                        xmlSidStarStar = xtree.SubElement(xmlSidStar, 'STAR')
+                        xmlSidStarStar.set('Name', star[2])
+                        xmlSidStarStar.set('Airport', aerodrome[1])
+                        xmlSidStarStar.set('Runways', runway[2])
 
-                    xmlRoute = xtree.SubElement(xmlSidStarStar, 'Route')
-                    xmlRoute.set('Runway', runway[2])
-                    xmlRoute.text = star[3]
-            except:
-                pass
+                        #xmlTransition = xtree.SubElement(xmlSidStarStar, 'Transition')
+                        #trans = star[3].split() ## get the start of the STAR route
+                        #xmlTransition.set('Name', trans[0]) # BUG: Don't think this is the correct bit for the transition
+                        #xmlTransition.text = trans[0] # BUG: Same as line above
 
-    ## Construct the XML element as per https://virtualairtrafficsystem.com/docs/dpk/#intersections
-    ## List all the verified points
-    sql = "SELECT * FROM fixes"
-    listFixes = mysqlExec(sql, "selectMany")
-    for fix in listFixes:
-        xmlFix = xtree.SubElement(xmlIntersections, 'Point')
-        xmlFix.set('Name', fix[1])
-        xmlFix.set('Type', 'Fix')
-        xmlFix.text = fix[2]
+                        xmlRoute = xtree.SubElement(xmlSidStarStar, 'Route')
+                        xmlRoute.set('Runway', runway[2])
+                        xmlRoute.text = star[3]
+                except:
+                    pass
 
-    sql = "SELECT * FROM navaids"
-    listNavAids = mysqlExec(sql, "selectMany")
-    for fix in listNavAids:
-        xmlFix = xtree.SubElement(xmlIntersections, 'Point')
-        xmlFix.set('Name', fix[1])
-        xmlFix.set('Type', 'Navaid')
-        xmlFix.set('NavaidType', fix[2])
-        xmlFix.text = fix[3]
+        ## Construct the XML element as per https://virtualairtrafficsystem.com/docs/dpk/#intersections
+        ## List all the verified points
+        sql = "SELECT * FROM fixes"
+        listFixes = mysqlExec(sql, "selectMany")
+        for fix in listFixes:
+            xmlFix = xtree.SubElement(xmlIntersections, 'Point')
+            xmlFix.set('Name', fix[1])
+            xmlFix.set('Type', 'Fix')
+            xmlFix.text = fix[2]
 
-    tree = xtree.ElementTree(xmlAirspace)
-    tree.write('Airspace.xml', encoding="utf-8", xml_declaration=True)
+        sql = "SELECT * FROM navaids"
+        listNavAids = mysqlExec(sql, "selectMany")
+        for fix in listNavAids:
+            xmlFix = xtree.SubElement(xmlIntersections, 'Point')
+            xmlFix.set('Name', fix[1])
+            xmlFix.set('Type', 'Navaid')
+            xmlFix.set('NavaidType', fix[2])
+            xmlFix.text = fix[3]
+
+        tree = xtree.ElementTree(xmlAirspace)
+        tree.write('Airspace.xml', encoding="utf-8", xml_declaration=True)
     # BUG: Probably read the whole XML through and run this regex (Runways=")([0-9]{2}[L|R|C]?)([0-9]{2}[L|R|C]?)(") and replace $1$2,$3$4
+    def clearDatabase():
+        print(Fore.RED + "WARNING!" + Style.RESET_ALL)
+        print("This will truncate (delete) the contents of all tables in this database.")
+        print("Are you sure you wish to contine? Please type 'confirm' to continue: ")
+        confirmation = input()
+        if confirmation == "confirm":
+            ## Back everything up first!
+            sqlA = "BACKUP DATABASE uk-dataset TO DISK 'backup.sql'"
+            sqlB = "TRUNCATE TABLE aerodromes"
+            sqlC = "TRUNCATE TABLE aerodrome_runways"
+            sqlD = "TRUNCATE TABLE aerodrome_runways_sid"
+            sqlE = "TRUNCATE TABLE aerodrome_runways_star"
+            sqlF = "TRUNCATE TABLE fixes"
+            sqlG = "TRUNCATE TABLE navaids"
+            #cursor.execute(sqlA)
+            cursor.execute(sqlB)
+            cursor.execute(sqlC)
+            cursor.execute(sqlD)
+            cursor.execute(sqlE)
+            cursor.execute(sqlF)
+            cursor.execute(sqlG)
+        else:
+            print("No data has been deleted. We think...")
+            exit()
 
-AirspaceXml()
-exit()
-
-##########################################################################################################
-## Define the XML sub tag 'SystemRunways' - https://virtualairtrafficsystem.com/docs/dpk/#systemrunways ##
-##########################################################################################################
+## Truncate all tables in the database. After all, this should only be run once per AIRAC cycle...
+Profile.clearDatabase()
 ## Get AD2 aerodrome list from AD0.6 table
-print("Processing EG-AD-0.6 Data...")
+print("Processing EG-AD-0.6 data to obtain ICAO designators...")
 getAerodromeList = getAiracTable("EG-AD-0.6-en-GB.html")
-
 listAerodromeList = getAerodromeList.find_all("tr") # IDEA: Think there is a more efficient way of parsing this data
-
 for row in listAerodromeList:
-    aerodromeCount = 0
     getAerodrome = row.find(string=re.compile("^(EG)[A-Z]{2}$"))
     if getAerodrome is not None:
         ## Place each aerodrome into the DB
-        sql = "INSERT INTO aerodromes (icao_designator, verified) VALUES ('"+ getAerodrome +"' , 0)"
+        sql = "INSERT INTO aerodromes (icao_designator, verified, location) VALUES ('"+ getAerodrome +"' , 0, 0)"
         mysqlExec(sql, "insertUpdate")
 
-## Count the number of aerodromes
+## Count the number of ICAO designators (may not actually be a verified aerodrome)
 sql = "SELECT COUNT(icao_designator) AS NumberofAerodromes FROM aerodromes"
 numberofAerodromes = mysqlExec(sql, "selectOne")
 
@@ -279,13 +307,14 @@ with alive_bar(numberofAerodromes[0]) as bar: ## Define the progress bar
     for aerodrome in tableAerodrome:
         ## list all aerodrome runways
         bar() # progress the progress bar
-        getRunways = getAiracTable("EG-AD-2."+ aerodrome[1] +"-en-GB.html") ## Try and find all runways at this aerodrome
+        getRunways = getAiracTable("EG-AD-2."+ aerodrome[1] +"-en-GB.html") ## Try and find all information for this aerodrome
         if getRunways != 404:
             ## Add verify flag for this aerodrome
             sql = "UPDATE aerodromes SET verified = 1 WHERE id = '"+ str(aerodrome[0]) +"'"
             mysqlExec(sql, "insertUpdate")
 
             print("Processing EG-AD-2 Data for "+ aerodrome[1] +"...")
+            aerodromeLocation = getRunways.find(id=aerodrome[1] + "-AD-2.2")
             aerodromeRunways = getRunways.find(id=aerodrome[1] + "-AD-2.12")
 
             for rwy in aerodromeRunways:
@@ -296,6 +325,27 @@ with alive_bar(numberofAerodromes[0]) as bar: ## Define the progress bar
                         ## Add runway to the aerodromeDB
                         sql = "INSERT INTO aerodrome_runways (aerodrome_id, runway) SELECT * FROM (SELECT '"+ str(aerodrome[0]) +"' AS airid, '"+ str(rwyDes[1]) +"' AS rwy) AS tmp WHERE NOT EXISTS (SELECT aerodrome_id FROM aerodrome_runways WHERE aerodrome_id =  '"+ str(aerodrome[0]) +"' AND runway = '"+ str(rwyDes[1]) +"') LIMIT 1"
                         mysqlExec(sql, "insertUpdate")
+
+            #for loc in aerodromeLocation:
+            aerodromeLat = re.search('(Lat: )(<span class="SD" id="ID_[0-9]{7}">)([0-9]{6})([N|S]{1})', str(aerodromeLocation))
+            aerodromeLon = re.search(r"(Long: )(<span class=\"SD\" id=\"ID_[0-9]{7}\">)([0-9]{7})([E|W]{1})", str(aerodromeLocation))
+
+            print(aerodromeLat)
+
+            if aerodromeLat:
+                latPM = plusMinus(aerodromeLat.group(4))
+            else:
+                latPM = "+" # BUG: lazy fail option
+
+            if aerodromeLon:
+                lonPM = plusMinus(aerodromeLon.group(4))
+            else:
+                lonPM = "-" # BUG: Lazy fail option
+
+            fullLocation = latPM + aerodromeLat.group(3) + lonPM + aerodromeLon.group(3)
+
+            sql = "UPDATE aerodromes SET location = '"+ str(fullLocation) +"' WHERE id = '"+ str(aerodrome[0]) +"'"
+            mysqlExec(sql, "insertUpdate")
         else:
             ## Remove verify flag for this aerodrome
             sql = "UPDATE aerodromes SET verified = 0 WHERE id = '"+ str(aerodrome[0]) +"'"
@@ -367,3 +417,5 @@ with alive_bar(numberofAerodromes[0]) as bar: ## Define the progress bar
                     print(line)
 
             bar() # progress the progress bar
+
+    Profile.constructXml()
