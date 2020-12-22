@@ -115,7 +115,6 @@ def mysqlExec(sql, type):
             return cursor.fetchall()
     except mysql.connector.Error as err:
         print(err)
-        exit()
 
 def plusMinus(arg):
     if arg == "N" or arg == "E":
@@ -132,17 +131,22 @@ class Profile():
         xmlSystemRunways = xtree.SubElement(xmlAirspace, 'SystemRunways')
         xmlSidStar = xtree.SubElement(xmlAirspace, 'SIDSTARs')
         xmlIntersections = xtree.SubElement(xmlAirspace, 'Intersections')
+        xmlAirports = xtree.SubElement(xmlAirspace, 'Airports')
 
         ## Construct the XML element as per https://virtualairtrafficsystem.com/docs/dpk/#systemrunways
         ## List all the verified aerodromes
-        #sql = "SELECT * FROM aerodromes WHERE verified = '1' AND icao_designator = 'EGKK'"
-        sql = "SELECT * FROM aerodromes WHERE verified = '1'"
+        sql = "SELECT * FROM aerodromes WHERE verified = '1' AND icao_designator = 'EGKK'"
+        #sql = "SELECT * FROM aerodromes WHERE verified = '1'"
         listAerodromes = mysqlExec(sql, "selectMany")
         for aerodrome in listAerodromes:
             ## Set airport name
             xmlAerodrome = xtree.SubElement(xmlSystemRunways, 'Airport')
             xmlAerodrome.set('Name', aerodrome[1])
             print(Fore.BLUE + "Constructing XML for " + aerodrome[1] + " ("+ str(aerodrome[0]) +")" + Style.RESET_ALL)
+            xmlAirport = xtree.SubElement(xmlAirports, 'Airport')
+            xmlAirport.set('ICAO', aerodrome[1])
+            xmlAirport.set('Position', aerodrome[3])
+            xmlAirport.set('Elevation', str(aerodrome[4]))
 
             ## Now for the runways that form part of the aerodrome
             sqlA = "SELECT * FROM aerodrome_runways WHERE aerodrome_id = '"+ str(aerodrome[0]) +"'"
@@ -242,7 +246,8 @@ class Profile():
     def clearDatabase():
         print(Fore.RED + "!!!WARNING!!!" + Style.RESET_ALL)
         print("This will truncate (delete) the contents of all tables in this database.")
-        print("Are you sure you wish to contine? Please type 'confirm' to continue: ")
+        print("Are you sure you wish to contine?")
+        print("Please type 'confirm' to continue or any other option to leave the database intact: ")
         confirmation = input()
         if confirmation == "confirm":
             ## Back everything up first!
@@ -262,7 +267,6 @@ class Profile():
             cursor.execute(sqlG)
         else:
             print("No data has been deleted. We think...")
-            exit()  ## Clear the database
 
     def processAd06Data():
         print("Processing EG-AD-0.6 data to obtain ICAO designators...")
@@ -272,9 +276,11 @@ class Profile():
             getAerodrome = row.find(string=re.compile("^(EG)[A-Z]{2}$"))
             if getAerodrome is not None:
                 ## Place each aerodrome into the DB
-                sql = "INSERT INTO aerodromes (icao_designator, verified, location) VALUES ('"+ getAerodrome +"' , 0, 0)"
+                sql = "INSERT INTO aerodromes (icao_designator, verified, location, elevation) VALUES ('"+ getAerodrome +"' , 0, 0, 0)"
                 mysqlExec(sql, "insertUpdate")  ## Process data from AD 0.6
 
+Profile.constructXml()
+exit()
 ## Truncate all tables in the database. After all, this should only be run once per AIRAC cycle...
 Profile.clearDatabase()
 ## Get AD2 aerodrome list from AD0.6 table
@@ -314,6 +320,7 @@ with alive_bar(numberofAerodromes[0]) as bar: ## Define the progress bar
             #for loc in aerodromeLocation:
             aerodromeLat = re.search('(Lat: )(<span class="SD" id="ID_[0-9]{7}">)([0-9]{6})([N|S]{1})', str(aerodromeLocation))
             aerodromeLon = re.search(r"(Long: )(<span class=\"SD\" id=\"ID_[0-9]{7}\">)([0-9]{7})([E|W]{1})", str(aerodromeLocation))
+            aerodromeElev = re.search(r"(VAL_ELEV\;)([0-9]{1,4})", str(aerodromeLocation))
 
             if aerodromeLat:
                 latPM = plusMinus(aerodromeLat.group(4))
@@ -327,7 +334,7 @@ with alive_bar(numberofAerodromes[0]) as bar: ## Define the progress bar
 
             fullLocation = latPM + aerodromeLat.group(3) + lonPM + aerodromeLon.group(3)
 
-            sql = "UPDATE aerodromes SET location = '"+ str(fullLocation) +"' WHERE id = '"+ str(aerodrome[0]) +"'"
+            sql = "UPDATE aerodromes SET location = '"+ str(fullLocation) +"', elevation = '"+ aerodromeElev[2] +"' WHERE id = '"+ str(aerodrome[0]) +"'"
             mysqlExec(sql, "insertUpdate")
         else:
             ## Remove verify flag for this aerodrome
