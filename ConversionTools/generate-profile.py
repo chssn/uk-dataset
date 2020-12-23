@@ -124,7 +124,28 @@ def plusMinus(arg):
 
 class Profile():
     def constructXml():    ## Define XML top level tag
-        xmlAirspace = xmlRoot('Airspace')
+        def constructXmlMapHeader(root, type, name, priority, center): ## ref https://virtualairtrafficsystem.com/docs/dpk/#map-element
+            ## creates the neccessary header for XML documents in the \Maps folder
+            mainHeader = xtree.SubElement(root, 'Maps')
+            mapHeader = xtree.SubElement(mainHeader, 'Map')
+
+            mapHeader.set('Type', type) # The type primarily will affect the colour vatSys uses to paint the map. Colours are defined in Colours.xml.
+            mapHeader.set('Name', name) # The title of the Map (as displayed to the user).
+            mapHeader.set('Priority', priority) # An integer specifying the z-axis layering of the map, 0 being drawn on top of everything else.
+            mapHeader.set('Center', center) # An approximate center point of the map, used to deconflict in the event of multiple Waypoints with the same name.
+
+            return mapHeader
+
+        xmlAirspace = xmlRoot('Airspace') ## create XML document Airspace.xml
+
+        xmlAllAirports = xmlRoot('AllAirports') ## create XML document Maps\ALL_AIRPORTS
+        xmlAllAirportsMap = constructXmlMapHeader(xmlAllAirports, 'System2', 'ALL_AIRPORTS', '2', '+53.7-1.5')
+        xmlAllAirportsLabel = xtree.SubElement(xmlAllAirportsMap, 'Label')
+        xmlAllAirportsLabel.set('HasLeader', 'true') # has a line connecting the point and label
+        xmlAllAirportsLabel.set('LabelOrientation', 'NW') # where the label will be positioned in relation to the point
+        xmlAllAirportsSymbol = xtree.SubElement(xmlAllAirportsMap, 'Symbol')
+        xmlAllAirportsSymbol.set('Type', 'Reticle') # https://virtualairtrafficsystem.com/docs/dpk/#symbol-element
+
         now = datetime.now()
         checkID = datetime.timestamp(now) ## generate unix timestamp to help verify if a row has already been added
         ## Define subtag SystemRunways - https://virtualairtrafficsystem.com/docs/dpk/#systemrunways
@@ -135,8 +156,8 @@ class Profile():
 
         ## Construct the XML element as per https://virtualairtrafficsystem.com/docs/dpk/#systemrunways
         ## List all the verified aerodromes
-        sql = "SELECT * FROM aerodromes WHERE verified = '1' AND icao_designator = 'EGKK'"
-        #sql = "SELECT * FROM aerodromes WHERE verified = '1'"
+        #sql = "SELECT * FROM aerodromes WHERE verified = '1' AND icao_designator = 'EGKK'"
+        sql = "SELECT * FROM aerodromes WHERE verified = '1'"
         listAerodromes = mysqlExec(sql, "selectMany")
         for aerodrome in listAerodromes:
             ## Set airport name
@@ -147,6 +168,12 @@ class Profile():
             xmlAirport.set('ICAO', aerodrome[1])
             xmlAirport.set('Position', aerodrome[3])
             xmlAirport.set('Elevation', str(aerodrome[4]))
+
+            ## Set points in Maps\ALL_AIRPORTS.xml
+            xmlAllAirportsLabelPoint = xtree.SubElement(xmlAllAirportsLabel, 'Point')
+            xmlAllAirportsLabelPoint.text = aerodrome[1]
+            xmlAllAirportsSymbolPoint = xtree.SubElement(xmlAllAirportsSymbol, 'Point')
+            xmlAllAirportsSymbolPoint.text = aerodrome[1]
 
             ## Now for the runways that form part of the aerodrome
             sqlA = "SELECT * FROM aerodrome_runways WHERE aerodrome_id = '"+ str(aerodrome[0]) +"'"
@@ -240,8 +267,11 @@ class Profile():
             xmlFix.set('NavaidType', fix[2])
             xmlFix.text = fix[3]
 
-        tree = xtree.ElementTree(xmlAirspace)
-        tree.write('Airspace.xml', encoding="utf-8", xml_declaration=True)
+        allAirportsTree = xtree.ElementTree(xmlAllAirports)
+        allAirportsTree.write('Build/Maps/ALL_AIRPORTS.xml', encoding="utf-8", xml_declaration=True)
+
+        airspaceTree = xtree.ElementTree(xmlAirspace)
+        airspaceTree.write('Build/Airspace.xml', encoding="utf-8", xml_declaration=True)
     # BUG: Probably read the whole XML through and run this regex (Runways=")([0-9]{2}[L|R|C]?)([0-9]{2}[L|R|C]?)(") and replace $1$2,$3$4
     def clearDatabase():
         print(Fore.RED + "!!!WARNING!!!" + Style.RESET_ALL)
@@ -279,6 +309,9 @@ class Profile():
                 sql = "INSERT INTO aerodromes (icao_designator, verified, location, elevation) VALUES ('"+ getAerodrome +"' , 0, 0, 0)"
                 mysqlExec(sql, "insertUpdate")  ## Process data from AD 0.6
 
+Profile.constructXml()
+exit()
+
 ## Truncate all tables in the database. After all, this should only be run once per AIRAC cycle...
 Profile.clearDatabase()
 ## Get AD2 aerodrome list from AD0.6 table
@@ -308,6 +341,7 @@ with alive_bar(numberofAerodromes[0]) as bar: ## Define the progress bar
 
             for rwy in aerodromeRunways:
                 addRunway = rwy.find_all(string=re.compile("(RWY)\s[0-3]{1}[0-9]{1}[L|R|C]?$")) ## String to search for runway designations
+                # IDEA: Consider using this search string ([0-9]{2}[L|C|R]?)(?=</span>.*>TRWY_DIRECTION)
                 for a in addRunway:
                     if a is not None:
                         rwyDes = a.split()
@@ -315,7 +349,7 @@ with alive_bar(numberofAerodromes[0]) as bar: ## Define the progress bar
                         sql = "INSERT INTO aerodrome_runways (aerodrome_id, runway) SELECT * FROM (SELECT '"+ str(aerodrome[0]) +"' AS airid, '"+ str(rwyDes[1]) +"' AS rwy) AS tmp WHERE NOT EXISTS (SELECT aerodrome_id FROM aerodrome_runways WHERE aerodrome_id =  '"+ str(aerodrome[0]) +"' AND runway = '"+ str(rwyDes[1]) +"') LIMIT 1"
                         mysqlExec(sql, "insertUpdate")
 
-            #for loc in aerodromeLocation:
+            ## Search for aerodrome lat/lon/elev
             aerodromeLat = re.search('(Lat: )(<span class="SD" id="ID_[0-9]{7}">)([0-9]{6})([N|S]{1})', str(aerodromeLocation))
             aerodromeLon = re.search(r"(Long: )(<span class=\"SD\" id=\"ID_[0-9]{7}\">)([0-9]{7})([E|W]{1})", str(aerodromeLocation))
             aerodromeElev = re.search(r"(VAL_ELEV\;)([0-9]{1,4})", str(aerodromeLocation))
