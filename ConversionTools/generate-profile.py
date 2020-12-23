@@ -1,5 +1,6 @@
 #! /usr/bin/python3
 import sys
+import argparse
 import requests
 import re
 import prettierfier as pretty
@@ -16,6 +17,13 @@ from alive_progress import alive_bar
 ### This file generates the Airspace.xml file for VATSys from the UK NATS AIRAC
 
 cursor = mysqlconnect.db.cursor()
+
+## Build command line argument parser
+cmdParse = argparse.ArgumentParser(description="Application to collect data from an AIRAC source and build that into xml files for use with vatSys.")
+cmdParse.add_argument('-s', '--scrape', help='web scrape and build database only', action='store_true')
+cmdParse.add_argument('-x', '--xml', help='build xml file from database', action='store_true')
+cmdParse.add_argument('-c', '--clear', help='drop all records from the database', action='store_true')
+args = cmdParse.parse_args()
 
 def airacURL():
     ## Base NATS URL
@@ -302,8 +310,137 @@ class Profile():
         else:
             print("No data has been deleted. We think...")
 
+class WebScrape():
+    def __init__(self):
+        ## Count the number of ICAO designators (may not actually be a verified aerodrome)
+        sql = "SELECT COUNT(icao_designator) AS NumberofAerodromes FROM aerodromes"
+        numberofAerodromes = mysqlExec(sql, "selectOne")
+
+        with alive_bar(numberofAerodromes[0]) as bar: ## Define the progress bar
+            ## Select all aerodromes and loop through
+            sql = "SELECT id, icao_designator FROM aerodromes"
+            tableAerodrome = mysqlExec(sql, "selectMany")
+
+            for aerodrome in tableAerodrome:    ## AD 2 data
+                ## list all aerodrome runways
+                bar() # progress the progress bar
+                getRunways = getAiracTable("EG-AD-2."+ aerodrome[1] +"-en-GB.html") ## Try and find all information for this aerodrome
+                if getRunways != 404:
+                    ## Add verify flag for this aerodrome
+                    sql = "UPDATE aerodromes SET verified = 1 WHERE id = '"+ str(aerodrome[0]) +"'"
+                    mysqlExec(sql, "insertUpdate")
+
+                    print("Parsing EG-AD-2 Data for "+ aerodrome[1] +"...")
+                    aerodromeLocation = getRunways.find(id=aerodrome[1] + "-AD-2.2")
+                    aerodromeAD212 = getRunways.find(id=aerodrome[1] + "-AD-2.12")
+                    aerodromeRunways = re.findall(r"([0-9]{2}[L|C|R]?)(?=<\/span>.*>TRWY_DIRECTION)", str(aerodromeAD212))
+                    aerodromeRunwaysLat = re.findall(r"([0-9]{6}\.[0-9]{2}[N|S]{1})(?=<\/span>.*>TRWY_CLINE_POINT;GEO_LAT)", str(aerodromeAD212))
+                    aerodromeRunwaysLong = re.findall(r"([0-9]{7}\.[0-9]{2}[E|W]{1})(?=<\/span>.*>TRWY_CLINE_POINT;GEO_LONG)", str(aerodromeAD212))
+                    aerodromeRunwaysElev = re.findall(r"([0-9]{3})(?=<\/span>.*>TRWY_CLINE_POINT;VAL_GEOID_UNDULATION)", str(aerodromeAD212))
+
+                    for rwy, lat, lon, elev in zip(aerodromeRunways, aerodromeRunwaysLat, aerodromeRunwaysLong, aerodromeRunwaysElev):
+                        ## Add runway to the aerodromeDB
+                        latSplit = re.search(r"([0-9]{6}\.[0-9]{2})([N|S]{1})", str(lat))
+                        lonSplit = re.search(r"([0-9]{7}\.[0-9]{2})([E|W]{1})", str(lon))
+                        latPM = plusMinus(latSplit.group(2))
+                        lonPM = plusMinus(lonSplit.group(2))
+                        loc = str(latPM) + str(latSplit.group(1)) + str(lonPM) + str(lonSplit.group(1)) ## build lat/lon string as per https://virtualairtrafficsystem.com/docs/dpk/#lat-long-format
+
+                        sql = "INSERT INTO aerodrome_runways (aerodrome_id, runway, location, elevation) VALUE ('"+ str(aerodrome[0]) +"', '"+ str(rwy) +"', '"+ str(loc) +"', '"+ str(elev) +"')"
+                        mysqlExec(sql, "insertUpdate")
+
+                    ## Search for aerodrome lat/lon/elev
+                    aerodromeLat = re.search('(Lat: )(<span class="SD" id="ID_[0-9]{7}">)([0-9]{6})([N|S]{1})', str(aerodromeLocation))
+                    aerodromeLon = re.search(r"(Long: )(<span class=\"SD\" id=\"ID_[0-9]{7}\">)([0-9]{7})([E|W]{1})", str(aerodromeLocation))
+                    aerodromeElev = re.search(r"(VAL_ELEV\;)([0-9]{1,4})", str(aerodromeLocation))
+
+                    if aerodromeLat:
+                        latPM = plusMinus(aerodromeLat.group(4))
+                    else:
+                        latPM = "+" # BUG: lazy fail option
+
+                    if aerodromeLon:
+                        lonPM = plusMinus(aerodromeLon.group(4))
+                    else:
+                        lonPM = "-" # BUG: Lazy fail option
+
+                    fullLocation = latPM + aerodromeLat.group(3) + ".0" + lonPM + aerodromeLon.group(3) + ".0"
+
+                    sql = "UPDATE aerodromes SET location = '"+ str(fullLocation) +"', elevation = '"+ aerodromeElev[2] +"' WHERE id = '"+ str(aerodrome[0]) +"'"
+                    mysqlExec(sql, "insertUpdate")
+                else:
+                    ## Remove verify flag for this aerodrome
+                    sql = "UPDATE aerodromes SET verified = 0 WHERE id = '"+ str(aerodrome[0]) +"'"
+                    mysqlExec(sql, "insertUpdate")
+                    print(Fore.RED + "Aerodrome " + aerodrome[1] + " does not exist" + Style.RESET_ALL)
+
+            ## Get ENR-4.1 data from the defined website
+            print("Parsing EG-ENR-4.1 Data (RADIO NAVIGATION AIDS - EN-ROUTE)...")
+            getENR41 = getAiracTable("EG-ENR-4.1-en-GB.html")
+            listENR41 = getENR41.find_all("tr", class_ = "Table-row-type-3")
+            enr41(listENR41)
+            bar() # progress the progress bar
+
+            ## Get ENR-4.4 data from the defined website
+            print("Parsing EG-ENR-4.4 Data (NAME-CODE DESIGNATORS FOR SIGNIFICANT POINTS)...")
+            getENR44 = getAiracTable("EG-ENR-4.4-en-GB.html")
+            listENR44 = getENR44.find_all("tr", class_ = "Table-row-type-3")
+            enr44(listENR44)
+            bar() # progress the progress bar
+
+        ##########################################################################################################
+        ## Define the XML sub tag 'SIDSTARs' - https://virtualairtrafficsystem.com/docs/dpk/#sidstars           ##
+        ##########################################################################################################
+        # IDEA: This is currently scraping the *.ese file from VATSIM-UK. Need to find a better way of doing this. Too much hard code here and it's lazy!
+            ese = open("UK.ese", "r")
+            for line in ese:
+                ## Pull out all SIDs
+                if line.startswith("SID"):
+                    element = line.split(":")
+                    aerodrome = str(element[1])
+                    runway = str(element[2])
+                    sid = str(element[3])
+                    routeComment = str(element[4])
+                    routeSplit = routeComment.split(";")
+                    route = routeSplit[0]
+
+                    if not sid.startswith('#'): ## try and exclude any commented out sections from the ese file
+                        sql = "SELECT aerodrome_runways.id FROM aerodromes INNER JOIN aerodrome_runways ON aerodromes.id = aerodrome_runways.aerodrome_id WHERE aerodromes.icao_designator = '"+ aerodrome +"' AND aerodrome_runways.runway = '"+ runway +"' LIMIT 1"
+                        rwyId = mysqlExec(sql, "selectOne")
+
+                        try:
+                            sql = "INSERT INTO aerodrome_runways_sid (runway_id, sid, route) SELECT * FROM (SELECT '"+ str(rwyId[0]) +"' AS selRwyId, '"+ sid +"' AS selSid, '"+ route +"' AS selRoute) AS tmp WHERE NOT EXISTS (SELECT runway_id FROM aerodrome_runways_sid WHERE runway_id =  "+ str(rwyId[0]) +" AND sid = '"+ sid +"' AND route = '"+ route +"') LIMIT 1"
+                            mysqlExec(sql, "insertUpdate")
+                        except:
+                            print(Fore.RED + "Aerodrome ICAO " + aerodrome + " not recognised" + Style.RESET_ALL)
+                            print(line)
+
+                    bar() # progress the progress bar
+
+                elif line.startswith("STAR"):
+                    element = line.split(":")
+                    aerodrome = str(element[1])
+                    runway = str(element[2])
+                    star = str(element[3])
+                    routeComment = str(element[4])
+                    routeSplit = routeComment.split(";")
+                    route = routeSplit[0]
+
+                    if not star.startswith('#'): ## try and exclude any commented out sections from the ese file
+                        sql = "SELECT aerodrome_runways.id FROM aerodromes INNER JOIN aerodrome_runways ON aerodromes.id = aerodrome_runways.aerodrome_id WHERE aerodromes.icao_designator = '"+ aerodrome +"' AND aerodrome_runways.runway = '"+ runway +"' LIMIT 1"
+                        rwyId = mysqlExec(sql, "selectOne")
+
+                        try:
+                            sql = "INSERT INTO aerodrome_runways_star (runway_id, star, route) SELECT * FROM (SELECT '"+ str(rwyId[0]) +"' AS selRwyId, '"+ star +"' AS selSid, '"+ route +"' AS selRoute) AS tmp WHERE NOT EXISTS (SELECT runway_id FROM aerodrome_runways_star WHERE runway_id =  "+ str(rwyId[0]) +" AND star = '"+ star +"' AND route = '"+ route +"') LIMIT 1"
+                            mysqlExec(sql, "insertUpdate")
+                        except:
+                            print(Fore.RED + "Aerodrome ICAO " + aerodrome + " not recognised" + Style.RESET_ALL)
+                            print(line)
+
+                    bar() # progress the progress bar
+
     def processAd06Data():
-        print("Processing EG-AD-0.6 data to obtain ICAO designators...")
+        print("Parsing EG-AD-0.6 data to obtain ICAO designators...")
         getAerodromeList = getAiracTable("EG-AD-0.6-en-GB.html")
         listAerodromeList = getAerodromeList.find_all("tr") # IDEA: Think there is a more efficient way of parsing this data
         for row in listAerodromeList:
@@ -313,139 +450,16 @@ class Profile():
                 sql = "INSERT INTO aerodromes (icao_designator, verified, location, elevation) VALUES ('"+ getAerodrome +"' , 0, 0, 0)"
                 mysqlExec(sql, "insertUpdate")  ## Process data from AD 0.6
 
-## Truncate all tables in the database. After all, this should only be run once per AIRAC cycle...
-Profile.clearDatabase()
-## Get AD2 aerodrome list from AD0.6 table
-Profile.processAd06Data()
-
-## Count the number of ICAO designators (may not actually be a verified aerodrome)
-sql = "SELECT COUNT(icao_designator) AS NumberofAerodromes FROM aerodromes"
-numberofAerodromes = mysqlExec(sql, "selectOne")
-
-with alive_bar(numberofAerodromes[0]) as bar: ## Define the progress bar
-    ## Select all aerodromes and loop through
-    sql = "SELECT id, icao_designator FROM aerodromes"
-    tableAerodrome = mysqlExec(sql, "selectMany")
-
-    for aerodrome in tableAerodrome:    ## AD 2 data
-        ## list all aerodrome runways
-        bar() # progress the progress bar
-        getRunways = getAiracTable("EG-AD-2."+ aerodrome[1] +"-en-GB.html") ## Try and find all information for this aerodrome
-        if getRunways != 404:
-            ## Add verify flag for this aerodrome
-            sql = "UPDATE aerodromes SET verified = 1 WHERE id = '"+ str(aerodrome[0]) +"'"
-            mysqlExec(sql, "insertUpdate")
-
-            print("Processing EG-AD-2 Data for "+ aerodrome[1] +"...")
-            aerodromeLocation = getRunways.find(id=aerodrome[1] + "-AD-2.2")
-            aerodromeAD212 = getRunways.find(id=aerodrome[1] + "-AD-2.12")
-            aerodromeRunways = re.findall(r"([0-9]{2}[L|C|R]?)(?=<\/span>.*>TRWY_DIRECTION)", str(aerodromeAD212))
-            aerodromeRunwaysLat = re.findall(r"([0-9]{6}\.[0-9]{2}[N|S]{1})(?=<\/span>.*>TRWY_CLINE_POINT;GEO_LAT)", str(aerodromeAD212))
-            aerodromeRunwaysLong = re.findall(r"([0-9]{7}\.[0-9]{2}[E|W]{1})(?=<\/span>.*>TRWY_CLINE_POINT;GEO_LONG)", str(aerodromeAD212))
-            aerodromeRunwaysElev = re.findall(r"([0-9]{3})(?=<\/span>.*>TRWY_CLINE_POINT;VAL_GEOID_UNDULATION)", str(aerodromeAD212))
-
-            for rwy, lat, lon, elev in zip(aerodromeRunways, aerodromeRunwaysLat, aerodromeRunwaysLong, aerodromeRunwaysElev):
-                ## Add runway to the aerodromeDB
-                latSplit = re.search(r"([0-9]{6}\.[0-9]{2})([N|S]{1})", str(lat))
-                lonSplit = re.search(r"([0-9]{7}\.[0-9]{2})([E|W]{1})", str(lon))
-                latPM = plusMinus(latSplit.group(2))
-                lonPM = plusMinus(lonSplit.group(2))
-                loc = str(latPM) + str(latSplit.group(1)) + str(lonPM) + str(lonSplit.group(1)) ## build lat/lon string as per https://virtualairtrafficsystem.com/docs/dpk/#lat-long-format
-
-                sql = "INSERT INTO aerodrome_runways (aerodrome_id, runway, location, elevation) VALUE ('"+ str(aerodrome[0]) +"', '"+ str(rwy) +"', '"+ str(loc) +"', '"+ str(elev) +"')"
-                mysqlExec(sql, "insertUpdate")
-
-            ## Search for aerodrome lat/lon/elev
-            aerodromeLat = re.search('(Lat: )(<span class="SD" id="ID_[0-9]{7}">)([0-9]{6})([N|S]{1})', str(aerodromeLocation))
-            aerodromeLon = re.search(r"(Long: )(<span class=\"SD\" id=\"ID_[0-9]{7}\">)([0-9]{7})([E|W]{1})", str(aerodromeLocation))
-            aerodromeElev = re.search(r"(VAL_ELEV\;)([0-9]{1,4})", str(aerodromeLocation))
-
-            if aerodromeLat:
-                latPM = plusMinus(aerodromeLat.group(4))
-            else:
-                latPM = "+" # BUG: lazy fail option
-
-            if aerodromeLon:
-                lonPM = plusMinus(aerodromeLon.group(4))
-            else:
-                lonPM = "-" # BUG: Lazy fail option
-
-            fullLocation = latPM + aerodromeLat.group(3) + ".0" + lonPM + aerodromeLon.group(3) + ".0"
-
-            sql = "UPDATE aerodromes SET location = '"+ str(fullLocation) +"', elevation = '"+ aerodromeElev[2] +"' WHERE id = '"+ str(aerodrome[0]) +"'"
-            mysqlExec(sql, "insertUpdate")
-        else:
-            ## Remove verify flag for this aerodrome
-            sql = "UPDATE aerodromes SET verified = 0 WHERE id = '"+ str(aerodrome[0]) +"'"
-            mysqlExec(sql, "insertUpdate")
-            print(Fore.RED + "Aerodrome " + aerodrome[1] + " does not exist" + Style.RESET_ALL)
-
-##########################################################################################################
-## Define the XML sub tag 'Intersections' - https://virtualairtrafficsystem.com/docs/dpk/#intersections ##
-##########################################################################################################
-    ## Get ENR-4.1 data from the defined website
-    print("Processing EG-ENR-4.1 Data (RADIO NAVIGATION AIDS - EN-ROUTE)...")
-    getENR41 = getAiracTable("EG-ENR-4.1-en-GB.html")
-    listENR41 = getENR41.find_all("tr", class_ = "Table-row-type-3")
-    enr41(listENR41)
-    bar() # progress the progress bar
-
-    ## Get ENR-4.4 data from the defined website
-    print("Processing EG-ENR-4.4 Data (NAME-CODE DESIGNATORS FOR SIGNIFICANT POINTS)...")
-    getENR44 = getAiracTable("EG-ENR-4.4-en-GB.html")
-    listENR44 = getENR44.find_all("tr", class_ = "Table-row-type-3")
-    enr44(listENR44)
-    bar() # progress the progress bar
-
-##########################################################################################################
-## Define the XML sub tag 'SIDSTARs' - https://virtualairtrafficsystem.com/docs/dpk/#sidstars           ##
-##########################################################################################################
-# IDEA: This is currently scraping the *.ese file from VATSIM-UK. Need to find a better way of doing this. Too much hard code here and it's lazy!
-    ese = open("UK.ese", "r")
-    for line in ese:
-        ## Pull out all SIDs
-        if line.startswith("SID"):
-            element = line.split(":")
-            aerodrome = str(element[1])
-            runway = str(element[2])
-            sid = str(element[3])
-            routeComment = str(element[4])
-            routeSplit = routeComment.split(";")
-            route = routeSplit[0]
-
-            if not sid.startswith('#'): ## try and exclude any commented out sections from the ese file
-                sql = "SELECT aerodrome_runways.id FROM aerodromes INNER JOIN aerodrome_runways ON aerodromes.id = aerodrome_runways.aerodrome_id WHERE aerodromes.icao_designator = '"+ aerodrome +"' AND aerodrome_runways.runway = '"+ runway +"' LIMIT 1"
-                rwyId = mysqlExec(sql, "selectOne")
-
-                try:
-                    sql = "INSERT INTO aerodrome_runways_sid (runway_id, sid, route) SELECT * FROM (SELECT '"+ str(rwyId[0]) +"' AS selRwyId, '"+ sid +"' AS selSid, '"+ route +"' AS selRoute) AS tmp WHERE NOT EXISTS (SELECT runway_id FROM aerodrome_runways_sid WHERE runway_id =  "+ str(rwyId[0]) +" AND sid = '"+ sid +"' AND route = '"+ route +"') LIMIT 1"
-                    mysqlExec(sql, "insertUpdate")
-                except:
-                    print(Fore.RED + "Aerodrome ICAO " + aerodrome + " not recognised" + Style.RESET_ALL)
-                    print(line)
-
-            bar() # progress the progress bar
-
-        elif line.startswith("STAR"):
-            element = line.split(":")
-            aerodrome = str(element[1])
-            runway = str(element[2])
-            star = str(element[3])
-            routeComment = str(element[4])
-            routeSplit = routeComment.split(";")
-            route = routeSplit[0]
-
-            if not star.startswith('#'): ## try and exclude any commented out sections from the ese file
-                sql = "SELECT aerodrome_runways.id FROM aerodromes INNER JOIN aerodrome_runways ON aerodromes.id = aerodrome_runways.aerodrome_id WHERE aerodromes.icao_designator = '"+ aerodrome +"' AND aerodrome_runways.runway = '"+ runway +"' LIMIT 1"
-                rwyId = mysqlExec(sql, "selectOne")
-
-                try:
-                    sql = "INSERT INTO aerodrome_runways_star (runway_id, star, route) SELECT * FROM (SELECT '"+ str(rwyId[0]) +"' AS selRwyId, '"+ star +"' AS selSid, '"+ route +"' AS selRoute) AS tmp WHERE NOT EXISTS (SELECT runway_id FROM aerodrome_runways_star WHERE runway_id =  "+ str(rwyId[0]) +" AND star = '"+ star +"' AND route = '"+ route +"') LIMIT 1"
-                    mysqlExec(sql, "insertUpdate")
-                except:
-                    print(Fore.RED + "Aerodrome ICAO " + aerodrome + " not recognised" + Style.RESET_ALL)
-                    print(line)
-
-            bar() # progress the progress bar
-
+if args.clear:
+    ## Truncate all tables in the database. After all, this should only be run once per AIRAC cycle...
+    Profile.clearDatabase()
+elif args.scrape:
+    ## Run the webscraper
+    ## Get AD2 aerodrome list from AD0.6 table
+    Webscrape.processAd06Data()
+    WebScrape()
+elif args.xml:
     Profile.constructXml()
+else:
+    print("Nothing to do here\n")
+    cmdParse.print_help()
