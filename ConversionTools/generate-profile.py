@@ -182,6 +182,10 @@ class Profile():
                 xmlRunway = xtree.SubElement(xmlAerodrome, 'Runway')
                 xmlRunway.set('Name', runway[2])
                 xmlRunway.set('DataRunway', runway[2])
+
+                xmlAirportRunway = xtree.SubElement(xmlAirport, 'Runway')
+                xmlAirportRunway.set('Name', runway[2])
+                xmlAirportRunway.set('Position', runway[3])
                 print("-- Constructing XML for runway " + runway[2])
 
                 ## Now the SIDs for that runway
@@ -334,17 +338,22 @@ with alive_bar(numberofAerodromes[0]) as bar: ## Define the progress bar
 
             print("Processing EG-AD-2 Data for "+ aerodrome[1] +"...")
             aerodromeLocation = getRunways.find(id=aerodrome[1] + "-AD-2.2")
-            aerodromeRunways = getRunways.find(id=aerodrome[1] + "-AD-2.12")
+            aerodromeAD212 = getRunways.find(id=aerodrome[1] + "-AD-2.12")
+            aerodromeRunways = re.findall(r"([0-9]{2}[L|C|R]?)(?=<\/span>.*>TRWY_DIRECTION)", str(aerodromeAD212))
+            aerodromeRunwaysLat = re.findall(r"([0-9]{6}\.[0-9]{2}[N|S]{1})(?=<\/span>.*>TRWY_CLINE_POINT;GEO_LAT)", str(aerodromeAD212))
+            aerodromeRunwaysLong = re.findall(r"([0-9]{7}\.[0-9]{2}[E|W]{1})(?=<\/span>.*>TRWY_CLINE_POINT;GEO_LONG)", str(aerodromeAD212))
+            aerodromeRunwaysElev = re.findall(r"([0-9]{3})(?=<\/span>.*>TRWY_CLINE_POINT;VAL_GEOID_UNDULATION)", str(aerodromeAD212))
 
-            for rwy in aerodromeRunways:
-                addRunway = rwy.find_all(string=re.compile("(RWY)\s[0-3]{1}[0-9]{1}[L|R|C]?$")) ## String to search for runway designations
-                # IDEA: Consider using this search string ([0-9]{2}[L|C|R]?)(?=</span>.*>TRWY_DIRECTION)
-                for a in addRunway:
-                    if a is not None:
-                        rwyDes = a.split()
-                        ## Add runway to the aerodromeDB
-                        sql = "INSERT INTO aerodrome_runways (aerodrome_id, runway) SELECT * FROM (SELECT '"+ str(aerodrome[0]) +"' AS airid, '"+ str(rwyDes[1]) +"' AS rwy) AS tmp WHERE NOT EXISTS (SELECT aerodrome_id FROM aerodrome_runways WHERE aerodrome_id =  '"+ str(aerodrome[0]) +"' AND runway = '"+ str(rwyDes[1]) +"') LIMIT 1"
-                        mysqlExec(sql, "insertUpdate")
+            for rwy, lat, lon, elev in zip(aerodromeRunways, aerodromeRunwaysLat, aerodromeRunwaysLong, aerodromeRunwaysElev):
+                ## Add runway to the aerodromeDB
+                latSplit = re.search(r"([0-9]{6}\.[0-9]{2})([N|S]{1})", str(lat))
+                lonSplit = re.search(r"([0-9]{7}\.[0-9]{2})([E|W]{1})", str(lon))
+                latPM = plusMinus(latSplit.group(2))
+                lonPM = plusMinus(lonSplit.group(2))
+                loc = str(latPM) + str(latSplit.group(1)) + str(lonPM) + str(lonSplit.group(1)) ## build lat/lon string as per https://virtualairtrafficsystem.com/docs/dpk/#lat-long-format
+
+                sql = "INSERT INTO aerodrome_runways (aerodrome_id, runway, location, elevation) VALUE ('"+ str(aerodrome[0]) +"', '"+ str(rwy) +"', '"+ str(loc) +"', '"+ str(elev) +"')"
+                mysqlExec(sql, "insertUpdate")
 
             ## Search for aerodrome lat/lon/elev
             aerodromeLat = re.search('(Lat: )(<span class="SD" id="ID_[0-9]{7}">)([0-9]{6})([N|S]{1})', str(aerodromeLocation))
