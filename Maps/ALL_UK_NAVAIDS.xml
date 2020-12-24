@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <AllNavaids xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" generated="Wed Dec 23 20:53:48 2020">
   <Maps>
-    <Map Type="System" Name="ALL_NAVAIDS_NAMES" Priority="0" Center="+53.7-1.5">
+    <Map Type="System" Name="ALL_UK_NAVAIDS_NAMES" Priority="0" Center="+53.7-1.5">
       <Label HasLeader="true">
         <Point Name="ABAPO">+520610.0-0044812.0</Point>
         <Point Name="ABBOT">+520058.0+0003558.0</Point>
@@ -1024,7 +1024,7 @@
     </Map>
   </Maps>
   <Maps>
-    <Map Type="System" Name="ALL_NAVAIDS" Priority="0" Center="+53.7-1.5">
+    <Map Type="System" Name="ALL_UK_NAVAIDS" Priority="0" Center="+53.7-1.5">
       <Symbol Type="Hexagon">
         <Point>+520610.0-0044812.0</Point>
         <Point>+520058.0+0003558.0</Point>

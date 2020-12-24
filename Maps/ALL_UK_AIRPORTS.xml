@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <AllAirports xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" generated="Wed Dec 23 20:07:19 2020">
   <Maps>
-    <Map Type="System2" Name="ALL_AIRPORTS" Priority="2" Center="+53.7-1.5">
+    <Map Type="System2" Name="ALL_UK_AIRPORTS" Priority="2" Center="+53.7-1.5">
       <Label HasLeader="true" LabelOrientation="NW">
         <Point>EGAA</Point>
         <Point>EGAB</Point>
