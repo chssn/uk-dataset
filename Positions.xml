@@ -1,20 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Positions xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <Position Name="London" Type="ASD" DefaultCenter="+52.8311111-001.3280556" DefaultRange="600">
+  <Position Name="London Center" Type="ASD" DefaultCenter="+52.8311111-001.3280556" DefaultRange="600">
     <Sectors>
-      <Sector Name="LON_N_CTR" />
-      <Sector Name="LON_C_CTR" />
-      <Sector Name="LON_W_CTR" />
+      <Sector Name="LON_CTR" />
+      <Sector Name="LON_SC_CTR" />
       <Sector Name="LON_S_CTR" />
+      <Sector Name="LTC_CTR" />
+      <Sector Name="LTC_S_CTR" />
+      <Sector Name="LTC_SW_CTR" />
     </Sectors>
     <Maps>
       <Map Name="ALL_CTA" />
       <Map Name="ALL_SECTORS" />
-      <Map Name="ALL_NAVAIDS" />
-      <Map Name="COAST_ALL" />
+      <Map Name="ALL_UK_NAVAIDS" />
+      <Map Name="UK_COAST" />
       <Map Name="ALL_ROUTES_HIGH" />
       <Map Name="ALL_POINTS_HIGH" />
-      <Map Name="FIR_BDRY" />
+      <Map Name="UK_FIR_BDRY" />
       <Map Name="UPPER_SECTOR_FREQS" />
     </Maps>
     <Strips Mode="State" Sort="Time">
