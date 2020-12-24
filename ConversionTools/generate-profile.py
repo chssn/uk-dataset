@@ -154,6 +154,17 @@ class Profile():
         xmlAllAirportsSymbol = xtree.SubElement(xmlAllAirportsMap, 'Symbol')
         xmlAllAirportsSymbol.set('Type', 'Reticle') # https://virtualairtrafficsystem.com/docs/dpk/#symbol-element
 
+        xmlAllNavaids = xmlRoot('AllNavaids') ## create XML document Maps\ALL_NAVAIDS
+        xmlAllNavaidsMap = constructXmlMapHeader(xmlAllNavaids, 'System', 'ALL_NAVAIDS_NAMES', '0', '+53.7-1.5')
+        xmlAllNavaidsLabel = xtree.SubElement(xmlAllNavaidsMap, 'Label')
+        xmlAllNavaidsLabel.set('HasLeader', 'true') # has a line connecting the point and label
+        #xmlAllNavaidsLabel.set('LabelOrientation', 'NW') # where the label will be positioned in relation to the point
+        xmlAllNavaidsMapSym = constructXmlMapHeader(xmlAllNavaids, 'System', 'ALL_NAVAIDS', '0', '+53.7-1.5')
+        xmlAllNavaidsSymbol = xtree.SubElement(xmlAllNavaidsMapSym, 'Symbol')
+        xmlAllNavaidsSymbol.set('Type', 'Hexagon') # https://virtualairtrafficsystem.com/docs/dpk/#symbol-element
+        xmlAllNavaidsSymbolH = xtree.SubElement(xmlAllNavaidsMapSym, 'Symbol')
+        xmlAllNavaidsSymbolH.set('Type', 'DotFillCircle') # https://virtualairtrafficsystem.com/docs/dpk/#symbol-element
+
         now = datetime.now()
         checkID = datetime.timestamp(now) ## generate unix timestamp to help verify if a row has already been added
         ## Define subtag SystemRunways - https://virtualairtrafficsystem.com/docs/dpk/#systemrunways
@@ -165,7 +176,7 @@ class Profile():
         ## Construct the XML element as per https://virtualairtrafficsystem.com/docs/dpk/#systemrunways
         ## List all the verified aerodromes
         #sql = "SELECT * FROM aerodromes WHERE verified = '1' AND icao_designator = 'EGKK'"
-        sql = "SELECT * FROM aerodromes WHERE verified = '1'"
+        sql = "SELECT * FROM aerodromes WHERE verified = '1' ORDER BY icao_designator"
         listAerodromes = mysqlExec(sql, "selectMany")
         for aerodrome in listAerodromes:
             ## Set airport name
@@ -184,7 +195,7 @@ class Profile():
             xmlAllAirportsSymbolPoint.text = aerodrome[1]
 
             ## Now for the runways that form part of the aerodrome
-            sqlA = "SELECT * FROM aerodrome_runways WHERE aerodrome_id = '"+ str(aerodrome[0]) +"'"
+            sqlA = "SELECT * FROM aerodrome_runways WHERE aerodrome_id = '"+ str(aerodrome[0]) +"' ORDER BY runway"
             listRunways = mysqlExec(sqlA, "selectMany")
             for runway in listRunways:
                 xmlRunway = xtree.SubElement(xmlAerodrome, 'Runway')
@@ -197,7 +208,7 @@ class Profile():
                 print("-- Constructing XML for runway " + runway[2])
 
                 ## Now the SIDs for that runway
-                sqlB = "SELECT * FROM aerodrome_runways_sid WHERE runway_id = '"+ str(runway[0]) +"' AND buildcheck != '"+ str(checkID) +"'"
+                sqlB = "SELECT * FROM aerodrome_runways_sid WHERE runway_id = '"+ str(runway[0]) +"' AND buildcheck != '"+ str(checkID) +"' ORDER BY sid"
                 try:
                     listSids = mysqlExec(sqlB, "selectMany")
                     for sid in listSids:
@@ -220,7 +231,7 @@ class Profile():
                             print("------ Constructing XML for SID " + sid[2] + " on runway " + str(rS[0]))
 
                             ## update the database SID entry with the checkID
-                            sqlU = "UPDATE aerodrome_runways_sid SET buildcheck = '"+ str(checkID) +"' WHERE id = '"+ str(rS[1]) +"'"
+                            sqlU = "UPDATE aerodrome_runways_sid SET buildcheck = '"+ str(checkID) +"' WHERE runway_id = '"+ str(runway[0]) +"' AND sid = '"+ str(sid[2]) +"'"
                             mysqlExec(sqlU, "insertUpdate")
 
                         xmlSidStarSid.set('Name', sid[2])
@@ -235,7 +246,7 @@ class Profile():
                     print(err)
 
                 ## Now the STARs for that runway
-                sqlD = "SELECT * FROM aerodrome_runways_star WHERE runway_id = '"+ str(runway[0]) +"'"
+                sqlD = "SELECT * FROM aerodrome_runways_star WHERE runway_id = '"+ str(runway[0]) +"' ORDER BY star"
                 try:
                     listStars = mysqlExec(sqlD, "selectMany")
                     for star in listStars:
@@ -265,10 +276,18 @@ class Profile():
         sql = "SELECT * FROM fixes"
         listFixes = mysqlExec(sql, "selectMany")
         for fix in listFixes:
+            ## Set fix in main Airspace.xml
             xmlFix = xtree.SubElement(xmlIntersections, 'Point')
             xmlFix.set('Name', fix[1])
             xmlFix.set('Type', 'Fix')
             xmlFix.text = fix[2]
+
+            ## Set points in Maps\ALL_AIRPORTS.xml
+            xmlAllNavaidsLabelPoint = xtree.SubElement(xmlAllNavaidsLabel, 'Point')
+            xmlAllNavaidsLabelPoint.set('Name', fix[1])
+            xmlAllNavaidsLabelPoint.text = fix[2]
+            xmlAllNavaidsSymbolPoint = xtree.SubElement(xmlAllNavaidsSymbol, 'Point')
+            xmlAllNavaidsSymbolPoint.text = fix[2]
 
         sql = "SELECT * FROM navaids"
         listNavAids = mysqlExec(sql, "selectMany")
@@ -279,8 +298,18 @@ class Profile():
             xmlFix.set('NavaidType', fix[2])
             xmlFix.text = fix[3]
 
+            ## Set points in Maps\ALL_AIRPORTS.xml
+            xmlAllNavaidsLabelPoint = xtree.SubElement(xmlAllNavaidsLabel, 'Point')
+            xmlAllNavaidsLabelPoint.set('Name', fix[1])
+            xmlAllNavaidsLabelPoint.text = fix[3]
+            xmlAllNavaidsSymbolPointH = xtree.SubElement(xmlAllNavaidsSymbolH, 'Point')
+            xmlAllNavaidsSymbolPointH.text = fix[3]
+
         allAirportsTree = xtree.ElementTree(xmlAllAirports)
         allAirportsTree.write('Build/Maps/ALL_AIRPORTS.xml', encoding="utf-8", xml_declaration=True)
+
+        allNavaidsTree = xtree.ElementTree(xmlAllNavaids)
+        allNavaidsTree.write('Build/Maps/ALL_NAVAIDS.xml', encoding="utf-8", xml_declaration=True)
 
         airspaceTree = xtree.ElementTree(xmlAirspace)
         airspaceTree.write('Build/Airspace.xml', encoding="utf-8", xml_declaration=True)
@@ -450,13 +479,34 @@ class WebScrape():
                 sql = "INSERT INTO aerodromes (icao_designator, verified, location, elevation) VALUES ('"+ getAerodrome +"' , 0, 0, 0)"
                 mysqlExec(sql, "insertUpdate")  ## Process data from AD 0.6
 
+    def parseUKMil():
+        ## this is a hard-coded bodge for getting UK military ICAO designators.
+        url = "https://www.aidu.mod.uk/aip/aipVolumes.htm"
+        http = urllib3.PoolManager()
+        error = http.request("GET", url)
+        if (error.status == 404):
+            return 404
+        else:
+            page = requests.get(url)
+            source = BeautifulSoup(page.content, "lxml")
+            getICAO = re.findall(r'(?<=\")([L|E|F]{1}[A-Z]{3})(?=\")', source) ## L, E and F are to include British Overseas Territory listed here
+
+            for icao in getICAO:
+                ## Place each aerodrome into the DB
+                sql = "INSERT INTO aerodromes (icao_designator, verified, location, elevation) VALUES ('"+ icao +"' , 0, 0, 0)"
+                mysqlExec(sql, "insertUpdate")
+
+                ##getLinks = re.findall(r'(?<=aip\/pdf\/ad\/)'+ icao + '')
+                # IDEA: Need to code this bit properly - placeholder for now
+
 if args.clear:
     ## Truncate all tables in the database. After all, this should only be run once per AIRAC cycle...
     Profile.clearDatabase()
 elif args.scrape:
     ## Run the webscraper
     ## Get AD2 aerodrome list from AD0.6 table
-    Webscrape.processAd06Data()
+    WebScrape.processAd06Data()
+    #WebScrape.parseUKMil() ## placeholder
     WebScrape()
 elif args.xml:
     Profile.constructXml()
