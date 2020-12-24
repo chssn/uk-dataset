@@ -23,6 +23,7 @@ cmdParse = argparse.ArgumentParser(description="Application to collect data from
 cmdParse.add_argument('-s', '--scrape', help='web scrape and build database only', action='store_true')
 cmdParse.add_argument('-x', '--xml', help='build xml file from database', action='store_true')
 cmdParse.add_argument('-c', '--clear', help='drop all records from the database', action='store_true')
+cmdParse.add_argument('-d', '--debug', help='runs the code defined in the debug section [DEV ONLY]', action='store_true')
 args = cmdParse.parse_args()
 
 def airacURL():
@@ -140,7 +141,8 @@ class Profile():
             mapHeader.set('Type', type) # The type primarily will affect the colour vatSys uses to paint the map. Colours are defined in Colours.xml.
             mapHeader.set('Name', name) # The title of the Map (as displayed to the user).
             mapHeader.set('Priority', priority) # An integer specifying the z-axis layering of the map, 0 being drawn on top of everything else.
-            mapHeader.set('Center', center) # An approximate center point of the map, used to deconflict in the event of multiple Waypoints with the same name.
+            if center:
+                mapHeader.set('Center', center) # An approximate center point of the map, used to deconflict in the event of multiple Waypoints with the same name.
 
             return mapHeader
 
@@ -164,6 +166,9 @@ class Profile():
         xmlAllNavaidsSymbol.set('Type', 'Hexagon') # https://virtualairtrafficsystem.com/docs/dpk/#symbol-element
         xmlAllNavaidsSymbolH = xtree.SubElement(xmlAllNavaidsMapSym, 'Symbol')
         xmlAllNavaidsSymbolH.set('Type', 'DotFillCircle') # https://virtualairtrafficsystem.com/docs/dpk/#symbol-element
+
+        xmlAllCta = xmlRoot('AllCta') ## create XML document Maps\ALL_NAVAIDS
+        xmlAllCtaMap = constructXmlMapHeader(xmlAllCta, 'System', 'ALL_CTA', '2', 0)
 
         now = datetime.now()
         checkID = datetime.timestamp(now) ## generate unix timestamp to help verify if a row has already been added
@@ -305,8 +310,19 @@ class Profile():
             xmlAllNavaidsSymbolPointH = xtree.SubElement(xmlAllNavaidsSymbolH, 'Point')
             xmlAllNavaidsSymbolPointH.text = fix[3]
 
+        sql = "SELECT * FROM control_areas"
+        listCta = mysqlExec(sql, "selectMany")
+        for cta in listCta:
+            xmlCta = xtree.SubElement(xmlAllCtaMap, 'Line')
+            xmlCta.set('Name', cta[2])
+            xmlCta.set('Pattern', 'Dashed')
+            xmlCta.text = cta[3].rstrip('/')
+
         allAirportsTree = xtree.ElementTree(xmlAllAirports)
         allAirportsTree.write('Build/Maps/ALL_AIRPORTS.xml', encoding="utf-8", xml_declaration=True)
+
+        allCtaTree = xtree.ElementTree(xmlAllCta)
+        allCtaTree.write('Build/Maps/ALL_CTA.xml', encoding="utf-8", xml_declaration=True)
 
         allNavaidsTree = xtree.ElementTree(xmlAllNavaids)
         allNavaidsTree.write('Build/Maps/ALL_NAVAIDS.xml', encoding="utf-8", xml_declaration=True)
@@ -417,9 +433,6 @@ class WebScrape():
             enr44(listENR44)
             bar() # progress the progress bar
 
-        ##########################################################################################################
-        ## Define the XML sub tag 'SIDSTARs' - https://virtualairtrafficsystem.com/docs/dpk/#sidstars           ##
-        ##########################################################################################################
         # IDEA: This is currently scraping the *.ese file from VATSIM-UK. Need to find a better way of doing this. Too much hard code here and it's lazy!
             ese = open("UK.ese", "r")
             for line in ese:
@@ -468,6 +481,40 @@ class WebScrape():
 
                     bar() # progress the progress bar
 
+    def firUirTmaCtaData():
+        print("Parsing EG-ENR-2.1 Data (FIR, UIR, TMA AND CTA)...")
+        getENR21 = getAiracTable("EG-ENR-2.1-en-GB.html")
+        listENR21 = getENR21.find_all("td")
+        for row in listENR21:
+            ## find all FIR spaces
+            firTitle = re.findall(r"([A-Z]*)(\sFIR)(?=<\/span>.*>TAIRSPACE;TXT_NAME)", str(row))
+            firSpace = re.findall(r"([0-9]{6,7}[N|E|S|W])(?=<\/span>.*>TAIRSPACE_VERTEX;GEO_[(LAT)|(LONG)])", str(row))
+            if firTitle:
+                print(firTitle)
+                print(firSpace)
+
+            ## find all CTA spaces
+            ctaTitle = re.findall(r"([A-Z\s]*)(\sCTA\s)([0-9]?)(?=<\/span>.*>TAIRSPACE;TXT_NAME)", str(row))
+            ctaSpaceLat = re.findall(r"([0-9]{6}[N|S])(?=<\/span>.*>TAIRSPACE_VERTEX;GEO_LAT)", str(row))
+            ctaSpaceLon = re.findall(r"([0-9]{7}[E|W])(?=<\/span>.*>TAIRSPACE_VERTEX;GEO_LONG)", str(row))
+            if ctaTitle:
+                fF = re.search(r"(\')([A-Z\s]*)(\')(.*)(\sCTA\s)(.*)([0-9]{1,2}?)", str(ctaTitle))
+                try:
+                    title = str(fF.group(2)) + str(fF.group(5)) + str(fF.group(7))
+                except:
+                    title = str(fF.group(2)) + str(fF.group(5))
+
+                boundary = ''
+                for lat, lon in zip(ctaSpaceLat, ctaSpaceLon):
+                    latSplit = re.search(r"([0-9]{2})([0-9]{4})([N|S]{1})", str(lat))
+                    lonSplit = re.search(r"([0-9]{3})([0-9]{4})([E|W]{1})", str(lon))
+                    latPM = plusMinus(latSplit.group(3))
+                    lonPM = plusMinus(lonSplit.group(3))
+                    boundary += str(latPM) + str(latSplit.group(1)) + "." + str(latSplit.group(2)) + str(lonPM) + str(lonSplit.group(1)) + "." + str(lonSplit.group(2) + "/") ## build lat/lon string as per https://virtualairtrafficsystem.com/docs/dpk/#lat-long-format
+
+                sql = "INSERT INTO control_areas (fir_id, name, boundary) VALUE ('0', '"+ str(title) +"', '"+ str(boundary) +"')"
+                mysqlExec(sql, "insertUpdate")
+
     def processAd06Data():
         print("Parsing EG-AD-0.6 data to obtain ICAO designators...")
         getAerodromeList = getAiracTable("EG-AD-0.6-en-GB.html")
@@ -510,6 +557,8 @@ elif args.scrape:
     WebScrape()
 elif args.xml:
     Profile.constructXml()
+elif args.debug:
+    WebScrape.firUirTmaCtaData()
 else:
     print("Nothing to do here\n")
     cmdParse.print_help()
