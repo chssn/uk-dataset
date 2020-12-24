@@ -167,8 +167,11 @@ class Profile():
         xmlAllNavaidsSymbolH = xtree.SubElement(xmlAllNavaidsMapSym, 'Symbol')
         xmlAllNavaidsSymbolH.set('Type', 'DotFillCircle') # https://virtualairtrafficsystem.com/docs/dpk/#symbol-element
 
-        xmlAllCta = xmlRoot('AllCta') ## create XML document Maps\ALL_NAVAIDS
+        xmlAllCta = xmlRoot('AllCta') ## create XML document Maps\ALL_CTA
         xmlAllCtaMap = constructXmlMapHeader(xmlAllCta, 'System', 'ALL_CTA', '2', 0)
+
+        xmlAllTma = xmlRoot('AllCta') ## create XML document Maps\ALL_TMA
+        xmlAllTmaMap = constructXmlMapHeader(xmlAllTma, 'System', 'ALL_TMA', '2', 0)
 
         now = datetime.now()
         checkID = datetime.timestamp(now) ## generate unix timestamp to help verify if a row has already been added
@@ -318,11 +321,22 @@ class Profile():
             xmlCta.set('Pattern', 'Dashed')
             xmlCta.text = cta[3].rstrip('/')
 
+        sql = "SELECT * FROM terminal_control_areas"
+        listTma = mysqlExec(sql, "selectMany")
+        for tma in listTma:
+            xmlTma = xtree.SubElement(xmlAllTmaMap, 'Line')
+            xmlTma.set('Name', tma[2])
+            xmlTma.set('Pattern', 'Dashed')
+            xmlTma.text = tma[3].rstrip('/')
+
         allAirportsTree = xtree.ElementTree(xmlAllAirports)
         allAirportsTree.write('Build/Maps/ALL_AIRPORTS.xml', encoding="utf-8", xml_declaration=True)
 
         allCtaTree = xtree.ElementTree(xmlAllCta)
         allCtaTree.write('Build/Maps/ALL_CTA.xml', encoding="utf-8", xml_declaration=True)
+
+        allTmaTree = xtree.ElementTree(xmlAllTma)
+        allTmaTree.write('Build/Maps/ALL_TMA.xml', encoding="utf-8", xml_declaration=True)
 
         allNavaidsTree = xtree.ElementTree(xmlAllNavaids)
         allNavaidsTree.write('Build/Maps/ALL_NAVAIDS.xml', encoding="utf-8", xml_declaration=True)
@@ -513,6 +527,28 @@ class WebScrape():
                     boundary += str(latPM) + str(latSplit.group(1)) + "." + str(latSplit.group(2)) + str(lonPM) + str(lonSplit.group(1)) + "." + str(lonSplit.group(2) + "/") ## build lat/lon string as per https://virtualairtrafficsystem.com/docs/dpk/#lat-long-format
 
                 sql = "INSERT INTO control_areas (fir_id, name, boundary) VALUE ('0', '"+ str(title) +"', '"+ str(boundary) +"')"
+                mysqlExec(sql, "insertUpdate")
+
+            ## find all TMA spaces
+            tmaTitle = re.findall(r"([A-Z\s]*)(\sTMA\s)([0-9]?)(?=<\/span>.*>TAIRSPACE;TXT_NAME)", str(row))
+            tmaSpaceLat = re.findall(r"([0-9]{6}[N|S])(?=<\/span>.*>TAIRSPACE_VERTEX;GEO_LAT)", str(row))
+            tmaSpaceLon = re.findall(r"([0-9]{7}[E|W])(?=<\/span>.*>TAIRSPACE_VERTEX;GEO_LONG)", str(row))
+            if tmaTitle:
+                fF = re.search(r"(\')([A-Z\s]*)(\')(.*)(\sTMA\s)(.*)([0-9]{1,2}?)", str(tmaTitle))
+                try:
+                    title = str(fF.group(2)) + str(fF.group(5)) + str(fF.group(7))
+                except:
+                    title = str(fF.group(2)) + str(fF.group(5))
+
+                boundary = ''
+                for lat, lon in zip(tmaSpaceLat, tmaSpaceLon):
+                    latSplit = re.search(r"([0-9]{2})([0-9]{4})([N|S]{1})", str(lat))
+                    lonSplit = re.search(r"([0-9]{3})([0-9]{4})([E|W]{1})", str(lon))
+                    latPM = plusMinus(latSplit.group(3))
+                    lonPM = plusMinus(lonSplit.group(3))
+                    boundary += str(latPM) + str(latSplit.group(1)) + "." + str(latSplit.group(2)) + str(lonPM) + str(lonSplit.group(1)) + "." + str(lonSplit.group(2) + "/") ## build lat/lon string as per https://virtualairtrafficsystem.com/docs/dpk/#lat-long-format
+
+                sql = "INSERT INTO terminal_control_areas (fir_id, name, boundary) VALUE ('0', '"+ str(title) +"', '"+ str(boundary) +"')"
                 mysqlExec(sql, "insertUpdate")
 
     def processAd06Data():
