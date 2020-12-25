@@ -371,6 +371,39 @@ class Profile():
         else:
             print("No data has been deleted. We think...")
 
+    def createAtisFreqXml(): ## creates the frequency secion of ATIS.xml
+        def myround(x, base=0.025): ## rounds to the nearest 25KHz - simulator limitations prevent 8.33KHz spacing currently
+            flt = float(x)
+            return base * round(flt/base)
+
+        sql = "SELECT aerodromes.icao_designator, aerodrome_frequencies.frequency FROM aerodromes INNER JOIN aerodrome_frequencies ON aerodromes.id = aerodrome_frequencies.aerodrome_id WHERE aerodrome_frequencies.callsign_type_id = 6 ORDER BY `aerodromes`.`icao_designator` ASC"
+        atisFreq = mysqlExec(sql, "selectMany")
+
+        for freq in atisFreq:
+            freq25khz = myround(freq[1])
+            print('<Frequency Airport="' + freq[0] + '" Frequency="%.3f" />' % freq25khz)
+
+    def createRadars():
+        sql = "SELECT * FROM radar_sites"
+        radarSites = mysqlExec(sql, "selectMany")
+
+        xmlAllRadars = Xml.root("Radars")
+
+        for radar in radarSites:
+            xmlRadar = xtree.SubElement(xmlAllRadars, 'Radar')
+            xmlRadar.set('Name', str(radar[1]))
+            xmlRadar.set('Type', str(radar[5]))
+            xmlRadar.set('Elevation', str(radar[4]))
+            xmlRadar.set('MaxRange', str(radar[6]))
+
+            xmlRadarLat = xtree.SubElement(xmlRadar, 'Lat')
+            xmlRadarLat.text = str(radar[2])
+            xmlRadarLong = xtree.SubElement(xmlRadar, 'Long')
+            xmlRadarLong.text = str(radar[3])
+
+            radarTree = xtree.ElementTree(xmlAllRadars)
+            radarTree.write('Build/Radars.xml', encoding="utf-8", xml_declaration=True)
+
 class WebScrape():
     def __init__(self):
         ## Count the number of ICAO designators (may not actually be a verified aerodrome)
@@ -527,7 +560,7 @@ class WebScrape():
 
             ## find all CTA spaces
             ctaTitle = Airac.search("([A-Z\s]*)(\sCTA\s)([\d]?)", "TAIRSPACE;TXT_NAME", str(row))
-            ctaSpaceLat = Airac.search("([\d]{6}[N|S])", "TAIRSPACE_VERTEX;GEO_LAT)", str(row))
+            ctaSpaceLat = Airac.search("([\d]{6}[N|S])", "TAIRSPACE_VERTEX;GEO_LAT", str(row))
             ctaSpaceLon = Airac.search("([\d]{7}[E|W])", "TAIRSPACE_VERTEX;GEO_LONG", str(row))
             if ctaTitle:
                 fF = re.search(r"(\')([A-Z\s]*)(\')(.*)(\sCTA\s)(.*)([\d]{1,2}?)", str(ctaTitle))
@@ -549,14 +582,14 @@ class WebScrape():
 
             ## find all TMA spaces
             tmaTitle = Airac.search("([A-Z\s]*)(\sCTA\s)([\d]?)", "TAIRSPACE;TXT_NAME", str(row))
-            tmaSpaceLat = Airac.search("([\d]{6}[N|S])", "TAIRSPACE_VERTEX;GEO_LAT)", str(row))
+            tmaSpaceLat = Airac.search("([\d]{6}[N|S])", "TAIRSPACE_VERTEX;GEO_LAT", str(row))
             tmaSpaceLon = Airac.search("([\d]{7}[E|W])", "TAIRSPACE_VERTEX;GEO_LONG", str(row))
             if tmaTitle:
                 fF = re.search(r"(\')([A-Z\s]*)(\')(.*)(\sTMA\s)(.*)([\d]{1,2}?)", str(tmaTitle))
-                try:
+                if fF:
                     title = str(fF.group(2)) + str(fF.group(5)) + str(fF.group(7))
-                except:
-                    title = str(fF.group(2)) + str(fF.group(5))
+                #else:
+                #    title = str(fF.group(2)) + str(fF.group(5))
 
                 boundary = ''
                 for lat, lon in zip(tmaSpaceLat, tmaSpaceLon):
