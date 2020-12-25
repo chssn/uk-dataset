@@ -24,92 +24,121 @@ cmdParse.add_argument('-s', '--scrape', help='web scrape and build database only
 cmdParse.add_argument('-x', '--xml', help='build xml file from database', action='store_true')
 cmdParse.add_argument('-c', '--clear', help='drop all records from the database', action='store_true')
 cmdParse.add_argument('-d', '--debug', help='runs the code defined in the debug section [DEV ONLY]', action='store_true')
+cmdParse.add_argument('-v', '--verbose', action='store_true')
 args = cmdParse.parse_args()
 
-def airacURL():
-    ## Base NATS URL
-    cycle = "" # BUG: need something to calculate current cycle and autofill the base URL
-    baseYear = "2020"
-    baseMonth = "12"
-    baseDay = "03"
-    return "https://www.aurora.nats.co.uk/htmlAIP/Publications/" + baseYear + "-" + baseMonth + "-" + baseDay + "-AIRAC/html/eAIP/"
+class Airac():
+    def getUrl():
+        ## Base NATS URL
+        cycle = "" # BUG: need something to calculate current cycle and autofill the base URL
+        baseYear = "2020"
+        baseMonth = "12"
+        baseDay = "03"
+        return "https://www.aurora.nats.co.uk/htmlAIP/Publications/" + baseYear + "-" + baseMonth + "-" + baseDay + "-AIRAC/html/eAIP/"
 
-def getAiracTable(uri):
-    ## Webscrape the specified page for AIRAC dataset
-    URL = airacURL() + uri
+    def getTable(uri):
+        ## Webscrape the specified page for AIRAC dataset
+        address = Airac.getUrl() + uri
 
-    http = urllib3.PoolManager()
-    error = http.request("GET", URL)
-    if (error.status == 404):
-        return 404
-    else:
-        page = requests.get(URL)
-        return BeautifulSoup(page.content, "lxml")
+        http = urllib3.PoolManager()
+        error = http.request("GET", address)
+        if (error.status == 404):
+            return 404
+        else:
+            page = requests.get(address)
+            return BeautifulSoup(page.content, "lxml")
 
-def convertCoords(row):
-    ## Get coordinates for the navaid
-    coordinates = {}
-    coords = row.find_all("span", class_="SD")
-    for coord in coords:
-        lat = coord.find(string=re.compile("(?<!Purpose\:\s)([0-9]{6}[NS]{1})"))
-        lon = coord.find(string=re.compile("(?<![NS]\s)([0-9]{7}[EW]{1})"))
-        if lon is not None :
-            if lon.endswith("E"):
-                coordinates["lon"] = ("+" + lon[0:7] + ".0") # Convert Eastings to +
-            elif lon.endswith("W"):
-                coordinates["lon"] = ("-" + lon[0:7] + ".0") # Convert Westings to -
-        if lat is not None :
-            if lat.endswith("N"):
-                coordinates["lat"] = ("+" + lat[0:6] + ".0") # Convert Northings to +
-            elif lat.endswith("S"):
-                coordinates["lat"] = ("-" + lat[0:6] + ".0") # Convert Southings to -
+    def enr41(table):
+        ## For every row that is found, do...
+        children = []
+        for row in table:
+            ## Get the row id which provides the name and navaid type
+            id = row['id']
+            name = id.split('-')
 
-    return coordinates.get("lat") + coordinates.get("lon")
+            fullCoord = Geo.convertCoords(row)
 
-def xmlRoot(name):
-    ## Define the XML root tag
-    xml = xtree.Element(name)
-    xml.set('xmlns:xsd', 'http://www.w3.org/2001/XMLSchema')
-    xml.set('xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance')
+            ## Set the navaid type correctly
+            if name[1] == "VORDME":
+                name[1] = "VOR"
+            elif name[1] == "DME":
+                name[1] = "VOR"
 
-    ## Set a tag for XML generation time
-    xml.set('generated', ctime(time()))
+            ## Add navaid to the aerodromeDB
+            sql = "INSERT INTO navaids (name, type, coords) SELECT * FROM (SELECT '"+ str(name[2]) +"' AS srcName, '"+ str(name[1]) +"' AS srcType, '"+ str(fullCoord) +"' AS srcCoord) AS tmp WHERE NOT EXISTS (SELECT name FROM navaids WHERE name =  '"+ str(name[2]) +"' AND type =  '"+ str(name[1]) +"' AND coords = '"+ str(fullCoord) +"') LIMIT 1"
+            mysqlExec(sql, "insertUpdate")
 
-    return xml
+    def enr44(table):
+        ## For every row that is found, do...
+        children = []
+        for row in table:
+            ## Get the row id which provides the name and navaid type
+            id = row['id']
+            name = id.split('-')
 
-def enr41(table):
-    ## For every row that is found, do...
-    children = []
-    for row in table:
-        ## Get the row id which provides the name and navaid type
-        id = row['id']
-        name = id.split('-')
+            fullCoord = Geo.convertCoords(row)
 
-        fullCoord = convertCoords(row)
+            ## Add fix to the aerodromeDB
+            sql = "INSERT INTO fixes (name, coords) SELECT * FROM (SELECT '"+ str(name[1]) +"' AS srcName, '"+ str(fullCoord) +"' AS srcCoord) AS tmp WHERE NOT EXISTS (SELECT name FROM fixes WHERE name =  '"+ str(name[1]) +"' AND coords = '"+ str(fullCoord) +"') LIMIT 1"
+            mysqlExec(sql, "insertUpdate")
 
-        ## Set the navaid type correctly
-        if name[1] == "VORDME":
-            name[1] = "VOR"
-        elif name[1] == "DME":
-            name[1] = "VOR"
+    def search(find, name, string):
+        searchString = find + "(?=<\/span>.*>" + name + ")"
+        result = re.findall(rf"{str(searchString)}", str(string))
 
-        ## Add navaid to the aerodromeDB
-        sql = "INSERT INTO navaids (name, type, coords) SELECT * FROM (SELECT '"+ str(name[2]) +"' AS srcName, '"+ str(name[1]) +"' AS srcType, '"+ str(fullCoord) +"' AS srcCoord) AS tmp WHERE NOT EXISTS (SELECT name FROM navaids WHERE name =  '"+ str(name[2]) +"' AND type =  '"+ str(name[1]) +"' AND coords = '"+ str(fullCoord) +"') LIMIT 1"
-        mysqlExec(sql, "insertUpdate")
+        return result
 
-def enr44(table):
-    ## For every row that is found, do...
-    children = []
-    for row in table:
-        ## Get the row id which provides the name and navaid type
-        id = row['id']
-        name = id.split('-')
+class Geo():
+    def convertCoords(row):
+        ## Get coordinates for the navaid
+        coordinates = {}
+        coords = row.find_all("span", class_="SD")
+        for coord in coords:
+            lat = coord.find(string=re.compile("(?<!Purpose\:\s)([\d]{6}[NS]{1})"))
+            lon = coord.find(string=re.compile("(?<![NS]\s)([\d]{7}[EW]{1})"))
+            if lon is not None :
+                if lon.endswith("E"):
+                    coordinates["lon"] = ("+" + lon[0:7] + ".0") # Convert Eastings to +
+                elif lon.endswith("W"):
+                    coordinates["lon"] = ("-" + lon[0:7] + ".0") # Convert Westings to -
+            if lat is not None :
+                if lat.endswith("N"):
+                    coordinates["lat"] = ("+" + lat[0:6] + ".0") # Convert Northings to +
+                elif lat.endswith("S"):
+                    coordinates["lat"] = ("-" + lat[0:6] + ".0") # Convert Southings to -
 
-        fullCoord = convertCoords(row)
+        return coordinates.get("lat") + coordinates.get("lon")
 
-        ## Add fix to the aerodromeDB
-        sql = "INSERT INTO fixes (name, coords) SELECT * FROM (SELECT '"+ str(name[1]) +"' AS srcName, '"+ str(fullCoord) +"' AS srcCoord) AS tmp WHERE NOT EXISTS (SELECT name FROM fixes WHERE name =  '"+ str(name[1]) +"' AND coords = '"+ str(fullCoord) +"') LIMIT 1"
-        mysqlExec(sql, "insertUpdate")
+    def plusMinus(arg): ## Turns a compass point into the correct + or - for lat and long
+        if arg == "N" or arg == "E":
+            return "+"
+        elif arg == "S" or arg == "W":
+            return "-"
+
+class Xml():
+    def root(name):
+        ## Define the XML root tag
+        xml = xtree.Element(name)
+        xml.set('xmlns:xsd', 'http://www.w3.org/2001/XMLSchema')
+        xml.set('xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance')
+
+        ## Set a tag for XML generation time
+        xml.set('generated', ctime(time()))
+
+        return xml
+
+    def constructMapHeader(root, type, name, priority, center): ## ref https://virtualairtrafficsystem.com/docs/dpk/#map-element
+        ## creates the neccessary header for XML documents in the \Maps folder
+        mainHeader = xtree.SubElement(root, 'Maps')
+        mapHeader = xtree.SubElement(mainHeader, 'Map')
+
+        mapHeader.set('Type', type) # The type primarily will affect the colour vatSys uses to paint the map. Colours are defined in Colours.xml.
+        mapHeader.set('Name', name) # The title of the Map (as displayed to the user).
+        mapHeader.set('Priority', priority) # An integer specifying the z-axis layering of the map, 0 being drawn on top of everything else.
+        if center:
+            mapHeader.set('Center', center) # An approximate center point of the map, used to deconflict in the event of multiple Waypoints with the same name.
+
+        return mapHeader
 
 def mysqlExec(sql, type):
     try:
@@ -125,53 +154,34 @@ def mysqlExec(sql, type):
     except mysql.connector.Error as err:
         print(err)
 
-def plusMinus(arg):
-    if arg == "N" or arg == "E":
-        return "+"
-    elif arg == "S" or arg == "W":
-        return "-"
-
 class Profile():
     def constructXml():    ## Define XML top level tag
-        def constructXmlMapHeader(root, type, name, priority, center): ## ref https://virtualairtrafficsystem.com/docs/dpk/#map-element
-            ## creates the neccessary header for XML documents in the \Maps folder
-            mainHeader = xtree.SubElement(root, 'Maps')
-            mapHeader = xtree.SubElement(mainHeader, 'Map')
+        xmlAirspace = Xml.root('Airspace') ## create XML document Airspace.xml
 
-            mapHeader.set('Type', type) # The type primarily will affect the colour vatSys uses to paint the map. Colours are defined in Colours.xml.
-            mapHeader.set('Name', name) # The title of the Map (as displayed to the user).
-            mapHeader.set('Priority', priority) # An integer specifying the z-axis layering of the map, 0 being drawn on top of everything else.
-            if center:
-                mapHeader.set('Center', center) # An approximate center point of the map, used to deconflict in the event of multiple Waypoints with the same name.
-
-            return mapHeader
-
-        xmlAirspace = xmlRoot('Airspace') ## create XML document Airspace.xml
-
-        xmlAllAirports = xmlRoot('AllAirports') ## create XML document Maps\ALL_AIRPORTS
-        xmlAllAirportsMap = constructXmlMapHeader(xmlAllAirports, 'System2', 'ALL_AIRPORTS', '2', '+53.7-1.5')
+        xmlAllAirports = Xml.root('AllAirports') ## create XML document Maps\ALL_AIRPORTS
+        xmlAllAirportsMap = Xml.constructMapHeader(xmlAllAirports, 'System2', 'ALL_AIRPORTS', '2', '+53.7-1.5')
         xmlAllAirportsLabel = xtree.SubElement(xmlAllAirportsMap, 'Label')
         xmlAllAirportsLabel.set('HasLeader', 'true') # has a line connecting the point and label
         xmlAllAirportsLabel.set('LabelOrientation', 'NW') # where the label will be positioned in relation to the point
         xmlAllAirportsSymbol = xtree.SubElement(xmlAllAirportsMap, 'Symbol')
         xmlAllAirportsSymbol.set('Type', 'Reticle') # https://virtualairtrafficsystem.com/docs/dpk/#symbol-element
 
-        xmlAllNavaids = xmlRoot('AllNavaids') ## create XML document Maps\ALL_NAVAIDS
-        xmlAllNavaidsMap = constructXmlMapHeader(xmlAllNavaids, 'System', 'ALL_NAVAIDS_NAMES', '0', '+53.7-1.5')
+        xmlAllNavaids = Xml.root('AllNavaids') ## create XML document Maps\ALL_NAVAIDS
+        xmlAllNavaidsMap = Xml.constructMapHeader(xmlAllNavaids, 'System', 'ALL_NAVAIDS_NAMES', '0', '+53.7-1.5')
         xmlAllNavaidsLabel = xtree.SubElement(xmlAllNavaidsMap, 'Label')
         xmlAllNavaidsLabel.set('HasLeader', 'true') # has a line connecting the point and label
         #xmlAllNavaidsLabel.set('LabelOrientation', 'NW') # where the label will be positioned in relation to the point
-        xmlAllNavaidsMapSym = constructXmlMapHeader(xmlAllNavaids, 'System', 'ALL_NAVAIDS', '0', '+53.7-1.5')
+        xmlAllNavaidsMapSym = Xml.constructMapHeader(xmlAllNavaids, 'System', 'ALL_NAVAIDS', '0', '+53.7-1.5')
         xmlAllNavaidsSymbol = xtree.SubElement(xmlAllNavaidsMapSym, 'Symbol')
         xmlAllNavaidsSymbol.set('Type', 'Hexagon') # https://virtualairtrafficsystem.com/docs/dpk/#symbol-element
         xmlAllNavaidsSymbolH = xtree.SubElement(xmlAllNavaidsMapSym, 'Symbol')
         xmlAllNavaidsSymbolH.set('Type', 'DotFillCircle') # https://virtualairtrafficsystem.com/docs/dpk/#symbol-element
 
-        xmlAllCta = xmlRoot('AllCta') ## create XML document Maps\ALL_CTA
-        xmlAllCtaMap = constructXmlMapHeader(xmlAllCta, 'System', 'ALL_CTA', '2', 0)
+        xmlAllCta = Xml.root('AllCta') ## create XML document Maps\ALL_CTA
+        xmlAllCtaMap = Xml.constructMapHeader(xmlAllCta, 'System', 'ALL_CTA', '2', 0)
 
-        xmlAllTma = xmlRoot('AllCta') ## create XML document Maps\ALL_TMA
-        xmlAllTmaMap = constructXmlMapHeader(xmlAllTma, 'System', 'ALL_TMA', '2', 0)
+        xmlAllTma = Xml.root('AllCta') ## create XML document Maps\ALL_TMA
+        xmlAllTmaMap = Xml.constructMapHeader(xmlAllTma, 'System', 'ALL_TMA', '2', 0)
 
         now = datetime.now()
         checkID = datetime.timestamp(now) ## generate unix timestamp to help verify if a row has already been added
@@ -343,7 +353,7 @@ class Profile():
 
         airspaceTree = xtree.ElementTree(xmlAirspace)
         airspaceTree.write('Build/Airspace.xml', encoding="utf-8", xml_declaration=True)
-    # BUG: Probably read the whole XML through and run this regex (Runways=")([0-9]{2}[L|R|C]?)([0-9]{2}[L|R|C]?)(") and replace $1$2,$3$4
+    # BUG: Probably read the whole XML through and run this regex (Runways=")([\d]{2}[L|R|C]?)([\d]{2}[L|R|C]?)(") and replace $1$2,$3$4
     def clearDatabase():
         print(Fore.RED + "!!!WARNING!!!" + Style.RESET_ALL)
         print("This will truncate (delete) the contents of all tables in this database.")
@@ -353,19 +363,11 @@ class Profile():
         if confirmation == "confirm":
             ## Back everything up first!
             sqlA = "BACKUP DATABASE uk-dataset TO DISK 'backup.sql'"
-            sqlB = "TRUNCATE TABLE aerodromes"
-            sqlC = "TRUNCATE TABLE aerodrome_runways"
-            sqlD = "TRUNCATE TABLE aerodrome_runways_sid"
-            sqlE = "TRUNCATE TABLE aerodrome_runways_star"
-            sqlF = "TRUNCATE TABLE fixes"
-            sqlG = "TRUNCATE TABLE navaids"
             #cursor.execute(sqlA)
-            cursor.execute(sqlB)
-            cursor.execute(sqlC)
-            cursor.execute(sqlD)
-            cursor.execute(sqlE)
-            cursor.execute(sqlF)
-            cursor.execute(sqlG)
+            tables = ["aerodromes", "aerodrome_frequencies", "aerodrome_runways", "aerodrome_runways_sid", "aerodrome_runways_star", "fixes", "navaids", "control_areas"]
+            for t in tables:
+                truncate = "TRUNCATE TABLE " + t
+                cursor.execute(truncate)
         else:
             print("No data has been deleted. We think...")
 
@@ -383,7 +385,7 @@ class WebScrape():
             for aerodrome in tableAerodrome:    ## AD 2 data
                 ## list all aerodrome runways
                 bar() # progress the progress bar
-                getRunways = getAiracTable("EG-AD-2."+ aerodrome[1] +"-en-GB.html") ## Try and find all information for this aerodrome
+                getRunways = Airac.getTable("EG-AD-2."+ aerodrome[1] +"-en-GB.html") ## Try and find all information for this aerodrome
                 if getRunways != 404:
                     ## Add verify flag for this aerodrome
                     sql = "UPDATE aerodromes SET verified = 1 WHERE id = '"+ str(aerodrome[0]) +"'"
@@ -392,34 +394,50 @@ class WebScrape():
                     print("Parsing EG-AD-2 Data for "+ aerodrome[1] +"...")
                     aerodromeLocation = getRunways.find(id=aerodrome[1] + "-AD-2.2")
                     aerodromeAD212 = getRunways.find(id=aerodrome[1] + "-AD-2.12")
-                    aerodromeRunways = re.findall(r"([0-9]{2}[L|C|R]?)(?=<\/span>.*>TRWY_DIRECTION)", str(aerodromeAD212))
-                    aerodromeRunwaysLat = re.findall(r"([0-9]{6}\.[0-9]{2}[N|S]{1})(?=<\/span>.*>TRWY_CLINE_POINT;GEO_LAT)", str(aerodromeAD212))
-                    aerodromeRunwaysLong = re.findall(r"([0-9]{7}\.[0-9]{2}[E|W]{1})(?=<\/span>.*>TRWY_CLINE_POINT;GEO_LONG)", str(aerodromeAD212))
-                    aerodromeRunwaysElev = re.findall(r"([0-9]{3})(?=<\/span>.*>TRWY_CLINE_POINT;VAL_GEOID_UNDULATION)", str(aerodromeAD212))
+                    aerodromeAD218 = getRunways.find(id=aerodrome[1] + "-AD-2.18")
+
+                    ## Parse runway locations
+                    aerodromeRunways = Airac.search("([\d]{2}[L|C|R]?)", "TRWY_DIRECTION", str(aerodromeAD212))
+                    aerodromeRunwaysLat = Airac.search("([\d]{6}\.[\d]{2}[N|S]{1})", "TRWY_CLINE_POINT;GEO_LAT", str(aerodromeAD212))
+                    aerodromeRunwaysLong = Airac.search("([\d]{7}\.[\d]{2}[E|W]{1})", "TRWY_CLINE_POINT;GEO_LONG", str(aerodromeAD212))
+                    aerodromeRunwaysElev = Airac.search("([\d]{3})", "TRWY_CLINE_POINT;VAL_GEOID_UNDULATION", str(aerodromeAD212))
 
                     for rwy, lat, lon, elev in zip(aerodromeRunways, aerodromeRunwaysLat, aerodromeRunwaysLong, aerodromeRunwaysElev):
                         ## Add runway to the aerodromeDB
-                        latSplit = re.search(r"([0-9]{6}\.[0-9]{2})([N|S]{1})", str(lat))
-                        lonSplit = re.search(r"([0-9]{7}\.[0-9]{2})([E|W]{1})", str(lon))
-                        latPM = plusMinus(latSplit.group(2))
-                        lonPM = plusMinus(lonSplit.group(2))
+                        latSplit = re.search(r"([\d]{6}\.[\d]{2})([N|S]{1})", str(lat))
+                        lonSplit = re.search(r"([\d]{7}\.[\d]{2})([E|W]{1})", str(lon))
+                        latPM = Geo.plusMinus(latSplit.group(2))
+                        lonPM = Geo.plusMinus(lonSplit.group(2))
                         loc = str(latPM) + str(latSplit.group(1)) + str(lonPM) + str(lonSplit.group(1)) ## build lat/lon string as per https://virtualairtrafficsystem.com/docs/dpk/#lat-long-format
 
                         sql = "INSERT INTO aerodrome_runways (aerodrome_id, runway, location, elevation) VALUE ('"+ str(aerodrome[0]) +"', '"+ str(rwy) +"', '"+ str(loc) +"', '"+ str(elev) +"')"
                         mysqlExec(sql, "insertUpdate")
 
+                    ## Parse air traffic services
+                    aerodromeServices = Airac.search("(APPROACH|GROUND|DELIVERY|TOWER|DIRECTOR|INFORMATION)", "TCALLSIGN_DETAIL", str(aerodromeAD218))
+                    serviceFrequency = Airac.search("([\d]{3}\.[\d]{3})", "TFREQUENCY", str(aerodromeAD218))
+
+                    for srv, frq in zip(aerodromeServices, serviceFrequency):
+                        callSignId = "SELECT id FROM standard_callsigns WHERE description = '"+ str(srv) +"' LIMIT 1"
+                        callSignType = mysqlExec(callSignId, "selectOne")
+                        csModify = re.search(r"([\d]{1,8})", str(callSignType))
+
+                        sql = "INSERT INTO aerodrome_frequencies (aerodrome_id, callsign_type_id, frequency) VALUE ('"+ str(aerodrome[0]) +"', '"+ str(csModify.group(1)) +"', '"+ str(frq) +"')"
+                        if args.verbose: print(sql)
+                        mysqlExec(sql, "insertUpdate")
+
                     ## Search for aerodrome lat/lon/elev
-                    aerodromeLat = re.search('(Lat: )(<span class="SD" id="ID_[0-9]{7}">)([0-9]{6})([N|S]{1})', str(aerodromeLocation))
-                    aerodromeLon = re.search(r"(Long: )(<span class=\"SD\" id=\"ID_[0-9]{7}\">)([0-9]{7})([E|W]{1})", str(aerodromeLocation))
-                    aerodromeElev = re.search(r"(VAL_ELEV\;)([0-9]{1,4})", str(aerodromeLocation))
+                    aerodromeLat = re.search('(Lat: )(<span class="SD" id="ID_[\d]{7}">)([\d]{6})([N|S]{1})', str(aerodromeLocation))
+                    aerodromeLon = re.search(r"(Long: )(<span class=\"SD\" id=\"ID_[\d]{7}\">)([\d]{7})([E|W]{1})", str(aerodromeLocation))
+                    aerodromeElev = re.search(r"(VAL_ELEV\;)([\d]{1,4})", str(aerodromeLocation))
 
                     if aerodromeLat:
-                        latPM = plusMinus(aerodromeLat.group(4))
+                        latPM = Geo.plusMinus(aerodromeLat.group(4))
                     else:
                         latPM = "+" # BUG: lazy fail option
 
                     if aerodromeLon:
-                        lonPM = plusMinus(aerodromeLon.group(4))
+                        lonPM = Geo.plusMinus(aerodromeLon.group(4))
                     else:
                         lonPM = "-" # BUG: Lazy fail option
 
@@ -435,16 +453,16 @@ class WebScrape():
 
             ## Get ENR-4.1 data from the defined website
             print("Parsing EG-ENR-4.1 Data (RADIO NAVIGATION AIDS - EN-ROUTE)...")
-            getENR41 = getAiracTable("EG-ENR-4.1-en-GB.html")
+            getENR41 = Airac.getTable("EG-ENR-4.1-en-GB.html")
             listENR41 = getENR41.find_all("tr", class_ = "Table-row-type-3")
-            enr41(listENR41)
+            Airac.enr41(listENR41)
             bar() # progress the progress bar
 
             ## Get ENR-4.4 data from the defined website
             print("Parsing EG-ENR-4.4 Data (NAME-CODE DESIGNATORS FOR SIGNIFICANT POINTS)...")
-            getENR44 = getAiracTable("EG-ENR-4.4-en-GB.html")
+            getENR44 = Airac.getTable("EG-ENR-4.4-en-GB.html")
             listENR44 = getENR44.find_all("tr", class_ = "Table-row-type-3")
-            enr44(listENR44)
+            Airac.enr44(listENR44)
             bar() # progress the progress bar
 
         # IDEA: This is currently scraping the *.ese file from VATSIM-UK. Need to find a better way of doing this. Too much hard code here and it's lazy!
@@ -497,22 +515,22 @@ class WebScrape():
 
     def firUirTmaCtaData():
         print("Parsing EG-ENR-2.1 Data (FIR, UIR, TMA AND CTA)...")
-        getENR21 = getAiracTable("EG-ENR-2.1-en-GB.html")
+        getENR21 = Airac.getTable("EG-ENR-2.1-en-GB.html")
         listENR21 = getENR21.find_all("td")
         for row in listENR21:
             ## find all FIR spaces
-            firTitle = re.findall(r"([A-Z]*)(\sFIR)(?=<\/span>.*>TAIRSPACE;TXT_NAME)", str(row))
-            firSpace = re.findall(r"([0-9]{6,7}[N|E|S|W])(?=<\/span>.*>TAIRSPACE_VERTEX;GEO_[(LAT)|(LONG)])", str(row))
+            firTitle = Airac.search("([A-Z]*)(\sFIR)", "TAIRSPACE;TXT_NAME", str(row))
+            firSpace = Airac.search("([\d]{6,7}[N|E|S|W])", "TAIRSPACE_VERTEX;GEO_[(LAT)|(LONG)]", str(row))
             if firTitle:
                 print(firTitle)
                 print(firSpace)
 
             ## find all CTA spaces
-            ctaTitle = re.findall(r"([A-Z\s]*)(\sCTA\s)([0-9]?)(?=<\/span>.*>TAIRSPACE;TXT_NAME)", str(row))
-            ctaSpaceLat = re.findall(r"([0-9]{6}[N|S])(?=<\/span>.*>TAIRSPACE_VERTEX;GEO_LAT)", str(row))
-            ctaSpaceLon = re.findall(r"([0-9]{7}[E|W])(?=<\/span>.*>TAIRSPACE_VERTEX;GEO_LONG)", str(row))
+            ctaTitle = Airac.search("([A-Z\s]*)(\sCTA\s)([\d]?)", "TAIRSPACE;TXT_NAME", str(row))
+            ctaSpaceLat = Airac.search("([\d]{6}[N|S])", "TAIRSPACE_VERTEX;GEO_LAT)", str(row))
+            ctaSpaceLon = Airac.search("([\d]{7}[E|W])", "TAIRSPACE_VERTEX;GEO_LONG", str(row))
             if ctaTitle:
-                fF = re.search(r"(\')([A-Z\s]*)(\')(.*)(\sCTA\s)(.*)([0-9]{1,2}?)", str(ctaTitle))
+                fF = re.search(r"(\')([A-Z\s]*)(\')(.*)(\sCTA\s)(.*)([\d]{1,2}?)", str(ctaTitle))
                 try:
                     title = str(fF.group(2)) + str(fF.group(5)) + str(fF.group(7))
                 except:
@@ -520,21 +538,21 @@ class WebScrape():
 
                 boundary = ''
                 for lat, lon in zip(ctaSpaceLat, ctaSpaceLon):
-                    latSplit = re.search(r"([0-9]{2})([0-9]{4})([N|S]{1})", str(lat))
-                    lonSplit = re.search(r"([0-9]{3})([0-9]{4})([E|W]{1})", str(lon))
-                    latPM = plusMinus(latSplit.group(3))
-                    lonPM = plusMinus(lonSplit.group(3))
+                    latSplit = re.search(r"([\d]{2})([\d]{4})([N|S]{1})", str(lat))
+                    lonSplit = re.search(r"([\d]{3})([\d]{4})([E|W]{1})", str(lon))
+                    latPM = Geo.plusMinus(latSplit.group(3))
+                    lonPM = Geo.plusMinus(lonSplit.group(3))
                     boundary += str(latPM) + str(latSplit.group(1)) + "." + str(latSplit.group(2)) + str(lonPM) + str(lonSplit.group(1)) + "." + str(lonSplit.group(2) + "/") ## build lat/lon string as per https://virtualairtrafficsystem.com/docs/dpk/#lat-long-format
 
                 sql = "INSERT INTO control_areas (fir_id, name, boundary) VALUE ('0', '"+ str(title) +"', '"+ str(boundary) +"')"
                 mysqlExec(sql, "insertUpdate")
 
             ## find all TMA spaces
-            tmaTitle = re.findall(r"([A-Z\s]*)(\sTMA\s)([0-9]?)(?=<\/span>.*>TAIRSPACE;TXT_NAME)", str(row))
-            tmaSpaceLat = re.findall(r"([0-9]{6}[N|S])(?=<\/span>.*>TAIRSPACE_VERTEX;GEO_LAT)", str(row))
-            tmaSpaceLon = re.findall(r"([0-9]{7}[E|W])(?=<\/span>.*>TAIRSPACE_VERTEX;GEO_LONG)", str(row))
+            tmaTitle = Airac.search("([A-Z\s]*)(\sCTA\s)([\d]?)", "TAIRSPACE;TXT_NAME", str(row))
+            tmaSpaceLat = Airac.search("([\d]{6}[N|S])", "TAIRSPACE_VERTEX;GEO_LAT)", str(row))
+            tmaSpaceLon = Airac.search("([\d]{7}[E|W])", "TAIRSPACE_VERTEX;GEO_LONG", str(row))
             if tmaTitle:
-                fF = re.search(r"(\')([A-Z\s]*)(\')(.*)(\sTMA\s)(.*)([0-9]{1,2}?)", str(tmaTitle))
+                fF = re.search(r"(\')([A-Z\s]*)(\')(.*)(\sTMA\s)(.*)([\d]{1,2}?)", str(tmaTitle))
                 try:
                     title = str(fF.group(2)) + str(fF.group(5)) + str(fF.group(7))
                 except:
@@ -542,10 +560,10 @@ class WebScrape():
 
                 boundary = ''
                 for lat, lon in zip(tmaSpaceLat, tmaSpaceLon):
-                    latSplit = re.search(r"([0-9]{2})([0-9]{4})([N|S]{1})", str(lat))
-                    lonSplit = re.search(r"([0-9]{3})([0-9]{4})([E|W]{1})", str(lon))
-                    latPM = plusMinus(latSplit.group(3))
-                    lonPM = plusMinus(lonSplit.group(3))
+                    latSplit = re.search(r"([\d]{2})([\d]{4})([N|S]{1})", str(lat))
+                    lonSplit = re.search(r"([\d]{3})([\d]{4})([E|W]{1})", str(lon))
+                    latPM = Geo.plusMinus(latSplit.group(3))
+                    lonPM = Geo.plusMinus(lonSplit.group(3))
                     boundary += str(latPM) + str(latSplit.group(1)) + "." + str(latSplit.group(2)) + str(lonPM) + str(lonSplit.group(1)) + "." + str(lonSplit.group(2) + "/") ## build lat/lon string as per https://virtualairtrafficsystem.com/docs/dpk/#lat-long-format
 
                 sql = "INSERT INTO terminal_control_areas (fir_id, name, boundary) VALUE ('0', '"+ str(title) +"', '"+ str(boundary) +"')"
@@ -553,7 +571,7 @@ class WebScrape():
 
     def processAd06Data():
         print("Parsing EG-AD-0.6 data to obtain ICAO designators...")
-        getAerodromeList = getAiracTable("EG-AD-0.6-en-GB.html")
+        getAerodromeList = Airac.getTable("EG-AD-0.6-en-GB.html")
         listAerodromeList = getAerodromeList.find_all("tr") # IDEA: Think there is a more efficient way of parsing this data
         for row in listAerodromeList:
             getAerodrome = row.find(string=re.compile("^(EG)[A-Z]{2}$"))
@@ -586,6 +604,7 @@ if args.clear:
     ## Truncate all tables in the database. After all, this should only be run once per AIRAC cycle...
     Profile.clearDatabase()
 elif args.scrape:
+    Profile.clearDatabase()
     ## Run the webscraper
     ## Get AD2 aerodrome list from AD0.6 table
     WebScrape.processAd06Data()
