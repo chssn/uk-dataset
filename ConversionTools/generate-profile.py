@@ -364,7 +364,7 @@ class Profile():
             ## Back everything up first!
             sqlA = "BACKUP DATABASE uk-dataset TO DISK 'backup.sql'"
             #cursor.execute(sqlA)
-            tables = ["aerodromes", "aerodrome_frequencies", "aerodrome_runways", "aerodrome_runways_sid", "aerodrome_runways_star", "fixes", "navaids", "control_areas"]
+            tables = ["aerodromes", "aerodrome_frequencies", "aerodrome_runways", "aerodrome_runways_sid", "aerodrome_runways_star", "fixes", "navaids", "control_areas", "terminal_control_areas"]
             for t in tables:
                 truncate = "TRUNCATE TABLE " + t
                 cursor.execute(truncate)
@@ -405,7 +405,7 @@ class Profile():
             radarTree.write('Build/Radars.xml', encoding="utf-8", xml_declaration=True)
 
 class WebScrape():
-    def __init__(self):
+    def main():
         ## Count the number of ICAO designators (may not actually be a verified aerodrome)
         sql = "SELECT COUNT(icao_designator) AS NumberofAerodromes FROM aerodromes"
         numberofAerodromes = mysqlExec(sql, "selectOne")
@@ -605,12 +605,12 @@ class WebScrape():
     def processAd06Data():
         print("Parsing EG-AD-0.6 data to obtain ICAO designators...")
         getAerodromeList = Airac.getTable("EG-AD-0.6-en-GB.html")
-        listAerodromeList = getAerodromeList.find_all("tr") # IDEA: Think there is a more efficient way of parsing this data
+        listAerodromeList = getAerodromeList.find_all("h3") # IDEA: Think there is a more efficient way of parsing this data
         for row in listAerodromeList:
-            getAerodrome = row.find(string=re.compile("^(EG)[A-Z]{2}$"))
-            if getAerodrome is not None:
+            getAerodrome = re.search(r"([A-Z]{4})(\n[\s\S]{7}\n[\s\S]{8})([A-Z]{4}.*)(\n[\s\S]{6}<\/a>)", str(row))
+            if getAerodrome:
                 ## Place each aerodrome into the DB
-                sql = "INSERT INTO aerodromes (icao_designator, verified, location, elevation) VALUES ('"+ getAerodrome +"' , 0, 0, 0)"
+                sql = "INSERT INTO aerodromes (icao_designator, verified, location, elevation, name) VALUES ('"+ str(getAerodrome[1]) +"' , 0, 0, 0, '"+ str(getAerodrome[3]) +"')"
                 mysqlExec(sql, "insertUpdate")  ## Process data from AD 0.6
 
     def parseUKMil():
@@ -637,14 +637,14 @@ if args.clear:
     ## Truncate all tables in the database. After all, this should only be run once per AIRAC cycle...
     Profile.clearDatabase()
 elif args.scrape:
-    Profile.clearDatabase()
-    ## Run the webscraper
-    ## Get AD2 aerodrome list from AD0.6 table
+    Profile.clearDatabase() # wipe the database first # BUG: need to code a database backup here first just in case...
     WebScrape.processAd06Data()
     #WebScrape.parseUKMil() ## placeholder
-    WebScrape()
+    WebScrape.main()
+    WebScrape.firUirTmaCtaData()
 elif args.xml:
     Profile.constructXml()
+    Profile.createRadars()
 elif args.debug:
     WebScrape.firUirTmaCtaData()
 else:
