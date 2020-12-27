@@ -30,7 +30,7 @@ cmdParse.add_argument('-v', '--verbose', action='store_true')
 args = cmdParse.parse_args()
 
 class Airac():
-    def getUrl():
+    def getUrl(self):
         def getCurrentCycle(): ## try and work out the current AIRAC cycle
             address = "https://www.nm.eurocontrol.int/RAD/common/airac_dates.html"
 
@@ -237,7 +237,7 @@ def mysqlExec(sql, type):
         print(err)
 
 class Profile():
-    def constructXml():    ## Define XML top level tag
+    def constructXml(self):    ## Define XML top level tag
         xmlAirspace = Xml.root('Airspace') ## create XML document Airspace.xml
 
         xmlAllAirports = Xml.root('AllAirports') ## create XML document Maps\ALL_AIRPORTS
@@ -436,7 +436,7 @@ class Profile():
         airspaceTree = xtree.ElementTree(xmlAirspace)
         airspaceTree.write('Build/Airspace.xml', encoding="utf-8", xml_declaration=True)
     # BUG: Probably read the whole XML through and run this regex (Runways=")([\d]{2}[L|R|C]?)([\d]{2}[L|R|C]?)(") and replace $1$2,$3$4
-    def clearDatabase():
+    def clearDatabase(self):
         print(Fore.RED + "!!!WARNING!!!" + Style.RESET_ALL)
         print("This will truncate (delete) the contents of all tables in this database.")
         print("Are you sure you wish to contine?")
@@ -453,7 +453,7 @@ class Profile():
         else:
             print("No data has been deleted. We think...")
 
-    def createAtisFreqXml(): ## creates the frequency secion of ATIS.xml
+    def createAtisFreqXml(self): ## creates the frequency secion of ATIS.xml
         def myround(x, base=0.025): ## rounds to the nearest 25KHz - simulator limitations prevent 8.33KHz spacing currently
             flt = float(x)
             return base * round(flt/base)
@@ -465,7 +465,7 @@ class Profile():
             freq25khz = myround(freq[1])
             print('<Frequency Airport="' + freq[0] + '" Frequency="%.3f" />' % freq25khz)
 
-    def createRadars():
+    def createRadars(self):
         sql = "SELECT * FROM radar_sites"
         radarSites = mysqlExec(sql, "selectMany")
 
@@ -487,7 +487,7 @@ class Profile():
             radarTree.write('Build/Radars.xml', encoding="utf-8", xml_declaration=True)
 
 class WebScrape():
-    def main():
+    def main(self):
         ## Count the number of ICAO designators (may not actually be a verified aerodrome)
         sql = "SELECT COUNT(icao_designator) AS NumberofAerodromes FROM aerodromes"
         numberofAerodromes = mysqlExec(sql, "selectOne")
@@ -628,7 +628,7 @@ class WebScrape():
 
                     bar() # progress the progress bar
 
-    def firUirTmaCtaData():
+    def firUirTmaCtaData(self):
         print("Parsing EG-ENR-2.1 Data (FIR, UIR, TMA AND CTA)...")
         getENR21 = Airac.getTable("EG-ENR-2.1-en-GB.html")
         listENR21 = getENR21.find_all("td")
@@ -684,7 +684,7 @@ class WebScrape():
                 sql = "INSERT INTO terminal_control_areas (fir_id, name, boundary) VALUE ('0', '"+ str(title) +"', '"+ str(boundary) +"')"
                 mysqlExec(sql, "insertUpdate")
 
-    def processAd06Data():
+    def processAd06Data(self):
         print("Parsing EG-AD-0.6 data to obtain ICAO designators...")
         getAerodromeList = Airac.getTable("EG-AD-0.6-en-GB.html")
         listAerodromeList = getAerodromeList.find_all("h3") # IDEA: Think there is a more efficient way of parsing this data
@@ -695,7 +695,7 @@ class WebScrape():
                 sql = "INSERT INTO aerodromes (icao_designator, verified, location, elevation, name) VALUES ('"+ str(getAerodrome[1]) +"' , 0, 0, 0, '"+ str(getAerodrome[3]) +"')"
                 mysqlExec(sql, "insertUpdate")  ## Process data from AD 0.6
 
-    def parseUKMil():
+    def parseUKMil(self):
         ## this is a hard-coded bodge for getting UK military ICAO designators.
         url = "https://www.aidu.mod.uk/aip/aipVolumes.htm"
         http = urllib3.PoolManager()
