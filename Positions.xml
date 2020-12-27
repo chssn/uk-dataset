@@ -65,6 +65,12 @@
   <Position Name="EGKK_GND" Type="ASMGCS" ASMGCSAirport="EGKK" DefaultCenter="+510853.0-0001125.0" DefaultRange="2" MagneticVariation="0.53" Rotation="10">
     <Maps>
       <Map Name="EGKK/EGKK_SMR" />
+      <Map Name="EGKK/EGKK_SMR_RWY" />
+      <Map Name="EGKK/EGKK_SMR_TWY" />
+      <Map Name="EGKK/EGKK_SMR_BLD" />
+      <Map Name="EGKK/EGKK_SMR_APR" />
+      <Map Name="EGKK/EGKK_SMR_BAK" />
+      <Map Name="EGKK/EGKK_SMR_INF" />
     </Maps>
     <Strips Mode="Beacon" Sort="Alpha">
       <Window Type="ADEP" Beacon="EGKK" Visible="true" />
@@ -77,11 +83,15 @@
       <Airport Name="EGKK" />
     </ArrivalLists>
   </Position>
-  <Position Name="EGKK_DEL" Type="ASMGCS" ASMGCSAirport="EGKK" DefaultCenter="+510853.0-0001125.0" DefaultRange="2" MagneticVariation="0" Rotation="0">
+  <Position Name="EGKK_DEL" Type="ASMGCS" ASMGCSAirport="EGKK" DefaultCenter="+510853.0-0001125.0" DefaultRange="2" MagneticVariation="0.53" Rotation="10">
     <Maps>
       <Map Name="EGKK/EGKK_SMR" />
       <Map Name="EGKK/EGKK_SMR_RWY" />
       <Map Name="EGKK/EGKK_SMR_TWY" />
+      <Map Name="EGKK/EGKK_SMR_BLD" />
+      <Map Name="EGKK/EGKK_SMR_APR" />
+      <Map Name="EGKK/EGKK_SMR_BAK" />
+      <Map Name="EGKK/EGKK_SMR_INF" />
     </Maps>
     <Strips Mode="Beacon" Sort="Alpha">
       <Window Type="ADEP" Beacon="EGKK" Visible="true" />
