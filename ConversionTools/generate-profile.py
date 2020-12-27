@@ -13,6 +13,7 @@ from bs4 import BeautifulSoup
 from colorama import Fore, Back, Style
 from time import time, ctime
 from alive_progress import alive_bar
+from pykml import parser
 
 ### This file generates the Airspace.xml file for VATSys from the UK NATS AIRAC
 
@@ -23,6 +24,7 @@ cmdParse = argparse.ArgumentParser(description="Application to collect data from
 cmdParse.add_argument('-s', '--scrape', help='web scrape and build database only', action='store_true')
 cmdParse.add_argument('-x', '--xml', help='build xml file from database', action='store_true')
 cmdParse.add_argument('-c', '--clear', help='drop all records from the database', action='store_true')
+cmdParse.add_argument('-g', '--geo', help='tool to assist with converting airport mapping from ES')
 cmdParse.add_argument('-d', '--debug', help='runs the code defined in the debug section [DEV ONLY]', action='store_true')
 cmdParse.add_argument('-v', '--verbose', action='store_true')
 args = cmdParse.parse_args()
@@ -114,6 +116,39 @@ class Geo():
             return "+"
         elif arg == "S" or arg == "W":
             return "-"
+
+    def kmlMappingConvert(fileIn):
+        ## Hardcoded to EGKK at the moment
+        xmlGround = Xml.root('Ground')
+
+        with open(fileIn) as fobj:
+            folder = parser.parse(fobj).getroot().Document
+
+        xmlGroundMapRwy = Xml.constructMapHeader(xmlGround, 'Ground_RWY', 'EGKK_SMR_RWY', '1', '+510853.0-0001125.0')
+        xmlGroundMapTwy = Xml.constructMapHeader(xmlGround, 'Ground_TWY', 'EGKK_SMR_TWY', '2', '+510853.0-0001125.0')
+
+        for pm in folder.Placemark:
+            name = pm.name
+            splitName = str(name).split()
+            coords = pm.Polygon.outerBoundaryIs.LinearRing.coordinates
+
+            if splitName[0] == "Rwy":
+                xmlGroundInfill = xtree.SubElement(xmlGroundMapRwy, 'Infill')
+            elif splitName[0] == "Twy":
+                xmlGroundInfill = xtree.SubElement(xmlGroundMapTwy, 'Infill')
+
+            search = re.finditer(r'([+|-]{1})([\d]{1}\.[\d]{10,20}),([\d]{2}\.[\d]{10,20})', str(coords))
+            output = ''
+            print(name)
+            for line in search:
+                print(line)
+                output += "+" + str(line.group(3)) + str(line.group(1)) + "00" + str(line.group(2)) + "/"
+
+            xmlGroundInfill.set('Name', name)
+            xmlGroundInfill.text = output.rstrip('/')
+
+        allGround = xtree.ElementTree(xmlGround)
+        allGround.write('Build/Maps/EGKK_SMR.xml', encoding="utf-8", xml_declaration=True)
 
 class Xml():
     def root(name):
@@ -647,6 +682,8 @@ elif args.xml:
     Profile.createRadars()
 elif args.debug:
     WebScrape.firUirTmaCtaData()
+elif args.geo:
+    Geo.kmlMappingConvert(args.geo)
 else:
     print("Nothing to do here\n")
     cmdParse.print_help()
