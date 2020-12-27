@@ -738,15 +738,18 @@ if menuOption == '1':
     #WebScrape.parseUKMil() ## placeholder
     WebScrape.main()
     WebScrape.firUirTmaCtaData()
+elif menuOption == '2':
+    Profile.constructXml()
+    Profile.createRadars()
 
+exit()
 if args.clear:
     ## Truncate all tables in the database. After all, this should only be run once per AIRAC cycle...
     Profile.clearDatabase()
 elif args.scrape:
     pass
 elif args.xml:
-    Profile.constructXml()
-    Profile.createRadars()
+    pass
 elif args.debug:
     WebScrape.firUirTmaCtaData()
 elif args.geo:
