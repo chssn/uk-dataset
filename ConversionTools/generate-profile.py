@@ -41,10 +41,10 @@ class Airac():
                 exit()
             else:
                 page = requests.get(address)
-                soup = BeautifulSoup(page.content, "lxml")
+                return BeautifulSoup(page.content, "lxml")
 
         ## Base NATS URL
-        cycle = "" # BUG: need something to calculate current cycle and autofill the base URL
+        #cycle = "" # BUG: need something to calculate current cycle and autofill the base URL
         baseUrl = "https://www.aurora.nats.co.uk/htmlAIP/Publications/"
         baseYear = "2020"
         baseMonth = "12"
@@ -66,7 +66,6 @@ class Airac():
 
     def enr41(table):
         ## For every row that is found, do...
-        children = []
         for row in table:
             ## Get the row id which provides the name and navaid type
             id = row['id']
@@ -369,8 +368,8 @@ class Profile():
                         xmlRoute = xtree.SubElement(xmlSidStarStar, 'Route')
                         xmlRoute.set('Runway', runway[2])
                         xmlRoute.text = star[3]
-                except:
-                    pass
+                except mysql.connector.Error as err:
+                    print(err)
 
         ## Construct the XML element as per https://virtualairtrafficsystem.com/docs/dpk/#intersections
         ## List all the verified points
