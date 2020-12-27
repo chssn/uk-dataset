@@ -16,7 +16,6 @@ args = cmdParse.parse_args()
 def convertFile(fileIn, fileOut):
     with open(fileIn, 'r') as f:
         data = json.loads(f.read())
-        format = json.dumps(data, indent=2)
         xml = dicttoxml.dicttoxml(data)
         with open(fileOut, 'w') as w:
             string = str(xml)
