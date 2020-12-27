@@ -1,23 +1,21 @@
 #! /usr/bin/python3
-import sys
 import argparse
 import requests
 import re
-import prettierfier as pretty
 import xml.etree.ElementTree as xtree
 import urllib3
 import mysql.connector
 import mysqlconnect ## mysql connection details
 from datetime import datetime
 from bs4 import BeautifulSoup
-from colorama import Fore, Back, Style
+from colorama import Fore, Style
 from time import time, ctime
 from alive_progress import alive_bar
 from pykml import parser
 from shapely.geometry import MultiPoint
 
 
-### This file generates the Airspace.xml file for VATSys from the UK NATS AIRAC
+### This file generates XML files for VATSys from the UK NATS AIRAC
 
 cursor = mysqlconnect.db.cursor()
 
@@ -33,12 +31,26 @@ args = cmdParse.parse_args()
 
 class Airac():
     def getUrl():
+        def getCurrentCycle(): ## try and work out the current AIRAC cycle
+            address = "https://www.nm.eurocontrol.int/RAD/common/airac_dates.html"
+
+            http = urllib3.PoolManager()
+            error = http.request("GET", address)
+            if (error.status == 404):
+                return 404
+                exit()
+            else:
+                page = requests.get(address)
+                soup = BeautifulSoup(page.content, "lxml")
+
         ## Base NATS URL
         cycle = "" # BUG: need something to calculate current cycle and autofill the base URL
+        baseUrl = "https://www.aurora.nats.co.uk/htmlAIP/Publications/"
         baseYear = "2020"
         baseMonth = "12"
         baseDay = "03"
-        return "https://www.aurora.nats.co.uk/htmlAIP/Publications/" + baseYear + "-" + baseMonth + "-" + baseDay + "-AIRAC/html/eAIP/"
+        basePostString = "-AIRAC/html/eAIP/"
+        return  baseUrl + baseYear + "-" + baseMonth + "-" + baseDay + basePostString
 
     def getTable(uri):
         ## Webscrape the specified page for AIRAC dataset
@@ -704,15 +716,34 @@ class WebScrape():
                 ##getLinks = re.findall(r'(?<=aip\/pdf\/ad\/)'+ icao + '')
                 # IDEA: Need to code this bit properly - placeholder for now
 
-if args.clear:
-    ## Truncate all tables in the database. After all, this should only be run once per AIRAC cycle...
-    Profile.clearDatabase()
-elif args.scrape:
+## Main Menu
+print("")
+print("############################################################")
+print("## vatSys XML Builder v0.1b                               ##")
+print("############################################################")
+print("")
+print("(1) - Perform a webscrape to obtain current AIRAC data.")
+print("(2) - Build XML files from the existing database.")
+print("(3) - Truncate the existing database.")
+print("(4) - Convert a Google Earth KML file.")
+print("")
+menuOption = input("Please select an option: ")
+
+if menuOption == '1':
+    print("By default, this will webscrape the eAIP for the United Kingdom (EGxx).")
+    print("Default [" + baseUrl + "]")
+    print("Please enter a different base URL if required or press enter to continue: ")
     Profile.clearDatabase() # wipe the database first # BUG: need to code a database backup here first just in case...
     WebScrape.processAd06Data()
     #WebScrape.parseUKMil() ## placeholder
     WebScrape.main()
     WebScrape.firUirTmaCtaData()
+
+if args.clear:
+    ## Truncate all tables in the database. After all, this should only be run once per AIRAC cycle...
+    Profile.clearDatabase()
+elif args.scrape:
+    pass
 elif args.xml:
     Profile.constructXml()
     Profile.createRadars()
