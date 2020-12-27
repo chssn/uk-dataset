@@ -14,6 +14,8 @@ from colorama import Fore, Back, Style
 from time import time, ctime
 from alive_progress import alive_bar
 from pykml import parser
+from shapely.geometry import MultiPoint
+
 
 ### This file generates the Airspace.xml file for VATSys from the UK NATS AIRAC
 
@@ -119,39 +121,61 @@ class Geo():
 
     def kmlMappingConvert(fileIn):
         ## Hardcoded to EGKK at the moment
+        def mapLabels():
+            ## code to generate the map labels.
+            points = MultiPoint(latLonString) ## function to calculate polygon centroid
+            labelPoint = points.centroid
+            labelPrint = re.sub(r'[A-Z()]', '', str(labelPoint))
+            labelSplit = labelPrint.split()
+
+            xmlGroundMapInfLabelPoint = xtree.SubElement(xmlGroundMapInfLabel, 'Point')
+            xmlGroundMapInfLabelPoint.set('Name', name)
+            xmlGroundMapInfLabelPoint.text = "+" + str(labelSplit[0]) + re.sub(r'-0\.', '-000.', labelSplit[1])
+
         xmlGround = Xml.root('Ground')
+        xmlGroundMap = xtree.SubElement(xmlGround, 'Maps')
 
         with open(fileIn) as fobj:
             folder = parser.parse(fobj).getroot().Document
 
-        xmlGroundMapRwy = Xml.constructMapHeader(xmlGround, 'Ground_RWY', 'EGKK_SMR_RWY', '1', '+510853.0-0001125.0')
-        xmlGroundMapTwy = Xml.constructMapHeader(xmlGround, 'Ground_TWY', 'EGKK_SMR_TWY', '2', '+510853.0-0001125.0')
-        xmlGroundMapBld = Xml.constructMapHeader(xmlGround, 'Ground_BLD', 'EGKK_SMR_BLD', '1', '+510853.0-0001125.0')
-        xmlGroundMapApr = Xml.constructMapHeader(xmlGround, 'Ground_APR', 'EGKK_SMR_APR', '3', '+510853.0-0001125.0')
-        xmlGroundMapBak = Xml.constructMapHeader(xmlGround, 'Ground_BAK', 'EGKK_SMR_BAK', '4', '+510853.0-0001125.0')
+        xmlGroundMapRwy = Xml.constructMapHeader(xmlGroundMap, 'Ground_RWY', 'EGKK_SMR_RWY', '1', '+510853.0-0001125.0', 1)
+        xmlGroundMapTwy = Xml.constructMapHeader(xmlGroundMap, 'Ground_TWY', 'EGKK_SMR_TWY', '2', '+510853.0-0001125.0', 1)
+        xmlGroundMapBld = Xml.constructMapHeader(xmlGroundMap, 'Ground_BLD', 'EGKK_SMR_BLD', '1', '+510853.0-0001125.0', 1)
+        xmlGroundMapApr = Xml.constructMapHeader(xmlGroundMap, 'Ground_APR', 'EGKK_SMR_APR', '3', '+510853.0-0001125.0', 1)
+        xmlGroundMapBak = Xml.constructMapHeader(xmlGroundMap, 'Ground_BAK', 'EGKK_SMR_BAK', '4', '+510853.0-0001125.0', 1)
+        xmlGroundMapInf = Xml.constructMapHeader(xmlGroundMap, 'Ground_INF', 'EGKK_SMR_INF', '0', '+510853.0-0001125.0', 1)
+
+        xmlGroundMapInfLabel = xtree.SubElement(xmlGroundMapInf, 'Label')
+        xmlGroundMapInfLabel.set('HasLeader', 'False')
+        xmlGroundMapInfLabel.set('Alignment', 'Center')
+        xmlGroundMapInfLabel.set('VerticalAlignment', 'Middle')
 
         for pm in folder.Placemark:
             name = pm.name
             splitName = str(name).split()
             coords = pm.Polygon.outerBoundaryIs.LinearRing.coordinates
 
+            search = re.finditer(r'([+|-]{1})([\d]{1}\.[\d]{10,20}),([\d]{2}\.[\d]{10,20})', str(coords))
+            output = ''
+            latLonString = []
+            print(name)
+            for line in search:
+                fullLon = line.group().split(',')
+                output += "+" + str(line.group(3)) + str(line.group(1)) + "00" + str(line.group(2)) + "/"
+                latLonString.append((float(line.group(3)),float(fullLon[0])))
+
             if splitName[0] == "Rwy":
                 xmlGroundInfill = xtree.SubElement(xmlGroundMapRwy, 'Infill')
+                mapLabels()
             elif splitName[0] == "Twy":
                 xmlGroundInfill = xtree.SubElement(xmlGroundMapTwy, 'Infill')
+                mapLabels()
             elif splitName[0] == "Bld":
                 xmlGroundInfill = xtree.SubElement(xmlGroundMapBld, 'Infill')
             elif splitName[0] == "Apr":
                 xmlGroundInfill = xtree.SubElement(xmlGroundMapApr, 'Infill')
             elif splitName[0] == "Bak":
                 xmlGroundInfill = xtree.SubElement(xmlGroundMapBak, 'Infill')
-
-            search = re.finditer(r'([+|-]{1})([\d]{1}\.[\d]{10,20}),([\d]{2}\.[\d]{10,20})', str(coords))
-            output = ''
-            print(name)
-            for line in search:
-                #print(line)
-                output += "+" + str(line.group(3)) + str(line.group(1)) + "00" + str(line.group(2)) + "/"
 
             xmlGroundInfill.set('Name', name)
             xmlGroundInfill.text = output.rstrip('/')
@@ -171,10 +195,13 @@ class Xml():
 
         return xml
 
-    def constructMapHeader(root, type, name, priority, center): ## ref https://virtualairtrafficsystem.com/docs/dpk/#map-element
+    def constructMapHeader(root, type, name, priority, center, sub=0): ## ref https://virtualairtrafficsystem.com/docs/dpk/#map-element
         ## creates the neccessary header for XML documents in the \Maps folder
-        mainHeader = xtree.SubElement(root, 'Maps')
-        mapHeader = xtree.SubElement(mainHeader, 'Map')
+        if not sub:
+            mainHeader = xtree.SubElement(root, 'Maps')
+            mapHeader = xtree.SubElement(mainHeader, 'Map')
+        elif sub:
+            mapHeader = xtree.SubElement(root, 'Map')
 
         mapHeader.set('Type', type) # The type primarily will affect the colour vatSys uses to paint the map. Colours are defined in Colours.xml.
         mapHeader.set('Name', name) # The title of the Map (as displayed to the user).
