@@ -126,6 +126,9 @@ class Geo():
 
         xmlGroundMapRwy = Xml.constructMapHeader(xmlGround, 'Ground_RWY', 'EGKK_SMR_RWY', '1', '+510853.0-0001125.0')
         xmlGroundMapTwy = Xml.constructMapHeader(xmlGround, 'Ground_TWY', 'EGKK_SMR_TWY', '2', '+510853.0-0001125.0')
+        xmlGroundMapBld = Xml.constructMapHeader(xmlGround, 'Ground_BLD', 'EGKK_SMR_BLD', '1', '+510853.0-0001125.0')
+        xmlGroundMapApr = Xml.constructMapHeader(xmlGround, 'Ground_APR', 'EGKK_SMR_APR', '3', '+510853.0-0001125.0')
+        xmlGroundMapBak = Xml.constructMapHeader(xmlGround, 'Ground_BAK', 'EGKK_SMR_BAK', '4', '+510853.0-0001125.0')
 
         for pm in folder.Placemark:
             name = pm.name
@@ -136,12 +139,18 @@ class Geo():
                 xmlGroundInfill = xtree.SubElement(xmlGroundMapRwy, 'Infill')
             elif splitName[0] == "Twy":
                 xmlGroundInfill = xtree.SubElement(xmlGroundMapTwy, 'Infill')
+            elif splitName[0] == "Bld":
+                xmlGroundInfill = xtree.SubElement(xmlGroundMapBld, 'Infill')
+            elif splitName[0] == "Apr":
+                xmlGroundInfill = xtree.SubElement(xmlGroundMapApr, 'Infill')
+            elif splitName[0] == "Bak":
+                xmlGroundInfill = xtree.SubElement(xmlGroundMapBak, 'Infill')
 
             search = re.finditer(r'([+|-]{1})([\d]{1}\.[\d]{10,20}),([\d]{2}\.[\d]{10,20})', str(coords))
             output = ''
             print(name)
             for line in search:
-                print(line)
+                #print(line)
                 output += "+" + str(line.group(3)) + str(line.group(1)) + "00" + str(line.group(2)) + "/"
 
             xmlGroundInfill.set('Name', name)
