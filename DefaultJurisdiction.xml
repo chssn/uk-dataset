@@ -1,12 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <DefaultJurisdiction>
   <RuleSets>
-    <RuleSet Name="AYPY_DEPS">
+    <RuleSet Name="EGKK_DEPS">
       <Rules>
-        <Departure Values="AYPY">
+        <Departure Values="EGKK">
           <Rules>
             <Default>
-              <AssignSector Order="AYPYD,AYPYA"/>
+              <AssignSector Order="EGKK_DEL,EGKK_GND,EGKK_TWR,LTC_CTR"/>
             </Default>
           </Rules>
         </Departure>

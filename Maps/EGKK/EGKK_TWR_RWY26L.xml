@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Maps>
+  <Map Type="System" Name="EGKK_TWR_RWY26L" Priority="1" Centre="+510853.0-0001125.0">
+    <!--YMAV-->
+    <Runway Name="26L/08R">
+      <Threshold Name="26L" Position="+510902.42-0001019.00" ExtendedCentrelineTrack="77.63" ExtendedCentrelineLength="10" ExtendedCentrelineTickInterval="1" />
+      <Threshold Name="08R" Position="+510845.12-0001224.52" />
+    </Runway>
+  </Map>
+</Maps>
