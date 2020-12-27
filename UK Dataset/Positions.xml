@@ -52,6 +52,7 @@
     <ControllerInfo>
       <Line>London Gatwick Tower</Line>
       <Line>ATIS available on 121.950</Line>
+      <Line>vatSys Demo</Line>
     </ControllerInfo>
     <Sectors>
       <Sector Name="EGKK_TWR" />
