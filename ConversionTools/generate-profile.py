@@ -140,7 +140,7 @@ class Geo():
             labelSplit = labelPrint.split()
 
             xmlGroundMapInfLabelPoint = xtree.SubElement(xmlGroundMapInfLabel, 'Point')
-            xmlGroundMapInfLabelPoint.set('Name', name)
+            xmlGroundMapInfLabelPoint.set('Name', splitName[1])
             xmlGroundMapInfLabelPoint.text = "+" + str(labelSplit[0]) + re.sub(r'-0\.', '-000.', labelSplit[1])
 
         xmlGround = Xml.root('Ground')
@@ -155,6 +155,7 @@ class Geo():
         xmlGroundMapApr = Xml.constructMapHeader(xmlGroundMap, 'Ground_APR', 'EGKK_SMR_APR', '3', '+510853.0-0001125.0', 1)
         xmlGroundMapBak = Xml.constructMapHeader(xmlGroundMap, 'Ground_BAK', 'EGKK_SMR_BAK', '4', '+510853.0-0001125.0', 1)
         xmlGroundMapInf = Xml.constructMapHeader(xmlGroundMap, 'Ground_INF', 'EGKK_SMR_INF', '0', '+510853.0-0001125.0', 1)
+        xmlGroundMapHld = Xml.constructMapHeader(xmlGroundMap, 'Ground_INF', 'EGKK_SMR_HLD', '0', '+510853.0-0001125.0', 1)
 
         xmlGroundMapInfLabel = xtree.SubElement(xmlGroundMapInf, 'Label')
         xmlGroundMapInfLabel.set('HasLeader', 'False')
@@ -164,7 +165,10 @@ class Geo():
         for pm in folder.Placemark:
             name = pm.name
             splitName = str(name).split()
-            coords = pm.Polygon.outerBoundaryIs.LinearRing.coordinates
+            if splitName[0] == "Hold":
+                coords = pm.LineString.coordinates
+            else:
+                coords = pm.Polygon.outerBoundaryIs.LinearRing.coordinates
 
             search = re.finditer(r'([+|-]{1})([\d]{1}\.[\d]{10,20}),([\d]{2}\.[\d]{10,20})', str(coords))
             output = ''
@@ -187,6 +191,9 @@ class Geo():
                 xmlGroundInfill = xtree.SubElement(xmlGroundMapApr, 'Infill')
             elif splitName[0] == "Bak":
                 xmlGroundInfill = xtree.SubElement(xmlGroundMapBak, 'Infill')
+            elif splitName[0] == "Hold":
+                xmlGroundInfill = xtree.SubElement(xmlGroundMapHld, 'Line')
+                mapLabels()
 
             xmlGroundInfill.set('Name', name)
             xmlGroundInfill.text = output.rstrip('/')
@@ -487,7 +494,7 @@ class Profile():
             radarTree.write('Build/Radars.xml', encoding="utf-8", xml_declaration=True)
 
 class WebScrape():
-    def main(self):
+    def main():
         ## Count the number of ICAO designators (may not actually be a verified aerodrome)
         sql = "SELECT COUNT(icao_designator) AS NumberofAerodromes FROM aerodromes"
         numberofAerodromes = mysqlExec(sql, "selectOne")
@@ -538,7 +545,6 @@ class WebScrape():
                         csModify = re.search(r"([\d]{1,8})", str(callSignType))
 
                         sql = "INSERT INTO aerodrome_frequencies (aerodrome_id, callsign_type_id, frequency) VALUE ('"+ str(aerodrome[0]) +"', '"+ str(csModify.group(1)) +"', '"+ str(frq) +"')"
-                        if args.verbose: print(sql)
                         mysqlExec(sql, "insertUpdate")
 
                     ## Search for aerodrome lat/lon/elev
@@ -628,7 +634,7 @@ class WebScrape():
 
                     bar() # progress the progress bar
 
-    def firUirTmaCtaData(self):
+    def firUirTmaCtaData():
         print("Parsing EG-ENR-2.1 Data (FIR, UIR, TMA AND CTA)...")
         getENR21 = Airac.getTable("EG-ENR-2.1-en-GB.html")
         listENR21 = getENR21.find_all("td")
@@ -684,7 +690,7 @@ class WebScrape():
                 sql = "INSERT INTO terminal_control_areas (fir_id, name, boundary) VALUE ('0', '"+ str(title) +"', '"+ str(boundary) +"')"
                 mysqlExec(sql, "insertUpdate")
 
-    def processAd06Data(self):
+    def processAd06Data():
         print("Parsing EG-AD-0.6 data to obtain ICAO designators...")
         getAerodromeList = Airac.getTable("EG-AD-0.6-en-GB.html")
         listAerodromeList = getAerodromeList.find_all("h3") # IDEA: Think there is a more efficient way of parsing this data
@@ -695,7 +701,7 @@ class WebScrape():
                 sql = "INSERT INTO aerodromes (icao_designator, verified, location, elevation, name) VALUES ('"+ str(getAerodrome[1]) +"' , 0, 0, 0, '"+ str(getAerodrome[3]) +"')"
                 mysqlExec(sql, "insertUpdate")  ## Process data from AD 0.6
 
-    def parseUKMil(self):
+    def parseUKMil():
         ## this is a hard-coded bodge for getting UK military ICAO designators.
         url = "https://www.aidu.mod.uk/aip/aipVolumes.htm"
         http = urllib3.PoolManager()
@@ -714,6 +720,7 @@ class WebScrape():
 
                 ##getLinks = re.findall(r'(?<=aip\/pdf\/ad\/)'+ icao + '')
                 # IDEA: Need to code this bit properly - placeholder for now
+
 
 ## Main Menu
 print("")
@@ -741,7 +748,6 @@ elif menuOption == '2':
     Profile.constructXml()
     Profile.createRadars()
 
-exit()
 if args.clear:
     ## Truncate all tables in the database. After all, this should only be run once per AIRAC cycle...
     Profile.clearDatabase()
