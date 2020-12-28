@@ -108,8 +108,8 @@ class Geo():
         coordinates = {}
         coords = row.find_all("span", class_="SD")
         for coord in coords:
-            lat = coord.find(string=re.compile("(?<!Purpose\:\s)([\d]{6}[NS]{1})"))
-            lon = coord.find(string=re.compile("(?<![NS]\s)([\d]{7}[EW]{1})"))
+            lat = coord.find(string=re.compile(r"(?<!Purpose\:\s)([\d]{6}[NS]{1})"))
+            lon = coord.find(string=re.compile(r"(?<![NS]\s)([\d]{7}[EW]{1})"))
             if lon is not None :
                 if lon.endswith("E"):
                     coordinates["lon"] = ("+" + lon[0:7] + ".0") # Convert Eastings to +
@@ -546,7 +546,7 @@ class WebScrape():
                         mysqlExec(sql, "insertUpdate")
 
                     # Search for aerodrome lat/lon/elev
-                    aerodromeLat = re.search('(Lat: )(<span class="SD" id="ID_[\d]{7}">)([\d]{6})([N|S]{1})', str(aerodromeLocation))
+                    aerodromeLat = re.search(r'(Lat: )(<span class="SD" id="ID_[\d]{7}">)([\d]{6})([N|S]{1})', str(aerodromeLocation))
                     aerodromeLon = re.search(r"(Long: )(<span class=\"SD\" id=\"ID_[\d]{7}\">)([\d]{7})([E|W]{1})", str(aerodromeLocation))
                     aerodromeElev = re.search(r"(VAL_ELEV\;)([\d]{1,4})", str(aerodromeLocation))
 
