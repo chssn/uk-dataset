@@ -110,12 +110,12 @@ class Geo():
         for coord in coords:
             lat = coord.find(string=re.compile(r"(?<!Purpose\:\s)([\d]{6}[NS]{1})"))
             lon = coord.find(string=re.compile(r"(?<![NS]\s)([\d]{7}[EW]{1})"))
-            if lon is not None :
+            if lon is not None:
                 if lon.endswith("E"):
                     coordinates["lon"] = ("+" + lon[0:7] + ".0") # Convert Eastings to +
                 elif lon.endswith("W"):
                     coordinates["lon"] = ("-" + lon[0:7] + ".0") # Convert Westings to -
-            if lat is not None :
+            if lat is not None:
                 if lat.endswith("N"):
                     coordinates["lat"] = ("+" + lat[0:6] + ".0") # Convert Northings to +
                 elif lat.endswith("S"):
