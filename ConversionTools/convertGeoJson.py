@@ -6,6 +6,9 @@ import argparse
 import re
 from bs4 import BeautifulSoup
 from time import time, ctime
+from defusedxml import defuse_stdlib
+
+defuse_stdlib()
 
 ## Build command line argument parser
 cmdParse = argparse.ArgumentParser(description="Application to convert a geojson file into xml for vatSys. Tip: use https://mapshaper.org/ to simplify the file first.")
