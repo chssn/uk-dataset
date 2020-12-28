@@ -28,7 +28,11 @@
     <Volumes />
     <ResponsibleSectors>EGKK_GND,EGKK_DEL,EGKK_TWR</ResponsibleSectors>
   </Sector>
-  <Sector FullName="Gatwick Tower" Frequency="121.500" Callsign="EGKK_TWR" Name="EGKK_TWR" />
-  <Sector FullName="Gatwick Clearance Delivery" Frequency="121.925" Callsign="EGKK_DEL" Name="EGKK_DEL" />
-  <Sector FullName="Gatwick Ground" Frequency="121.800" Callsign="EGKK_GND" Name="EGKK_GND" />
+  <Sector FullName="Gatwick Tower" Frequency="121.500" Callsign="EGKK_TWR" Name="EGKK_TWR">
+    <ResponsibleSectors>EGKK_GND,EGKK_DEL</ResponsibleSectors>
+  </Sector>
+  <Sector FullName="Gatwick Delivery" Frequency="121.925" Callsign="EGKK_DEL" Name="EGKK_DEL" />
+  <Sector FullName="Gatwick Ground" Frequency="121.800" Callsign="EGKK_GND" Name="EGKK_GND">
+    <ResponsibleSectors>EGKK_DEL</ResponsibleSectors>
+  </Sector>
 </Sectors>
