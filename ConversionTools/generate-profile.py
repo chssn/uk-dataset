@@ -5,7 +5,7 @@ import re
 import xml.etree.ElementTree as xtree
 import urllib3
 import mysql.connector
-import mysqlconnect ## mysql connection details
+import mysqlconnect # mysql connection details
 from defusedxml import defuse_stdlib
 from datetime import datetime
 from bs4 import BeautifulSoup
@@ -16,11 +16,11 @@ from pykml import parser
 from shapely.geometry import MultiPoint
 
 
-### This file generates XML files for VATSys from the UK NATS AIRAC
+# This file generates XML files for VATSys from the UK NATS AIRAC
 defuse_stdlib()
 cursor = mysqlconnect.db.cursor()
 
-## Build command line argument parser
+# Build command line argument parser
 cmdParse = argparse.ArgumentParser(description="Application to collect data from an AIRAC source and build that into xml files for use with vatSys.")
 cmdParse.add_argument('-s', '--scrape', help='web scrape and build database only', action='store_true')
 cmdParse.add_argument('-x', '--xml', help='build xml file from database', action='store_true')
@@ -32,7 +32,7 @@ args = cmdParse.parse_args()
 
 class Airac():
     def getUrl():
-        def getCurrentCycle(): ## try and work out the current AIRAC cycle
+        def getCurrentCycle(): # try and work out the current AIRAC cycle
             address = "https://www.nm.eurocontrol.int/RAD/common/airac_dates.html"
 
             http = urllib3.PoolManager()
@@ -43,7 +43,7 @@ class Airac():
             page = requests.get(address)
             return BeautifulSoup(page.content, "lxml")
 
-        ## Base NATS URL
+        # Base NATS URL
         #cycle = "" # BUG: need something to calculate current cycle and autofill the base URL
         baseUrl = "https://www.aurora.nats.co.uk/htmlAIP/Publications/"
         baseYear = "2020"
@@ -53,7 +53,7 @@ class Airac():
         return  baseUrl + baseYear + "-" + baseMonth + "-" + baseDay + basePostString
 
     def getTable(uri):
-        ## Webscrape the specified page for AIRAC dataset
+        # Webscrape the specified page for AIRAC dataset
         address = Airac.getUrl() + uri
 
         http = urllib3.PoolManager()
@@ -65,34 +65,34 @@ class Airac():
         return BeautifulSoup(page.content, "lxml")
 
     def enr41(table):
-        ## For every row that is found, do...
+        # For every row that is found, do...
         for row in table:
-            ## Get the row id which provides the name and navaid type
+            # Get the row id which provides the name and navaid type
             id = row['id']
             name = id.split('-')
 
             fullCoord = Geo.convertCoords(row)
 
-            ## Set the navaid type correctly
+            # Set the navaid type correctly
             if name[1] == "VORDME":
                 name[1] = "VOR"
             elif name[1] == "DME":
                 name[1] = "VOR"
 
-            ## Add navaid to the aerodromeDB
+            # Add navaid to the aerodromeDB
             sql = "INSERT INTO navaids (name, type, coords) SELECT * FROM (SELECT '"+ str(name[2]) +"' AS srcName, '"+ str(name[1]) +"' AS srcType, '"+ str(fullCoord) +"' AS srcCoord) AS tmp WHERE NOT EXISTS (SELECT name FROM navaids WHERE name =  '"+ str(name[2]) +"' AND type =  '"+ str(name[1]) +"' AND coords = '"+ str(fullCoord) +"') LIMIT 1"
             mysqlExec(sql, "insertUpdate")
 
     def enr44(table):
-        ## For every row that is found, do...
+        # For every row that is found, do...
         for row in table:
-            ## Get the row id which provides the name and navaid type
+            # Get the row id which provides the name and navaid type
             id = row['id']
             name = id.split('-')
 
             fullCoord = Geo.convertCoords(row)
 
-            ## Add fix to the aerodromeDB
+            # Add fix to the aerodromeDB
             sql = "INSERT INTO fixes (name, coords) SELECT * FROM (SELECT '"+ str(name[1]) +"' AS srcName, '"+ str(fullCoord) +"' AS srcCoord) AS tmp WHERE NOT EXISTS (SELECT name FROM fixes WHERE name =  '"+ str(name[1]) +"' AND coords = '"+ str(fullCoord) +"') LIMIT 1"
             mysqlExec(sql, "insertUpdate")
 
@@ -104,7 +104,7 @@ class Airac():
 
 class Geo():
     def convertCoords(row):
-        ## Get coordinates for the navaid
+        # Get coordinates for the navaid
         coordinates = {}
         coords = row.find_all("span", class_="SD")
         for coord in coords:
@@ -123,16 +123,16 @@ class Geo():
 
         return coordinates.get("lat") + coordinates.get("lon")
 
-    def plusMinus(arg): ## Turns a compass point into the correct + or - for lat and long
+    def plusMinus(arg): # Turns a compass point into the correct + or - for lat and long
         if arg in ('N','E'):
             return "+"
         return "-"
 
     def kmlMappingConvert(fileIn):
-        ## Hardcoded to EGKK at the moment
+        # Hardcoded to EGKK at the moment
         def mapLabels():
-            ## code to generate the map labels.
-            points = MultiPoint(latLonString) ## function to calculate polygon centroid
+            # code to generate the map labels.
+            points = MultiPoint(latLonString) # function to calculate polygon centroid
             labelPoint = points.centroid
             labelPrint = re.sub(r'[A-Z()]', '', str(labelPoint))
             labelSplit = labelPrint.split()
@@ -201,18 +201,18 @@ class Geo():
 
 class Xml():
     def root(name):
-        ## Define the XML root tag
+        # Define the XML root tag
         xml = xtree.Element(name)
         xml.set('xmlns:xsd', 'http://www.w3.org/2001/XMLSchema')
         xml.set('xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance')
 
-        ## Set a tag for XML generation time
+        # Set a tag for XML generation time
         xml.set('generated', ctime(time()))
 
         return xml
 
-    def constructMapHeader(root, mapType, name, priority, center, sub=0): ## ref https://virtualairtrafficsystem.com/docs/dpk/#map-element
-        ## creates the neccessary header for XML documents in the \Maps folder
+    def constructMapHeader(root, mapType, name, priority, center, sub=0): # ref https://virtualairtrafficsystem.com/docs/dpk/#map-element
+        # creates the neccessary header for XML documents in the \Maps folder
         if not sub:
             mainHeader = xtree.SubElement(root, 'Maps')
             mapHeader = xtree.SubElement(mainHeader, 'Map')
@@ -242,10 +242,10 @@ def mysqlExec(sql, sqlType):
         print(err)
 
 class Profile():
-    def constructXml():    ## Define XML top level tag
-        xmlAirspace = Xml.root('Airspace') ## create XML document Airspace.xml
+    def constructXml():    # Define XML top level tag
+        xmlAirspace = Xml.root('Airspace') # create XML document Airspace.xml
 
-        xmlAllAirports = Xml.root('AllAirports') ## create XML document Maps\ALL_AIRPORTS
+        xmlAllAirports = Xml.root('AllAirports') # create XML document Maps\ALL_AIRPORTS
         xmlAllAirportsMap = Xml.constructMapHeader(xmlAllAirports, 'System2', 'ALL_AIRPORTS', '2', '+53.7-1.5')
         xmlAllAirportsLabel = xtree.SubElement(xmlAllAirportsMap, 'Label')
         xmlAllAirportsLabel.set('HasLeader', 'true') # has a line connecting the point and label
@@ -253,7 +253,7 @@ class Profile():
         xmlAllAirportsSymbol = xtree.SubElement(xmlAllAirportsMap, 'Symbol')
         xmlAllAirportsSymbol.set('Type', 'Reticle') # https://virtualairtrafficsystem.com/docs/dpk/#symbol-element
 
-        xmlAllNavaids = Xml.root('AllNavaids') ## create XML document Maps\ALL_NAVAIDS
+        xmlAllNavaids = Xml.root('AllNavaids') # create XML document Maps\ALL_NAVAIDS
         xmlAllNavaidsMap = Xml.constructMapHeader(xmlAllNavaids, 'System', 'ALL_NAVAIDS_NAMES', '0', '+53.7-1.5')
         xmlAllNavaidsLabel = xtree.SubElement(xmlAllNavaidsMap, 'Label')
         xmlAllNavaidsLabel.set('HasLeader', 'true') # has a line connecting the point and label
@@ -264,27 +264,27 @@ class Profile():
         xmlAllNavaidsSymbolH = xtree.SubElement(xmlAllNavaidsMapSym, 'Symbol')
         xmlAllNavaidsSymbolH.set('Type', 'DotFillCircle') # https://virtualairtrafficsystem.com/docs/dpk/#symbol-element
 
-        xmlAllCta = Xml.root('AllCta') ## create XML document Maps\ALL_CTA
+        xmlAllCta = Xml.root('AllCta') # create XML document Maps\ALL_CTA
         xmlAllCtaMap = Xml.constructMapHeader(xmlAllCta, 'System', 'ALL_CTA', '2', 0)
 
-        xmlAllTma = Xml.root('AllCta') ## create XML document Maps\ALL_TMA
+        xmlAllTma = Xml.root('AllCta') # create XML document Maps\ALL_TMA
         xmlAllTmaMap = Xml.constructMapHeader(xmlAllTma, 'System', 'ALL_TMA', '2', 0)
 
         now = datetime.now()
-        checkID = datetime.timestamp(now) ## generate unix timestamp to help verify if a row has already been added
-        ## Define subtag SystemRunways - https://virtualairtrafficsystem.com/docs/dpk/#systemrunways
+        checkID = datetime.timestamp(now) # generate unix timestamp to help verify if a row has already been added
+        # Define subtag SystemRunways - https://virtualairtrafficsystem.com/docs/dpk/#systemrunways
         xmlSystemRunways = xtree.SubElement(xmlAirspace, 'SystemRunways')
         xmlSidStar = xtree.SubElement(xmlAirspace, 'SIDSTARs')
         xmlIntersections = xtree.SubElement(xmlAirspace, 'Intersections')
         xmlAirports = xtree.SubElement(xmlAirspace, 'Airports')
 
-        ## Construct the XML element as per https://virtualairtrafficsystem.com/docs/dpk/#systemrunways
-        ## List all the verified aerodromes
+        # Construct the XML element as per https://virtualairtrafficsystem.com/docs/dpk/#systemrunways
+        # List all the verified aerodromes
         #sql = "SELECT * FROM aerodromes WHERE verified = '1' AND icao_designator = 'EGKK'"
         sql = "SELECT * FROM aerodromes WHERE verified = '1' ORDER BY icao_designator"
         listAerodromes = mysqlExec(sql, "selectMany")
         for aerodrome in listAerodromes:
-            ## Set airport name
+            # Set airport name
             xmlAerodrome = xtree.SubElement(xmlSystemRunways, 'Airport')
             xmlAerodrome.set('Name', aerodrome[1])
             print(Fore.BLUE + "Constructing XML for " + aerodrome[1] + " ("+ str(aerodrome[0]) +")" + Style.RESET_ALL)
@@ -293,13 +293,13 @@ class Profile():
             xmlAirport.set('Position', aerodrome[3])
             xmlAirport.set('Elevation', str(aerodrome[4]))
 
-            ## Set points in Maps\ALL_AIRPORTS.xml
+            # Set points in Maps\ALL_AIRPORTS.xml
             xmlAllAirportsLabelPoint = xtree.SubElement(xmlAllAirportsLabel, 'Point')
             xmlAllAirportsLabelPoint.text = aerodrome[1]
             xmlAllAirportsSymbolPoint = xtree.SubElement(xmlAllAirportsSymbol, 'Point')
             xmlAllAirportsSymbolPoint.text = aerodrome[1]
 
-            ## Now for the runways that form part of the aerodrome
+            # Now for the runways that form part of the aerodrome
             sqlA = "SELECT * FROM aerodrome_runways WHERE aerodrome_id = '"+ str(aerodrome[0]) +"' ORDER BY runway"
             listRunways = mysqlExec(sqlA, "selectMany")
             for runway in listRunways:
@@ -312,7 +312,7 @@ class Profile():
                 xmlAirportRunway.set('Position', runway[3])
                 print("-- Constructing XML for runway " + runway[2])
 
-                ## Now the SIDs for that runway
+                # Now the SIDs for that runway
                 sqlB = "SELECT * FROM aerodrome_runways_sid WHERE runway_id = '"+ str(runway[0]) +"' AND buildcheck != '"+ str(checkID) +"' ORDER BY sid"
                 try:
                     listSids = mysqlExec(sqlB, "selectMany")
@@ -321,8 +321,8 @@ class Profile():
                         xmlSid.set('Name', sid[2])
                         print("---- Constructing XML for SID " + sid[2])
 
-                        ## Build in the extra bits for the SIDSTARs section - https://virtualairtrafficsystem.com/docs/dpk/#sidstars
-                        ## Check to see if multiple runways are using the same SID
+                        # Build in the extra bits for the SIDSTARs section - https://virtualairtrafficsystem.com/docs/dpk/#sidstars
+                        # Check to see if multiple runways are using the same SID
                         sqlC = "SELECT aerodrome_runways.runway, aerodrome_runways_sid.id FROM aerodrome_runways INNER JOIN aerodrome_runways_sid ON aerodrome_runways.id = aerodrome_runways_sid.runway_id WHERE aerodrome_runways_sid.sid = '"+ sid[2] +"' AND buildcheck != '"+ str(checkID) +"'"
                         runwaySid = mysqlExec(sqlC, "selectMany")
                         runwaySelect = ''
@@ -335,7 +335,7 @@ class Profile():
                             runwaySelect += str(rS[0])
                             print("------ Constructing XML for SID " + sid[2] + " on runway " + str(rS[0]))
 
-                            ## update the database SID entry with the checkID
+                            # update the database SID entry with the checkID
                             sqlU = "UPDATE aerodrome_runways_sid SET buildcheck = '"+ str(checkID) +"' WHERE runway_id = '"+ str(runway[0]) +"' AND sid = '"+ str(sid[2]) +"'"
                             mysqlExec(sqlU, "insertUpdate")
 
@@ -344,13 +344,13 @@ class Profile():
                         xmlSidStarSid.set('Runways', runwaySelect)
 
                         #xmlTransition = xtree.SubElement(xmlSidStarSid, 'Transition')
-                        #trans = sid[3].split() ## get the start of the STAR route
+                        #trans = sid[3].split() # get the start of the STAR route
                         #xmlTransition.set('Name', trans[0]) # BUG: Don't think this is the correct bit for the transition
                         #xmlTransition.text = trans[0] # BUG: Same as line above
                 except mysql.connector.Error as err:
                     print(err)
 
-                ## Now the STARs for that runway
+                # Now the STARs for that runway
                 sqlD = "SELECT * FROM aerodrome_runways_star WHERE runway_id = '"+ str(runway[0]) +"' ORDER BY star"
                 try:
                     listStars = mysqlExec(sqlD, "selectMany")
@@ -359,14 +359,14 @@ class Profile():
                         xmlStar.set('Name', star[2])
                         print("---- Constructing XML for STAR " + star[2])
 
-                        ## Build in the extra bits for the SIDSTARs section - https://virtualairtrafficsystem.com/docs/dpk/#sidstars
+                        # Build in the extra bits for the SIDSTARs section - https://virtualairtrafficsystem.com/docs/dpk/#sidstars
                         xmlSidStarStar = xtree.SubElement(xmlSidStar, 'STAR')
                         xmlSidStarStar.set('Name', star[2])
                         xmlSidStarStar.set('Airport', aerodrome[1])
                         xmlSidStarStar.set('Runways', runway[2])
 
                         #xmlTransition = xtree.SubElement(xmlSidStarStar, 'Transition')
-                        #trans = star[3].split() ## get the start of the STAR route
+                        #trans = star[3].split() # get the start of the STAR route
                         #xmlTransition.set('Name', trans[0]) # BUG: Don't think this is the correct bit for the transition
                         #xmlTransition.text = trans[0] # BUG: Same as line above
 
@@ -376,18 +376,18 @@ class Profile():
                 except mysql.connector.Error as err:
                     print(err)
 
-        ## Construct the XML element as per https://virtualairtrafficsystem.com/docs/dpk/#intersections
-        ## List all the verified points
+        # Construct the XML element as per https://virtualairtrafficsystem.com/docs/dpk/#intersections
+        # List all the verified points
         sql = "SELECT * FROM fixes"
         listFixes = mysqlExec(sql, "selectMany")
         for fix in listFixes:
-            ## Set fix in main Airspace.xml
+            # Set fix in main Airspace.xml
             xmlFix = xtree.SubElement(xmlIntersections, 'Point')
             xmlFix.set('Name', fix[1])
             xmlFix.set('Type', 'Fix')
             xmlFix.text = fix[2]
 
-            ## Set points in Maps\ALL_AIRPORTS.xml
+            # Set points in Maps\ALL_AIRPORTS.xml
             xmlAllNavaidsLabelPoint = xtree.SubElement(xmlAllNavaidsLabel, 'Point')
             xmlAllNavaidsLabelPoint.set('Name', fix[1])
             xmlAllNavaidsLabelPoint.text = fix[2]
@@ -403,7 +403,7 @@ class Profile():
             xmlFix.set('NavaidType', fix[2])
             xmlFix.text = fix[3]
 
-            ## Set points in Maps\ALL_AIRPORTS.xml
+            # Set points in Maps\ALL_AIRPORTS.xml
             xmlAllNavaidsLabelPoint = xtree.SubElement(xmlAllNavaidsLabel, 'Point')
             xmlAllNavaidsLabelPoint.set('Name', fix[1])
             xmlAllNavaidsLabelPoint.text = fix[3]
@@ -448,7 +448,7 @@ class Profile():
         print("Please type 'confirm' to continue or any other option to leave the database intact: ")
         confirmation = input()
         if confirmation == "confirm":
-            ## Back everything up first!
+            # Back everything up first!
             sqlA = "BACKUP DATABASE uk-dataset TO DISK 'backup.sql'"
             #cursor.execute(sqlA)
             tables = ["aerodromes", "aerodrome_frequencies", "aerodrome_runways", "aerodrome_runways_sid", "aerodrome_runways_star", "fixes", "navaids", "control_areas", "terminal_control_areas"]
@@ -458,8 +458,8 @@ class Profile():
         else:
             print("No data has been deleted. We think...")
 
-    def createAtisFreqXml(): ## creates the frequency secion of ATIS.xml
-        def myround(x, base=0.025): ## rounds to the nearest 25KHz - simulator limitations prevent 8.33KHz spacing currently
+    def createAtisFreqXml(): # creates the frequency secion of ATIS.xml
+        def myround(x, base=0.025): # rounds to the nearest 25KHz - simulator limitations prevent 8.33KHz spacing currently
             flt = float(x)
             return base * round(flt/base)
 
@@ -493,21 +493,21 @@ class Profile():
 
 class WebScrape():
     def main():
-        ## Count the number of ICAO designators (may not actually be a verified aerodrome)
+        # Count the number of ICAO designators (may not actually be a verified aerodrome)
         sql = "SELECT COUNT(icao_designator) AS NumberofAerodromes FROM aerodromes"
         numberofAerodromes = mysqlExec(sql, "selectOne")
 
-        with alive_bar(numberofAerodromes[0]) as bar: ## Define the progress bar
-            ## Select all aerodromes and loop through
+        with alive_bar(numberofAerodromes[0]) as bar: # Define the progress bar
+            # Select all aerodromes and loop through
             sql = "SELECT id, icao_designator FROM aerodromes"
             tableAerodrome = mysqlExec(sql, "selectMany")
 
-            for aerodrome in tableAerodrome:    ## AD 2 data
-                ## list all aerodrome runways
+            for aerodrome in tableAerodrome:    # AD 2 data
+                # list all aerodrome runways
                 bar() # progress the progress bar
-                getRunways = Airac.getTable("EG-AD-2."+ aerodrome[1] +"-en-GB.html") ## Try and find all information for this aerodrome
+                getRunways = Airac.getTable("EG-AD-2."+ aerodrome[1] +"-en-GB.html") # Try and find all information for this aerodrome
                 if getRunways != 404:
-                    ## Add verify flag for this aerodrome
+                    # Add verify flag for this aerodrome
                     sql = "UPDATE aerodromes SET verified = 1 WHERE id = '"+ str(aerodrome[0]) +"'"
                     mysqlExec(sql, "insertUpdate")
 
@@ -516,24 +516,24 @@ class WebScrape():
                     aerodromeAD212 = getRunways.find(id=aerodrome[1] + "-AD-2.12")
                     aerodromeAD218 = getRunways.find(id=aerodrome[1] + "-AD-2.18")
 
-                    ## Parse runway locations
+                    # Parse runway locations
                     aerodromeRunways = Airac.search("([\d]{2}[L|C|R]?)", "TRWY_DIRECTION", str(aerodromeAD212))
                     aerodromeRunwaysLat = Airac.search("([\d]{6}\.[\d]{2}[N|S]{1})", "TRWY_CLINE_POINT;GEO_LAT", str(aerodromeAD212))
                     aerodromeRunwaysLong = Airac.search("([\d]{7}\.[\d]{2}[E|W]{1})", "TRWY_CLINE_POINT;GEO_LONG", str(aerodromeAD212))
                     aerodromeRunwaysElev = Airac.search("([\d]{3})", "TRWY_CLINE_POINT;VAL_GEOID_UNDULATION", str(aerodromeAD212))
 
                     for rwy, lat, lon, elev in zip(aerodromeRunways, aerodromeRunwaysLat, aerodromeRunwaysLong, aerodromeRunwaysElev):
-                        ## Add runway to the aerodromeDB
+                        # Add runway to the aerodromeDB
                         latSplit = re.search(r"([\d]{6}\.[\d]{2})([N|S]{1})", str(lat))
                         lonSplit = re.search(r"([\d]{7}\.[\d]{2})([E|W]{1})", str(lon))
                         latPM = Geo.plusMinus(latSplit.group(2))
                         lonPM = Geo.plusMinus(lonSplit.group(2))
-                        loc = str(latPM) + str(latSplit.group(1)) + str(lonPM) + str(lonSplit.group(1)) ## build lat/lon string as per https://virtualairtrafficsystem.com/docs/dpk/#lat-long-format
+                        loc = str(latPM) + str(latSplit.group(1)) + str(lonPM) + str(lonSplit.group(1)) # build lat/lon string as per https://virtualairtrafficsystem.com/docs/dpk/#lat-long-format
 
                         sql = "INSERT INTO aerodrome_runways (aerodrome_id, runway, location, elevation) VALUE ('"+ str(aerodrome[0]) +"', '"+ str(rwy) +"', '"+ str(loc) +"', '"+ str(elev) +"')"
                         mysqlExec(sql, "insertUpdate")
 
-                    ## Parse air traffic services
+                    # Parse air traffic services
                     aerodromeServices = Airac.search("(APPROACH|GROUND|DELIVERY|TOWER|DIRECTOR|INFORMATION)", "TCALLSIGN_DETAIL", str(aerodromeAD218))
                     serviceFrequency = Airac.search("([\d]{3}\.[\d]{3})", "TFREQUENCY", str(aerodromeAD218))
 
@@ -545,7 +545,7 @@ class WebScrape():
                         sql = "INSERT INTO aerodrome_frequencies (aerodrome_id, callsign_type_id, frequency) VALUE ('"+ str(aerodrome[0]) +"', '"+ str(csModify.group(1)) +"', '"+ str(frq) +"')"
                         mysqlExec(sql, "insertUpdate")
 
-                    ## Search for aerodrome lat/lon/elev
+                    # Search for aerodrome lat/lon/elev
                     aerodromeLat = re.search('(Lat: )(<span class="SD" id="ID_[\d]{7}">)([\d]{6})([N|S]{1})', str(aerodromeLocation))
                     aerodromeLon = re.search(r"(Long: )(<span class=\"SD\" id=\"ID_[\d]{7}\">)([\d]{7})([E|W]{1})", str(aerodromeLocation))
                     aerodromeElev = re.search(r"(VAL_ELEV\;)([\d]{1,4})", str(aerodromeLocation))
@@ -565,19 +565,19 @@ class WebScrape():
                     sql = "UPDATE aerodromes SET location = '"+ str(fullLocation) +"', elevation = '"+ aerodromeElev[2] +"' WHERE id = '"+ str(aerodrome[0]) +"'"
                     mysqlExec(sql, "insertUpdate")
                 else:
-                    ## Remove verify flag for this aerodrome
+                    # Remove verify flag for this aerodrome
                     sql = "UPDATE aerodromes SET verified = 0 WHERE id = '"+ str(aerodrome[0]) +"'"
                     mysqlExec(sql, "insertUpdate")
                     print(Fore.RED + "Aerodrome " + aerodrome[1] + " does not exist" + Style.RESET_ALL)
 
-            ## Get ENR-4.1 data from the defined website
+            # Get ENR-4.1 data from the defined website
             print("Parsing EG-ENR-4.1 Data (RADIO NAVIGATION AIDS - EN-ROUTE)...")
             getENR41 = Airac.getTable("EG-ENR-4.1-en-GB.html")
             listENR41 = getENR41.find_all("tr", class_ = "Table-row-type-3")
             Airac.enr41(listENR41)
             bar() # progress the progress bar
 
-            ## Get ENR-4.4 data from the defined website
+            # Get ENR-4.4 data from the defined website
             print("Parsing EG-ENR-4.4 Data (NAME-CODE DESIGNATORS FOR SIGNIFICANT POINTS)...")
             getENR44 = Airac.getTable("EG-ENR-4.4-en-GB.html")
             listENR44 = getENR44.find_all("tr", class_ = "Table-row-type-3")
@@ -587,7 +587,7 @@ class WebScrape():
         # IDEA: This is currently scraping the *.ese file from VATSIM-UK. Need to find a better way of doing this. Too much hard code here and it's lazy!
             ese = open("UK.ese", "r")
             for line in ese:
-                ## Pull out all SIDs
+                # Pull out all SIDs
                 if line.startswith("SID"):
                     element = line.split(":")
                     aerodrome = str(element[1])
@@ -597,7 +597,7 @@ class WebScrape():
                     routeSplit = routeComment.split(";")
                     route = routeSplit[0]
 
-                    if not sid.startswith('#'): ## try and exclude any commented out sections from the ese file
+                    if not sid.startswith('#'): # try and exclude any commented out sections from the ese file
                         sql = "SELECT aerodrome_runways.id FROM aerodromes INNER JOIN aerodrome_runways ON aerodromes.id = aerodrome_runways.aerodrome_id WHERE aerodromes.icao_designator = '"+ aerodrome +"' AND aerodrome_runways.runway = '"+ runway +"' LIMIT 1"
                         rwyId = mysqlExec(sql, "selectOne")
 
@@ -619,7 +619,7 @@ class WebScrape():
                     routeSplit = routeComment.split(";")
                     route = routeSplit[0]
 
-                    if not star.startswith('#'): ## try and exclude any commented out sections from the ese file
+                    if not star.startswith('#'): # try and exclude any commented out sections from the ese file
                         sql = "SELECT aerodrome_runways.id FROM aerodromes INNER JOIN aerodrome_runways ON aerodromes.id = aerodrome_runways.aerodrome_id WHERE aerodromes.icao_designator = '"+ aerodrome +"' AND aerodrome_runways.runway = '"+ runway +"' LIMIT 1"
                         rwyId = mysqlExec(sql, "selectOne")
 
@@ -637,14 +637,14 @@ class WebScrape():
         getENR21 = Airac.getTable("EG-ENR-2.1-en-GB.html")
         listENR21 = getENR21.find_all("td")
         for row in listENR21:
-            ## find all FIR spaces
+            # find all FIR spaces
             firTitle = Airac.search("([A-Z]*)(\sFIR)", "TAIRSPACE;TXT_NAME", str(row))
             firSpace = Airac.search("([\d]{6,7}[N|E|S|W])", "TAIRSPACE_VERTEX;GEO_[(LAT)|(LONG)]", str(row))
             if firTitle:
                 print(firTitle)
                 print(firSpace)
 
-            ## find all CTA spaces
+            # find all CTA spaces
             ctaTitle = Airac.search("([A-Z\s]*)(\sCTA\s)([\d]?)", "TAIRSPACE;TXT_NAME", str(row))
             ctaSpaceLat = Airac.search("([\d]{6}[N|S])", "TAIRSPACE_VERTEX;GEO_LAT", str(row))
             ctaSpaceLon = Airac.search("([\d]{7}[E|W])", "TAIRSPACE_VERTEX;GEO_LONG", str(row))
@@ -661,12 +661,12 @@ class WebScrape():
                     lonSplit = re.search(r"([\d]{3})([\d]{4})([E|W]{1})", str(lon))
                     latPM = Geo.plusMinus(latSplit.group(3))
                     lonPM = Geo.plusMinus(lonSplit.group(3))
-                    boundary += str(latPM) + str(latSplit.group(1)) + "." + str(latSplit.group(2)) + str(lonPM) + str(lonSplit.group(1)) + "." + str(lonSplit.group(2) + "/") ## build lat/lon string as per https://virtualairtrafficsystem.com/docs/dpk/#lat-long-format
+                    boundary += str(latPM) + str(latSplit.group(1)) + "." + str(latSplit.group(2)) + str(lonPM) + str(lonSplit.group(1)) + "." + str(lonSplit.group(2) + "/") # build lat/lon string as per https://virtualairtrafficsystem.com/docs/dpk/#lat-long-format
 
                 sql = "INSERT INTO control_areas (fir_id, name, boundary) VALUE ('0', '"+ str(title) +"', '"+ str(boundary) +"')"
                 mysqlExec(sql, "insertUpdate")
 
-            ## find all TMA spaces
+            # find all TMA spaces
             tmaTitle = Airac.search("([A-Z\s]*)(\sCTA\s)([\d]?)", "TAIRSPACE;TXT_NAME", str(row))
             tmaSpaceLat = Airac.search("([\d]{6}[N|S])", "TAIRSPACE_VERTEX;GEO_LAT", str(row))
             tmaSpaceLon = Airac.search("([\d]{7}[E|W])", "TAIRSPACE_VERTEX;GEO_LONG", str(row))
@@ -683,7 +683,7 @@ class WebScrape():
                     lonSplit = re.search(r"([\d]{3})([\d]{4})([E|W]{1})", str(lon))
                     latPM = Geo.plusMinus(latSplit.group(3))
                     lonPM = Geo.plusMinus(lonSplit.group(3))
-                    boundary += str(latPM) + str(latSplit.group(1)) + "." + str(latSplit.group(2)) + str(lonPM) + str(lonSplit.group(1)) + "." + str(lonSplit.group(2) + "/") ## build lat/lon string as per https://virtualairtrafficsystem.com/docs/dpk/#lat-long-format
+                    boundary += str(latPM) + str(latSplit.group(1)) + "." + str(latSplit.group(2)) + str(lonPM) + str(lonSplit.group(1)) + "." + str(lonSplit.group(2) + "/") # build lat/lon string as per https://virtualairtrafficsystem.com/docs/dpk/#lat-long-format
 
                 sql = "INSERT INTO terminal_control_areas (fir_id, name, boundary) VALUE ('0', '"+ str(title) +"', '"+ str(boundary) +"')"
                 mysqlExec(sql, "insertUpdate")
@@ -695,12 +695,12 @@ class WebScrape():
         for row in listAerodromeList:
             getAerodrome = re.search(r"([A-Z]{4})(\n[\s\S]{7}\n[\s\S]{8})([A-Z]{4}.*)(\n[\s\S]{6}<\/a>)", str(row))
             if getAerodrome:
-                ## Place each aerodrome into the DB
+                # Place each aerodrome into the DB
                 sql = "INSERT INTO aerodromes (icao_designator, verified, location, elevation, name) VALUES ('"+ str(getAerodrome[1]) +"' , 0, 0, 0, '"+ str(getAerodrome[3]) +"')"
-                mysqlExec(sql, "insertUpdate")  ## Process data from AD 0.6
+                mysqlExec(sql, "insertUpdate")  # Process data from AD 0.6
 
     def parseUKMil():
-        ## this is a hard-coded bodge for getting UK military ICAO designators.
+        # this is a hard-coded bodge for getting UK military ICAO designators.
         url = "https://www.aidu.mod.uk/aip/aipVolumes.htm"
         http = urllib3.PoolManager()
         error = http.request("GET", url)
@@ -709,22 +709,22 @@ class WebScrape():
 
         page = requests.get(url)
         source = BeautifulSoup(page.content, "lxml")
-        getICAO = re.findall(r'(?<=\")([L|E|F]{1}[A-Z]{3})(?=\")', source) ## L, E and F are to include British Overseas Territory listed here
+        getICAO = re.findall(r'(?<=\")([L|E|F]{1}[A-Z]{3})(?=\")', source) # L, E and F are to include British Overseas Territory listed here
 
         for icao in getICAO:
-            ## Place each aerodrome into the DB
+            # Place each aerodrome into the DB
             sql = "INSERT INTO aerodromes (icao_designator, verified, location, elevation) VALUES ('"+ icao +"' , 0, 0, 0)"
             mysqlExec(sql, "insertUpdate")
 
-                ##getLinks = re.findall(r'(?<=aip\/pdf\/ad\/)'+ icao + '')
+                #getLinks = re.findall(r'(?<=aip\/pdf\/ad\/)'+ icao + '')
                 # IDEA: Need to code this bit properly - placeholder for now
 
 
-## Main Menu
+# Main Menu
 print("")
-print("############################################################")
-print("## vatSys XML Builder v0.1b                               ##")
-print("############################################################")
+print("##############################")
+print("# vatSys XML Builder v0.1b   #")
+print("##############################")
 print("")
 print("(1) - Perform a webscrape to obtain current AIRAC data.")
 print("(2) - Build XML files from the existing database.")
@@ -739,7 +739,7 @@ if menuOption == '1':
     print("Please enter a different base URL if required or press enter to continue: ")
     Profile.clearDatabase() # wipe the database first # BUG: need to code a database backup here first just in case...
     WebScrape.processAd06Data()
-    #WebScrape.parseUKMil() ## placeholder
+    #WebScrape.parseUKMil() # placeholder
     WebScrape.main()
     WebScrape.firUirTmaCtaData()
 elif menuOption == '2':
@@ -747,7 +747,7 @@ elif menuOption == '2':
     Profile.createRadars()
 
 if args.clear:
-    ## Truncate all tables in the database. After all, this should only be run once per AIRAC cycle...
+    # Truncate all tables in the database. After all, this should only be run once per AIRAC cycle...
     Profile.clearDatabase()
 elif args.scrape:
     pass
