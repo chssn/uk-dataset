@@ -31,7 +31,7 @@ cmdParse.add_argument('-v', '--verbose', action='store_true')
 args = cmdParse.parse_args()
 
 class Airac():
-    def getUrl(self):
+    def getUrl():
         def getCurrentCycle(): ## try and work out the current AIRAC cycle
             address = "https://www.nm.eurocontrol.int/RAD/common/airac_dates.html"
 
@@ -86,7 +86,6 @@ class Airac():
 
     def enr44(table):
         ## For every row that is found, do...
-        children = []
         for row in table:
             ## Get the row id which provides the name and navaid type
             id = row['id']
@@ -126,9 +125,9 @@ class Geo():
         return coordinates.get("lat") + coordinates.get("lon")
 
     def plusMinus(arg): ## Turns a compass point into the correct + or - for lat and long
-        if arg == "N" or arg == "E":
+        if arg in ('N','E'):
             return "+"
-        elif arg == "S" or arg == "W":
+        elif arg in ('S','W'):
             return "-"
 
     def kmlMappingConvert(fileIn):
@@ -207,7 +206,7 @@ class Xml():
 
         return xml
 
-    def constructMapHeader(root, type, name, priority, center, sub=0): ## ref https://virtualairtrafficsystem.com/docs/dpk/#map-element
+    def constructMapHeader(root, mapType, name, priority, center, sub=0): ## ref https://virtualairtrafficsystem.com/docs/dpk/#map-element
         ## creates the neccessary header for XML documents in the \Maps folder
         if not sub:
             mainHeader = xtree.SubElement(root, 'Maps')
@@ -215,7 +214,7 @@ class Xml():
         elif sub:
             mapHeader = xtree.SubElement(root, 'Map')
 
-        mapHeader.set('Type', type) # The type primarily will affect the colour vatSys uses to paint the map. Colours are defined in Colours.xml.
+        mapHeader.set('Type', mapType) # The type primarily will affect the colour vatSys uses to paint the map. Colours are defined in Colours.xml.
         mapHeader.set('Name', name) # The title of the Map (as displayed to the user).
         mapHeader.set('Priority', priority) # An integer specifying the z-axis layering of the map, 0 being drawn on top of everything else.
         if center:
@@ -223,24 +222,21 @@ class Xml():
 
         return mapHeader
 
-def mysqlExec(sql, type):
+def mysqlExec(sql, sqlType):
     try:
-        if type == "insertUpdate":
+        if sqlType == "insertUpdate":
             cursor.execute(sql)
             mysqlconnect.db.commit()
-        elif type == "selectOne":
+        elif sqlType == "selectOne":
             cursor.execute(sql)
             return cursor.fetchone()
-        elif type == "selectMany":
+        elif sqlType == "selectMany":
             cursor.execute(sql)
             return cursor.fetchall()
     except mysql.connector.Error as err:
         print(err)
 
 class Profile():
-    def __init__(self):
-        pass
-
     def constructXml():    ## Define XML top level tag
         xmlAirspace = Xml.root('Airspace') ## create XML document Airspace.xml
 
