@@ -10,7 +10,7 @@ from defusedxml import defuse_stdlib
 
 defuse_stdlib()
 
-## Build command line argument parser
+# Build command line argument parser
 cmdParse = argparse.ArgumentParser(description="Application to convert a geojson file into xml for vatSys. Tip: use https://mapshaper.org/ to simplify the file first.")
 cmdParse.add_argument('-p', '--print', help='print the xml file to screen')
 cmdParse.add_argument('-c', '--convert', help='carry out the initial geoson to xml conversion')
@@ -31,12 +31,12 @@ if args.convert:
     convertFile(file, 'OUTPUT.xml')
 elif args.print:
     file = args.print
-    ## Define the XML root tag
+    # Define the XML root tag
     xml = xtree.Element("Maps")
     xml.set('xmlns:xsd', 'http://www.w3.org/2001/XMLSchema')
     xml.set('xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance')
 
-    ## Set a tag for XML generation time
+    # Set a tag for XML generation time
     xml.set('generated', ctime(time()))
 
     xmlMap = xtree.SubElement(xml, 'Map')
