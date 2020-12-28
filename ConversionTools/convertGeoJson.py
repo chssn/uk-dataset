@@ -25,6 +25,7 @@ def convertFile(fileIn, fileOut):
             w.write(string)
         w.close()
 
+
 if args.convert:
     file = args.convert
     convertFile(file, 'OUTPUT.xml')
