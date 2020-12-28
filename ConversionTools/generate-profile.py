@@ -39,10 +39,9 @@ class Airac():
             error = http.request("GET", address)
             if (error.status == 404):
                 return 404
-                exit()
-            else:
-                page = requests.get(address)
-                return BeautifulSoup(page.content, "lxml")
+
+            page = requests.get(address)
+            return BeautifulSoup(page.content, "lxml")
 
         ## Base NATS URL
         #cycle = "" # BUG: need something to calculate current cycle and autofill the base URL
@@ -61,9 +60,9 @@ class Airac():
         error = http.request("GET", address)
         if (error.status == 404):
             return 404
-        else:
-            page = requests.get(address)
-            return BeautifulSoup(page.content, "lxml")
+
+        page = requests.get(address)
+        return BeautifulSoup(page.content, "lxml")
 
     def enr41(table):
         ## For every row that is found, do...
@@ -127,8 +126,7 @@ class Geo():
     def plusMinus(arg): ## Turns a compass point into the correct + or - for lat and long
         if arg in ('N','E'):
             return "+"
-        elif arg in ('S','W'):
-            return "-"
+        return "-"
 
     def kmlMappingConvert(fileIn):
         ## Hardcoded to EGKK at the moment
@@ -708,15 +706,15 @@ class WebScrape():
         error = http.request("GET", url)
         if (error.status == 404):
             return 404
-        else:
-            page = requests.get(url)
-            source = BeautifulSoup(page.content, "lxml")
-            getICAO = re.findall(r'(?<=\")([L|E|F]{1}[A-Z]{3})(?=\")', source) ## L, E and F are to include British Overseas Territory listed here
 
-            for icao in getICAO:
-                ## Place each aerodrome into the DB
-                sql = "INSERT INTO aerodromes (icao_designator, verified, location, elevation) VALUES ('"+ icao +"' , 0, 0, 0)"
-                mysqlExec(sql, "insertUpdate")
+        page = requests.get(url)
+        source = BeautifulSoup(page.content, "lxml")
+        getICAO = re.findall(r'(?<=\")([L|E|F]{1}[A-Z]{3})(?=\")', source) ## L, E and F are to include British Overseas Territory listed here
+
+        for icao in getICAO:
+            ## Place each aerodrome into the DB
+            sql = "INSERT INTO aerodromes (icao_designator, verified, location, elevation) VALUES ('"+ icao +"' , 0, 0, 0)"
+            mysqlExec(sql, "insertUpdate")
 
                 ##getLinks = re.findall(r'(?<=aip\/pdf\/ad\/)'+ icao + '')
                 # IDEA: Need to code this bit properly - placeholder for now
