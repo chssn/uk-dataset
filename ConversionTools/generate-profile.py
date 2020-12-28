@@ -6,6 +6,7 @@ import xml.etree.ElementTree as xtree
 import urllib3
 import mysql.connector
 import mysqlconnect ## mysql connection details
+from defusedxml import defuse_stdlib
 from datetime import datetime
 from bs4 import BeautifulSoup
 from colorama import Fore, Style
@@ -16,7 +17,7 @@ from shapely.geometry import MultiPoint
 
 
 ### This file generates XML files for VATSys from the UK NATS AIRAC
-
+defuse_stdlib()
 cursor = mysqlconnect.db.cursor()
 
 ## Build command line argument parser
@@ -237,7 +238,10 @@ def mysqlExec(sql, type):
         print(err)
 
 class Profile():
-    def constructXml(self):    ## Define XML top level tag
+    def __init__(self):
+        pass
+
+    def constructXml():    ## Define XML top level tag
         xmlAirspace = Xml.root('Airspace') ## create XML document Airspace.xml
 
         xmlAllAirports = Xml.root('AllAirports') ## create XML document Maps\ALL_AIRPORTS
@@ -436,7 +440,7 @@ class Profile():
         airspaceTree = xtree.ElementTree(xmlAirspace)
         airspaceTree.write('Build/Airspace.xml', encoding="utf-8", xml_declaration=True)
     # BUG: Probably read the whole XML through and run this regex (Runways=")([\d]{2}[L|R|C]?)([\d]{2}[L|R|C]?)(") and replace $1$2,$3$4
-    def clearDatabase(self):
+    def clearDatabase():
         print(Fore.RED + "!!!WARNING!!!" + Style.RESET_ALL)
         print("This will truncate (delete) the contents of all tables in this database.")
         print("Are you sure you wish to contine?")
@@ -453,7 +457,7 @@ class Profile():
         else:
             print("No data has been deleted. We think...")
 
-    def createAtisFreqXml(self): ## creates the frequency secion of ATIS.xml
+    def createAtisFreqXml(): ## creates the frequency secion of ATIS.xml
         def myround(x, base=0.025): ## rounds to the nearest 25KHz - simulator limitations prevent 8.33KHz spacing currently
             flt = float(x)
             return base * round(flt/base)
@@ -465,7 +469,7 @@ class Profile():
             freq25khz = myround(freq[1])
             print('<Frequency Airport="' + freq[0] + '" Frequency="%.3f" />' % freq25khz)
 
-    def createRadars(self):
+    def createRadars():
         sql = "SELECT * FROM radar_sites"
         radarSites = mysqlExec(sql, "selectMany")
 
