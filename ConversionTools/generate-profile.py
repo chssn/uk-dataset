@@ -48,7 +48,7 @@ class Airac():
         baseUrl = "https://www.aurora.nats.co.uk/htmlAIP/Publications/"
         baseYear = "2020"
         baseMonth = "12"
-        baseDay = "03"
+        baseDay = "31"
         basePostString = "-AIRAC/html/eAIP/"
         return  baseUrl + baseYear + "-" + baseMonth + "-" + baseDay + basePostString
 
