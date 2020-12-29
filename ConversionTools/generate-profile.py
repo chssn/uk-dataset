@@ -507,22 +507,35 @@ class WebScrape():
                 bar() # progress the progress bar
                 getRunways = Airac.getTable("EG-AD-2."+ aerodrome[1] +"-en-GB.html") # Try and find all information for this aerodrome
                 if getRunways != 404:
-                    # Add verify flag for this aerodrome
-                    sql = "UPDATE aerodromes SET verified = 1 WHERE id = '"+ str(aerodrome[0]) +"'"
-                    mysqlExec(sql, "insertUpdate")
-
                     print("Parsing EG-AD-2 Data for "+ aerodrome[1] +"...")
                     aerodromeLocation = getRunways.find(id=aerodrome[1] + "-AD-2.2")
                     aerodromeAD212 = getRunways.find(id=aerodrome[1] + "-AD-2.12")
                     aerodromeAD218 = getRunways.find(id=aerodrome[1] + "-AD-2.18")
 
+                    # Parse current magnetic variation
+                    aerodromeMagVar = Airac.search("([\d]{1}\.[\d]{2}).([W|E]{1})", "TAD_HP;VAL_MAG_VAR", str(aerodromeLocation))
+                    pM = Geo.plusMinus(aerodromeMagVar[0][1])
+                    floatMagVar = pM + aerodromeMagVar[0][0]
+
+                    # Add verify flag and magnetic variation for this aerodrome
+                    sql = "UPDATE aerodromes SET verified = 1, magnetic_variation = '"+ str(floatMagVar) +"' WHERE id = '"+ str(aerodrome[0]) +"'"
+                    mysqlExec(sql, "insertUpdate")
+
                     # Parse runway locations
-                    aerodromeRunways = Airac.search("([\d]{2}[L|C|R]?)", "TRWY_DIRECTION", str(aerodromeAD212))
+                    aerodromeRunways = Airac.search("([\d]{2}[L|C|R]?)", "TRWY_DIRECTION;TXT_DESIG", str(aerodromeAD212))
                     aerodromeRunwaysLat = Airac.search("([\d]{6}\.[\d]{2}[N|S]{1})", "TRWY_CLINE_POINT;GEO_LAT", str(aerodromeAD212))
                     aerodromeRunwaysLong = Airac.search("([\d]{7}\.[\d]{2}[E|W]{1})", "TRWY_CLINE_POINT;GEO_LONG", str(aerodromeAD212))
                     aerodromeRunwaysElev = Airac.search("([\d]{3})", "TRWY_CLINE_POINT;VAL_GEOID_UNDULATION", str(aerodromeAD212))
+                    aerodromeRunwaysBearing = Airac.search("([\d]{3}\.[\d]{2}.)", "TRWY_DIRECTION;VAL_TRUE_BRG", str(aerodromeAD212))
 
-                    for rwy, lat, lon, elev in zip(aerodromeRunways, aerodromeRunwaysLat, aerodromeRunwaysLong, aerodromeRunwaysElev):
+                    if args.verbose:
+                        print(aerodromeRunways)
+                        print(aerodromeRunwaysLat)
+                        print(aerodromeRunwaysLong)
+                        print(aerodromeRunwaysElev)
+                        print(aerodromeRunwaysBearing)
+
+                    for rwy, lat, lon, elev, brg in zip(aerodromeRunways, aerodromeRunwaysLat, aerodromeRunwaysLong, aerodromeRunwaysElev, aerodromeRunwaysBearing):
                         # Add runway to the aerodromeDB
                         latSplit = re.search(r"([\d]{6}\.[\d]{2})([N|S]{1})", str(lat))
                         lonSplit = re.search(r"([\d]{7}\.[\d]{2})([E|W]{1})", str(lon))
@@ -530,7 +543,7 @@ class WebScrape():
                         lonPM = Geo.plusMinus(lonSplit.group(2))
                         loc = str(latPM) + str(latSplit.group(1)) + str(lonPM) + str(lonSplit.group(1)) # build lat/lon string as per https://virtualairtrafficsystem.com/docs/dpk/#lat-long-format
 
-                        sql = "INSERT INTO aerodrome_runways (aerodrome_id, runway, location, elevation) VALUE ('"+ str(aerodrome[0]) +"', '"+ str(rwy) +"', '"+ str(loc) +"', '"+ str(elev) +"')"
+                        sql = "INSERT INTO aerodrome_runways (aerodrome_id, runway, location, elevation, bearing) VALUE ('"+ str(aerodrome[0]) +"', '"+ str(rwy) +"', '"+ str(loc) +"', '"+ str(elev) +"', '"+ str(brg.rstrip('°')) +"')"
                         mysqlExec(sql, "insertUpdate")
 
                     # Parse air traffic services
