@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Profile Name="United Kingdom" FullName="United Kingdom">
-	<Version AIRAC="2013" Revision="c" PublishDate="20201226" UpdateURL="https://raw.githubusercontent.com/chssn/uk-dataset/master/UK%20Dataset" />
+	<Version AIRAC="2013" Revision="d" PublishDate="20201229" UpdateURL="https://dev.snet.solutions.co.uk/vatsys/UK" />
 	<Servers>
 		<VATSIMStatus url="https://status.vatsim.net/" />
 		<GRIB url="https://sawbe.com/GRIB/" />
