@@ -26,9 +26,7 @@ jobs:
         with:
           # Filename for archive
           filename: profile.zip
-          exclusions: '*.git* /*node_modules/* .editorconfig *.md'
-          # Base path for archive files
-          path: "UK\ Dataset/*"
+          exclusions: '*.git* /*node_modules/* .editorconfig *.md .dependabot ConversionTools .deepsource.toml azure-pipelines.yml'
 
       - name: copy file via ssh key
         uses: appleboy/scp-action@master
