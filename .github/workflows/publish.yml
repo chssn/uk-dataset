@@ -28,7 +28,7 @@ jobs:
           filename: profile.zip
           exclusions: '*.git* /*node_modules/* .editorconfig *.md'
           # Base path for archive files
-          path: "UK Dataset/*"
+          path: "UK\ Dataset/*"
 
       - name: copy file via ssh key
         uses: appleboy/scp-action@master
