@@ -689,8 +689,8 @@ class WebScrape():
                 mysqlExec(sql, "insertUpdate")
 
     def processAd06Data():
-        print("Parsing EG-AD-0.6 data to obtain ICAO designators...")
-        getAerodromeList = Airac.getTable("EG-AD-0.6-en-GB.html")
+        print("Parsing EG-AD-0.1 data to obtain ICAO designators...")
+        getAerodromeList = Airac.getTable("EG-AD-0.1-en-GB.html")
         listAerodromeList = getAerodromeList.find_all("h3") # IDEA: Think there is a more efficient way of parsing this data
         for row in listAerodromeList:
             getAerodrome = re.search(r"([A-Z]{4})(\n[\s\S]{7}\n[\s\S]{8})([A-Z]{4}.*)(\n[\s\S]{6}<\/a>)", str(row))
@@ -735,7 +735,7 @@ menuOption = input("Please select an option: ")
 
 if menuOption == '1':
     print("By default, this will webscrape the eAIP for the United Kingdom (EGxx).")
-    print("Default [" + baseUrl + "]")
+    print("Default []")
     print("Please enter a different base URL if required or press enter to continue: ")
     Profile.clearDatabase() # wipe the database first # BUG: need to code a database backup here first just in case...
     WebScrape.processAd06Data()
