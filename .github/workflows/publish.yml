@@ -18,16 +18,6 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - name: checkout
-        uses: actions/checkout@master
-
-      - name: zip
-        uses: TheDoctor0/zip-release@0.4.1
-        with:
-          # Filename for archive
-          filename: profile.zip
-          exclusions: '*.git* /*node_modules/* .editorconfig *.md .dependabot ConversionTools .deepsource.toml azure-pipelines.yml'
-
       - name: copy file via ssh key
         uses: appleboy/scp-action@master
         with:
@@ -36,5 +26,5 @@ jobs:
           port: ${{ secrets.PORT }}
           key: ${{ secrets.KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
-          source: "profile.zip"
-          target: "/var/www/html/vatsys/profile.zip"
+          source: "UK Dataset/"
+          target: "/var/www/html/vatsys/uk"
