@@ -26,5 +26,5 @@ jobs:
           port: ${{ secrets.PORT }}
           key: ${{ secrets.KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
-          source: "UK Dataset/"
+          source: "UK Dataset/*"
           target: "/var/www/html/vatsys/uk"
