@@ -742,7 +742,7 @@ print("")
 print("(1) - Perform a webscrape to obtain current AIRAC data.")
 print("(2) - Build XML files from the existing database.")
 print("(3) - Truncate the existing database.")
-print("(4) - Convert a Google Earth KML file.")
+print("(4) - Convert a Google Earth KML file - run with -g option to pass KML filename.")
 print("")
 menuOption = input("Please select an option: ")
 
@@ -758,17 +758,9 @@ if menuOption == '1':
 elif menuOption == '2':
     Profile.constructXml()
     Profile.createRadars()
-
-if args.clear:
-    # Truncate all tables in the database. After all, this should only be run once per AIRAC cycle...
+elif menuOption == '3':
     Profile.clearDatabase()
-elif args.scrape:
-    pass
-elif args.xml:
-    pass
-elif args.debug:
-    WebScrape.firUirTmaCtaData()
-elif args.geo:
+elif menuOption == '4':
     Geo.kmlMappingConvert(args.geo)
 else:
     print("Nothing to do here\n")
