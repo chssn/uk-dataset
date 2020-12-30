@@ -72,6 +72,7 @@
       <Map Name="EGKK/EGKK_SMR_APR" />
       <Map Name="EGKK/EGKK_SMR_BAK" />
       <Map Name="EGKK/EGKK_SMR_INF" />
+      <Map Name="EGKK/EGKK_SMR_HLD" />
     </Maps>
     <Strips Mode="Beacon" Sort="Alpha">
       <Window Type="ADEP" Beacon="EGKK" Visible="true" />
@@ -93,6 +94,7 @@
       <Map Name="EGKK/EGKK_SMR_APR" />
       <Map Name="EGKK/EGKK_SMR_BAK" />
       <Map Name="EGKK/EGKK_SMR_INF" />
+      <Map Name="EGKK/EGKK_SMR_HLD" />
     </Maps>
     <Strips Mode="Beacon" Sort="Alpha">
       <Window Type="ADEP" Beacon="EGKK" Visible="true" />
