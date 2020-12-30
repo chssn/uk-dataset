@@ -121,10 +121,10 @@
   </Colour>
   <Colour id="VSCSColdline">
     <Use>VSCS Closed Coldlines</Use>
-    <Name>CyanBlue</Name>
-    <R>0</R>
-    <G>235</G>
-    <B>235</B>
+    <Name>Grey</Name>
+    <R>191</R>
+    <G>191</G>
+    <B>191</B>
   </Colour>
   <Colour id="VSCSOpenColdline">
     <Use>VSCS Open and (flashing) Ringing Coldlines</Use>
@@ -142,10 +142,10 @@
   </Colour>
   <Colour id="VSCSReceivingFrequency">
     <Use>VSCS Frequencies are receiving a transmission</Use>
-    <Name>White</Name>
+    <Name>DarkRed</Name>
     <R>255</R>
-    <G>255</G>
-    <B>255</B>
+    <G>48</G>
+    <B>48</B>
   </Colour>
   <Colour id="VSCSFrequencyWarning">
     <Use>VSCS Frequencies that are receive only or without voice</Use>
@@ -166,10 +166,10 @@
     </Colour>
     <Colour id="VSCSButtonSelected">
       <Use>VSCS Buttons that are selected / highlighted</Use>
-      <Name>FUCHSIA</Name>
-      <R>241</R>
-      <G>178</G>
-      <B>225</B>
+      <Name>PaleGreen</Name>
+      <R>108</R>
+      <G>173</G>
+      <B>108</B>
     </Colour>
     <Colour id="NonInteractiveText">
       <Use>Non-Interactive Text</Use>
