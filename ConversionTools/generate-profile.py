@@ -1,7 +1,9 @@
 #! /usr/bin/python3
 import argparse
 import requests
+import math
 import re
+import os
 import xml.etree.ElementTree as xtree
 import urllib3
 import mysql.connector
@@ -141,19 +143,21 @@ class Geo():
             xmlGroundMapInfLabelPoint.set('Name', splitName[1])
             xmlGroundMapInfLabelPoint.text = "+" + str(labelSplit[0]) + re.sub(r'-0\.', '-000.', labelSplit[1])
 
+        aerodromeIcao = "EGKK"
+
         xmlGround = Xml.root('Ground')
         xmlGroundMap = xtree.SubElement(xmlGround, 'Maps')
 
         with open(fileIn) as fobj:
             folder = parser.parse(fobj).getroot().Document
 
-        xmlGroundMapRwy = Xml.constructMapHeader(xmlGroundMap, 'Ground_RWY', 'EGKK_SMR_RWY', '1', '+510853.0-0001125.0', 1)
-        xmlGroundMapTwy = Xml.constructMapHeader(xmlGroundMap, 'Ground_TWY', 'EGKK_SMR_TWY', '2', '+510853.0-0001125.0', 1)
-        xmlGroundMapBld = Xml.constructMapHeader(xmlGroundMap, 'Ground_BLD', 'EGKK_SMR_BLD', '1', '+510853.0-0001125.0', 1)
-        xmlGroundMapApr = Xml.constructMapHeader(xmlGroundMap, 'Ground_APR', 'EGKK_SMR_APR', '3', '+510853.0-0001125.0', 1)
-        xmlGroundMapBak = Xml.constructMapHeader(xmlGroundMap, 'Ground_BAK', 'EGKK_SMR_BAK', '4', '+510853.0-0001125.0', 1)
-        xmlGroundMapInf = Xml.constructMapHeader(xmlGroundMap, 'Ground_INF', 'EGKK_SMR_INF', '0', '+510853.0-0001125.0', 1)
-        xmlGroundMapHld = Xml.constructMapHeader(xmlGroundMap, 'Ground_INF', 'EGKK_SMR_HLD', '0', '+510853.0-0001125.0', 1)
+        xmlGroundMapRwy = Xml.constructMapHeader(xmlGroundMap, 'Ground_RWY', aerodromeIcao + '_SMR_RWY', '1', '+510853.0-0001125.0', 1)
+        xmlGroundMapTwy = Xml.constructMapHeader(xmlGroundMap, 'Ground_TWY', aerodromeIcao + '_SMR_TWY', '2', '+510853.0-0001125.0', 1)
+        xmlGroundMapBld = Xml.constructMapHeader(xmlGroundMap, 'Ground_BLD', aerodromeIcao + '_SMR_BLD', '1', '+510853.0-0001125.0', 1)
+        xmlGroundMapApr = Xml.constructMapHeader(xmlGroundMap, 'Ground_APR', aerodromeIcao + '_SMR_APR', '3', '+510853.0-0001125.0', 1)
+        xmlGroundMapBak = Xml.constructMapHeader(xmlGroundMap, 'Ground_BAK', aerodromeIcao + '_SMR_BAK', '4', '+510853.0-0001125.0', 1)
+        xmlGroundMapInf = Xml.constructMapHeader(xmlGroundMap, 'Ground_INF', aerodromeIcao + '_SMR_INF', '0', '+510853.0-0001125.0', 1)
+        xmlGroundMapHld = Xml.constructMapHeader(xmlGroundMap, 'Ground_INF', aerodromeIcao + '_SMR_HLD', '0', '+510853.0-0001125.0', 1)
 
         xmlGroundMapInfLabel = xtree.SubElement(xmlGroundMapInf, 'Label')
         xmlGroundMapInfLabel.set('HasLeader', 'False')
@@ -197,7 +201,93 @@ class Geo():
             xmlGroundInfill.text = output.rstrip('/')
 
         allGround = xtree.ElementTree(xmlGround)
-        allGround.write('Build/Maps/EGKK_SMR.xml', encoding="utf-8", xml_declaration=True)
+        allGround.write('Build/Maps/'+ aerodromeIcao + '_SMR.xml', encoding="utf-8", xml_declaration=True)
+
+    def add_distance(lat, lon, bearing, distance):
+        def dms2dec(dms_str, lat): # convert AIRAC ddmmss.ss or dddmmss.ss into decimal degrees
+            if lat:
+                split = re.match(r'([+|-]?)([0-9]{2})([0-9]{2})(.*)', str(dms_str))
+            else:
+                split = re.match(r'([+|-]?)([0-9]{3})([0-9]{2})(.*)', str(dms_str))
+
+            dms_str = re.sub(r'\s', '', dms_str)
+
+            sign = -1 if split.group(1) == "-" else 1
+
+            degree = split.group(2)
+            minute = split.group(3)
+            second = split.group(4)
+
+            return sign * (int(degree) + float(minute) / 60 + float(second) / 3600)
+
+        def dec2dms(dms_str, lat): # convert AIRAC ddmmss.ss or dddmmss.ss into decimal degrees
+            split = str(dms_str).split('.')
+
+            if float(dms_str) < 0:
+                split[0] = split[0] * -1
+                sign = "-"
+            else:
+                sign = "+"
+
+            if lat:
+                degree = split[0].zfill(2)
+            else:
+                degree = split[0].zfill(3)
+
+            minuteA = "0." + str(split[1])
+            minuteB = float(minuteA) * 60
+            minuteC = round(minuteB, 0)
+            minuteD = str(minuteC).split('.')
+
+            secondA = str(minuteB).split('.')
+            secondB = "0." + str(secondA[1])
+            secondC = float(secondB) * 60
+            secondD = round(secondC, 2)
+
+            decSecA = str(secondD).split('.')
+
+            return sign + str(degree) + str(minuteD[0]).zfill(2) + str(decSecA[0]).zfill(2) + '.' + decSecA[1]
+
+        EARTH_RADIUS = 6378137
+        # convert Latitude and Longitude
+        # into radians for calculation
+        latitude = math.radians(dms2dec(lat, 1))
+        longitute = math.radians(dms2dec(lon, 0))
+
+        # calculate next latitude
+        next_latitude = math.asin(math.sin(latitude) *
+                        math.cos(distance/EARTH_RADIUS) +
+                        math.cos(latitude) *
+                        math.sin(distance/EARTH_RADIUS) *
+                        math.cos(math.radians(bearing)))
+
+        # calculate next longitude
+        next_longitude = longitute + (math.atan2(math.sin(math.radians(bearing)) *
+                                                 math.sin(distance/EARTH_RADIUS) *
+                                                 math.cos(latitude),
+                                                 math.cos(distance/EARTH_RADIUS) -
+                                                 math.sin(latitude) *
+                                                 math.sin(next_latitude)
+                                                )
+                                     )
+
+        # convert points into decimal degrees
+        new_lat = math.degrees(next_latitude)
+        new_lon = math.degrees(next_longitude)
+
+        # convert decimal degrees into degrees, minutes and seconds
+        dms_lat = dec2dms(new_lat, 1)
+        dms_lon = dec2dms(new_lon, 0)
+
+        # print new latitude and longitude
+        return dms_lat + dms_lon
+
+    def backBearing(brg):
+        if float(brg) < 180:
+            bB = float(brg) + 180
+        else:
+            bB = float(brg) - 180
+        return round(bB, 2)
 
 class Xml():
     def root(name):
@@ -243,6 +333,9 @@ def mysqlExec(sql, sqlType):
 
 class Profile():
     def constructXml():    # Define XML top level tag
+        now = datetime.now()
+        checkID = datetime.timestamp(now) # generate unix timestamp to help verify if a row has already been added
+
         xmlAirspace = Xml.root('Airspace') # create XML document Airspace.xml
 
         xmlAllAirports = Xml.root('AllAirports') # create XML document Maps\ALL_AIRPORTS
@@ -254,10 +347,10 @@ class Profile():
         xmlAllAirportsSymbol.set('Type', 'Reticle') # https://virtualairtrafficsystem.com/docs/dpk/#symbol-element
 
         xmlAllNavaids = Xml.root('AllNavaids') # create XML document Maps\ALL_NAVAIDS
+
         xmlAllNavaidsMap = Xml.constructMapHeader(xmlAllNavaids, 'System', 'ALL_NAVAIDS_NAMES', '0', '+53.7-1.5')
         xmlAllNavaidsLabel = xtree.SubElement(xmlAllNavaidsMap, 'Label')
         xmlAllNavaidsLabel.set('HasLeader', 'true') # has a line connecting the point and label
-        #xmlAllNavaidsLabel.set('LabelOrientation', 'NW') # where the label will be positioned in relation to the point
         xmlAllNavaidsMapSym = Xml.constructMapHeader(xmlAllNavaids, 'System', 'ALL_NAVAIDS', '0', '+53.7-1.5')
         xmlAllNavaidsSymbol = xtree.SubElement(xmlAllNavaidsMapSym, 'Symbol')
         xmlAllNavaidsSymbol.set('Type', 'Hexagon') # https://virtualairtrafficsystem.com/docs/dpk/#symbol-element
@@ -270,8 +363,6 @@ class Profile():
         xmlAllTma = Xml.root('AllCta') # create XML document Maps\ALL_TMA
         xmlAllTmaMap = Xml.constructMapHeader(xmlAllTma, 'System', 'ALL_TMA', '2', 0)
 
-        now = datetime.now()
-        checkID = datetime.timestamp(now) # generate unix timestamp to help verify if a row has already been added
         # Define subtag SystemRunways - https://virtualairtrafficsystem.com/docs/dpk/#systemrunways
         xmlSystemRunways = xtree.SubElement(xmlAirspace, 'SystemRunways')
         xmlSidStar = xtree.SubElement(xmlAirspace, 'SIDSTARs')
@@ -307,6 +398,50 @@ class Profile():
                 xmlRunway.set('Name', runway[2])
                 xmlRunway.set('DataRunway', runway[2])
 
+                # create XML maps for each runway
+                #figure out the other end of the runway first
+                oppEndSplit = re.match(r'([\d]{2})([L|R|C])?', runway[2])
+                if int(oppEndSplit.group(1)) < 18:
+                    oppEnd = int(oppEndSplit.group(1)) + 18
+                else:
+                    oppEnd = int(oppEndSplit.group(1)) - 18
+
+                if oppEndSplit.group(2):
+                    if oppEndSplit.group(2) == "L":
+                        oppEnd = str(oppEnd).zfill(2) + "R"
+                    elif oppEndSplit.group(2) == "R":
+                        oppEnd = str(oppEnd).zfill(2) + "L"
+                    elif oppEndSplit.group(2) == "C":
+                        oppEnd = str(oppEnd).zfill(2) + "C"
+                else:
+                    oppEnd = str(oppEnd).zfill(2)
+
+                xmlMapsRunway = Xml.root('Maps')
+                xmlMapsRunwayMap = Xml.constructMapHeader(xmlMapsRunway, 'System', aerodrome[1] + '_TWR_RWY' + runway[2], '1', aerodrome[3], 1)
+                xmlMapsRunwayMapRwy = xtree.SubElement(xmlMapsRunwayMap, 'Runway')
+                xmlMapsRunwayMapRwy.set('Name', runway[2])
+                xmlMapsRunwayThresh = xtree.SubElement(xmlMapsRunwayMapRwy, 'Threshold')
+                xmlMapsRunwayThresh.set('Name', runway[2])
+                xmlMapsRunwayThresh.set('Position', runway[3])
+                centreLineTrack = Geo.backBearing(runway[5])
+                xmlMapsRunwayThresh.set('ExtendedCentrelineTrack', str(centreLineTrack))
+                xmlMapsRunwayThresh.set('ExtendedCentrelineLength', "10")
+                xmlMapsRunwayThresh.set('ExtendedCentrelineTickInterval', "1")
+                xmlMapsRunwayThreshOpp = xtree.SubElement(xmlMapsRunwayMapRwy, 'Threshold')
+                oppCoord = re.match(r'([+|-]{1}[\d]{6}\.[\d]{2})([+|-]{1}[\d]{7}\.[\d]{2})', runway[3])
+                oppLat = oppCoord.group(1)
+                oppLon = oppCoord.group(2)
+                oppPosition = Geo.add_distance(oppLat, oppLon, runway[5], runway[6])
+                xmlMapsRunwayThreshOpp.set('Name', str(oppEnd))
+                xmlMapsRunwayThreshOpp.set('Position', str(oppPosition))
+
+                # create folder structure if not exists
+                filename = 'Build/Maps/' + aerodrome[1] + '/' + aerodrome[1] + '_TWR_RWY' + runway[2] + '.xml'
+                os.makedirs(os.path.dirname(filename), exist_ok=True)
+                xmlMapsRunwayTree = xtree.ElementTree(xmlMapsRunway)
+                xmlMapsRunwayTree.write(filename, encoding="utf-8", xml_declaration=True)
+
+                # add runway into the airspace.xml file
                 xmlAirportRunway = xtree.SubElement(xmlAirport, 'Runway')
                 xmlAirportRunway.set('Name', runway[2])
                 xmlAirportRunway.set('Position', runway[3])
@@ -527,6 +662,7 @@ class WebScrape():
                     aerodromeRunwaysLong = Airac.search("([\d]{7}\.[\d]{2}[E|W]{1})", "TRWY_CLINE_POINT;GEO_LONG", str(aerodromeAD212))
                     aerodromeRunwaysElev = Airac.search("([\d]{3})", "TRWY_CLINE_POINT;VAL_GEOID_UNDULATION", str(aerodromeAD212))
                     aerodromeRunwaysBearing = Airac.search("([\d]{3}\.[\d]{2}.)", "TRWY_DIRECTION;VAL_TRUE_BRG", str(aerodromeAD212))
+                    aerodromeRunwaysLen = Airac.search("([\d]{3,4})", "TRWY;VAL_LEN", str(aerodromeAD212))
 
                     if args.verbose:
                         print(aerodromeRunways)
@@ -534,8 +670,9 @@ class WebScrape():
                         print(aerodromeRunwaysLong)
                         print(aerodromeRunwaysElev)
                         print(aerodromeRunwaysBearing)
+                        print(aerodromeRunwaysLen)
 
-                    for rwy, lat, lon, elev, brg in zip(aerodromeRunways, aerodromeRunwaysLat, aerodromeRunwaysLong, aerodromeRunwaysElev, aerodromeRunwaysBearing):
+                    for rwy, lat, lon, elev, brg, len in zip(aerodromeRunways, aerodromeRunwaysLat, aerodromeRunwaysLong, aerodromeRunwaysElev, aerodromeRunwaysBearing, aerodromeRunwaysLen):
                         # Add runway to the aerodromeDB
                         latSplit = re.search(r"([\d]{6}\.[\d]{2})([N|S]{1})", str(lat))
                         lonSplit = re.search(r"([\d]{7}\.[\d]{2})([E|W]{1})", str(lon))
@@ -543,7 +680,7 @@ class WebScrape():
                         lonPM = Geo.plusMinus(lonSplit.group(2))
                         loc = str(latPM) + str(latSplit.group(1)) + str(lonPM) + str(lonSplit.group(1)) # build lat/lon string as per https://virtualairtrafficsystem.com/docs/dpk/#lat-long-format
 
-                        sql = "INSERT INTO aerodrome_runways (aerodrome_id, runway, location, elevation, bearing) VALUE ('"+ str(aerodrome[0]) +"', '"+ str(rwy) +"', '"+ str(loc) +"', '"+ str(elev) +"', '"+ str(brg.rstrip('°')) +"')"
+                        sql = "INSERT INTO aerodrome_runways (aerodrome_id, runway, location, elevation, bearing, length) VALUE ('"+ str(aerodrome[0]) +"', '"+ str(rwy) +"', '"+ str(loc) +"', '"+ str(elev) +"', '"+ str(brg.rstrip('°')) +"', '"+ str(len) +"')"
                         mysqlExec(sql, "insertUpdate")
 
                     # Parse air traffic services
