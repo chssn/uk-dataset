@@ -283,10 +283,10 @@ class Geo():
         return dms_lat + dms_lon
 
     def backBearing(brg):
-        if float(brg) < 180:
-            bB = float(brg) + 180
+        if (float(brg) - 180) < 0:
+            bB = float(brg) + 180.00
         else:
-            bB = float(brg) - 180
+            bB = float(brg) - 180.00
         return round(bB, 2)
 
 class Xml():
@@ -428,18 +428,24 @@ class Profile():
                 xmlMapsRunwayThresh.set('ExtendedCentrelineLength', "10")
                 xmlMapsRunwayThresh.set('ExtendedCentrelineTickInterval', "1")
                 xmlMapsRunwayThreshOpp = xtree.SubElement(xmlMapsRunwayMapRwy, 'Threshold')
-                oppCoord = re.match(r'([+|-]{1}[\d]{6}\.[\d]{2})([+|-]{1}[\d]{7}\.[\d]{2})', runway[3])
-                oppLat = oppCoord.group(1)
-                oppLon = oppCoord.group(2)
-                oppPosition = Geo.add_distance(oppLat, oppLon, runway[5], runway[6])
-                xmlMapsRunwayThreshOpp.set('Name', str(oppEnd))
-                xmlMapsRunwayThreshOpp.set('Position', str(oppPosition))
 
-                # create folder structure if not exists
-                filename = 'Build/Maps/' + aerodrome[1] + '/' + aerodrome[1] + '_TWR_RWY' + runway[2] + '.xml'
-                os.makedirs(os.path.dirname(filename), exist_ok=True)
-                xmlMapsRunwayTree = xtree.ElementTree(xmlMapsRunway)
-                xmlMapsRunwayTree.write(filename, encoding="utf-8", xml_declaration=True)
+                sqlOpp = "SELECT * FROM aerodrome_runways WHERE aerodrome_id = '"+ str(aerodrome[0]) +"' AND runway = '"+ str(oppEnd) +"'"
+                oppRunway = mysqlExec(sqlOpp, "selectOne")
+                if oppRunway:
+                    #oppCoord = re.match(r'([+|-]{1}[\d]{6}\.[\d]{2})([+|-]{1}[\d]{7}\.[\d]{2})', runway[3])
+                    #oppLat = oppCoord.group(1)
+                    #oppLon = oppCoord.group(2)
+                    #oppPosition = Geo.add_distance(oppLat, oppLon, runway[5], runway[6])
+                    xmlMapsRunwayThreshOpp.set('Name', str(oppEnd))
+                    xmlMapsRunwayThreshOpp.set('Position', str(oppRunway[3]))
+
+                    # create folder structure if not exists
+                    filename = 'Build/Maps/' + aerodrome[1] + '/' + aerodrome[1] + '_TWR_RWY' + runway[2] + '.xml'
+                    os.makedirs(os.path.dirname(filename), exist_ok=True)
+                    xmlMapsRunwayTree = xtree.ElementTree(xmlMapsRunway)
+                    xmlMapsRunwayTree.write(filename, encoding="utf-8", xml_declaration=True)
+                else:
+                    print(Fore.RED + "No opposite runway for " + runway[3] + " at " + aerodrome[1] + Style.RESET_ALL)
 
                 # add runway into the airspace.xml file
                 xmlAirportRunway = xtree.SubElement(xmlAirport, 'Runway')
