@@ -1,0 +1,2 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Maps xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" generated="Wed Dec 30 16:55:29 2020"><Map Type="System" Name="EGGW_TWR_RWY07" Priority="1" Center="+515229.0-0002206.0"><Runway Name="07"><Threshold Name="07" Position="+515219.25-0002300.91" ExtendedCentrelineTrack="254.38" ExtendedCentrelineLength="10" ExtendedCentrelineTickInterval="1" /><Threshold Name="25" Position="+515237.36-0002116.15" /></Runway></Map></Maps>

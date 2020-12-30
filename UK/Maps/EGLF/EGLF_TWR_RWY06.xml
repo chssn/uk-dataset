@@ -1,0 +1,2 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Maps xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" generated="Wed Dec 30 16:55:36 2020"><Map Type="System" Name="EGLF_TWR_RWY06" Priority="1" Center="+511631.0-0004639.0"><Runway Name="06"><Threshold Name="06" Position="+511622.19-0004706.76" ExtendedCentrelineTrack="242.02" ExtendedCentrelineLength="10" ExtendedCentrelineTickInterval="1" /><Threshold Name="24" Position="+511641.36-0004609.22" /></Runway></Map></Maps>

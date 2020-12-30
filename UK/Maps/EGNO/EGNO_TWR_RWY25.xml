@@ -1,0 +1,2 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Maps xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" generated="Wed Dec 30 16:55:40 2020"><Map Type="System" Name="EGNO_TWR_RWY25" Priority="1" Center="+534442.0-0025300.0"><Runway Name="25"><Threshold Name="25" Position="+534454.39-0025159.51" ExtendedCentrelineTrack="71.18" ExtendedCentrelineLength="10" ExtendedCentrelineTickInterval="1" /><Threshold Name="07" Position="+534429.78-0025401.22" /></Runway></Map></Maps>

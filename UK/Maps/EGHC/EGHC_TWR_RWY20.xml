@@ -1,0 +1,2 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Maps xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" generated="Wed Dec 30 16:55:29 2020"><Map Type="System" Name="EGHC_TWR_RWY20" Priority="1" Center="+500610.0-0054014.0"><Runway Name="20"><Threshold Name="20" Position="+500617.61-0054019.84" ExtendedCentrelineTrack="19.64" ExtendedCentrelineLength="10" ExtendedCentrelineTickInterval="1" /><Threshold Name="02" Position="+500604.05-0054027.36" /></Runway></Map></Maps>

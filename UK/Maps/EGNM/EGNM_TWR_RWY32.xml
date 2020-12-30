@@ -1,0 +1,2 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Maps xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" generated="Wed Dec 30 16:55:39 2020"><Map Type="System" Name="EGNM_TWR_RWY32" Priority="1" Center="+535158.0-0013939.0"><Runway Name="32"><Threshold Name="32" Position="+535137.31-0013907.44" ExtendedCentrelineTrack="137.75" ExtendedCentrelineLength="10" ExtendedCentrelineTickInterval="1" /><Threshold Name="14" Position="+535217.15-0014008.68" /></Runway></Map></Maps>

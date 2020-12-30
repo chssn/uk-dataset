@@ -1,0 +1,2 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Maps xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" generated="Wed Dec 30 16:55:35 2020"><Map Type="System" Name="EGKK_TWR_RWY26R" Priority="1" Center="+510853.0-0001125.0"><Runway Name="26R"><Threshold Name="26R" Position="+510903.69-0001057.40" ExtendedCentrelineTrack="77.65" ExtendedCentrelineLength="10" ExtendedCentrelineTickInterval="1" /><Threshold Name="08L" Position="+510851.04-0001229.17" /></Runway></Map></Maps>

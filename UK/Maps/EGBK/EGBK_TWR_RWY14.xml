@@ -1,0 +1,2 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Maps xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" generated="Wed Dec 30 16:55:24 2020"><Map Type="System" Name="EGBK_TWR_RWY14" Priority="1" Center="+521822.0-0004732.0"><Runway Name="14"><Threshold Name="14" Position="+521835.79-0004739.75" ExtendedCentrelineTrack="313.74" ExtendedCentrelineLength="10" ExtendedCentrelineTickInterval="1" /><Threshold Name="32" Position="+521817.87-0004709.20" /></Runway></Map></Maps>

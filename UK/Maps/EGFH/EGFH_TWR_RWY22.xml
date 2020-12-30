@@ -1,0 +1,2 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Maps xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" generated="Wed Dec 30 16:55:28 2020"><Map Type="System" Name="EGFH_TWR_RWY22" Priority="1" Center="+513619.0-0040404.0"><Runway Name="22"><Threshold Name="22" Position="+513633.98-0040346.49" ExtendedCentrelineTrack="36.32" ExtendedCentrelineLength="10" ExtendedCentrelineTickInterval="1" /><Threshold Name="04" Position="+513601.13-0040425.26" /></Runway></Map></Maps>

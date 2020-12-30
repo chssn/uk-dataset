@@ -1,0 +1,2 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Maps xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" generated="Wed Dec 30 16:55:26 2020"><Map Type="System" Name="EGCC_TWR_RWY23R" Priority="1" Center="+532114.0-0021630.0"><Runway Name="23R"><Threshold Name="23R" Position="+532140.75-0021533.41" ExtendedCentrelineTrack="51.09" ExtendedCentrelineLength="10" ExtendedCentrelineTickInterval="1" /><Threshold Name="05L" Position="+532051.20-0021715.95" /></Runway></Map></Maps>

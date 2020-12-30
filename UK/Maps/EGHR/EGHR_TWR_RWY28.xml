@@ -1,0 +1,2 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Maps xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" generated="Wed Dec 30 16:55:30 2020"><Map Type="System" Name="EGHR_TWR_RWY28" Priority="1" Center="+505134.0-0004533.0"><Runway Name="28"><Threshold Name="28" Position="+505141.51-0004513.28" ExtendedCentrelineTrack="103.04" ExtendedCentrelineLength="10" ExtendedCentrelineTickInterval="1" /><Threshold Name="10" Position="+505146.62-0004548.15" /></Runway></Map></Maps>

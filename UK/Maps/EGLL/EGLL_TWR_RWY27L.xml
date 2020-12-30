@@ -1,0 +1,2 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Maps xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" generated="Wed Dec 30 16:55:37 2020"><Map Type="System" Name="EGLL_TWR_RWY27L" Priority="1" Center="+512839.0-0002741.0"><Runway Name="27L"><Threshold Name="27L" Position="+512753.82-0002602.76" ExtendedCentrelineTrack="89.72" ExtendedCentrelineLength="10" ExtendedCentrelineTickInterval="1" /><Threshold Name="09R" Position="+512753.25-0002856.33" /></Runway></Map></Maps>
