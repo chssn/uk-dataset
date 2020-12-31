@@ -599,17 +599,43 @@ class Profile():
         else:
             print("No data has been deleted. We think...")
 
-    def createAtisFreqXml(): # creates the frequency secion of ATIS.xml
+    def createFrequencies(): # creates the frequency secion of ATIS.xml, Sectors.xml
         def myround(x, base=0.025): # rounds to the nearest 25KHz - simulator limitations prevent 8.33KHz spacing currently
             flt = float(x)
             return base * round(flt/base)
 
-        sql = "SELECT aerodromes.icao_designator, aerodrome_frequencies.frequency FROM aerodromes INNER JOIN aerodrome_frequencies ON aerodromes.id = aerodrome_frequencies.aerodrome_id WHERE aerodrome_frequencies.callsign_type_id = 6 ORDER BY `aerodromes`.`icao_designator` ASC"
-        atisFreq = mysqlExec(sql, "selectMany")
+        xmlSectors = Xml.root("Sectors")
+        lastType = ''
 
-        for freq in atisFreq:
-            freq25khz = myround(freq[1])
-            print('<Frequency Airport="' + freq[0] + '" Frequency="%.3f" />' % freq25khz)
+        sql = "SELECT aerodromes.icao_designator, aerodromes.name, aerodrome_frequencies.frequency, standard_callsigns.callsign_postfix, standard_callsigns.description FROM aerodromes INNER JOIN aerodrome_frequencies ON aerodromes.id = aerodrome_frequencies.aerodrome_id INNER JOIN standard_callsigns ON aerodrome_frequencies.callsign_type_id = standard_callsigns.id ORDER BY `aerodromes`.`name`, standard_callsigns.description ASC"
+        frequencies = mysqlExec(sql, "selectMany")
+
+        for freq in frequencies:
+            if freq[3] != lastType:
+                freq25khz = myround(freq[2])
+                if freq[3] != "_ATIS":
+                    xmlSector = xtree.SubElement(xmlSectors, "Sector")
+                    xmlSector.set('FullName', freq[1] + " " + freq[4]) # eg LONDON GATWICK GROUND
+                    xmlSector.set('Frequency', "%.3f" % freq25khz) # format to full frequency eg 122.800
+                    xmlSector.set('Callsign', freq[0] + freq[3]) # eg EGKK_GND
+                    xmlSector.set('Name', freq[0] + freq[3])
+                    print(freq[1] + ' ' + freq[4] + "|" + "%.3f" % freq25khz + "|" + freq[0] + freq[3])
+
+                    # cascade for ResponsibleSectors tag in Sectors.xml
+                    xmlSectorResponsible = xtree.SubElement(xmlSector, "ResponsibleSectors")
+                    if freq[3] == "_D_APP":
+                        xmlSectorResponsible.text = freq[0] + "_APP," + freq[0] + "_TWR," + freq[0] + "_GND," + freq[0] + "_DEL"
+                    elif freq[3] == "_APP":
+                        xmlSectorResponsible.text = freq[0] + "_TWR," + freq[0] + "_GND," + freq[0] + "_DEL"
+                    elif freq[3] == "_TWR":
+                        xmlSectorResponsible.text = freq[0] + "_GND," + freq[0] + "_DEL"
+                    elif freq[3] == "_GND":
+                        xmlSectorResponsible.text = freq[0] + "_DEL"
+
+                lastType = freq[3]
+
+        sectorTree = xtree.ElementTree(xmlSectors)
+        sectorTree.write('Build/Sectors.xml', encoding="utf-8", xml_declaration=True)
 
     def createRadars():
         sql = "SELECT * FROM radar_sites"
