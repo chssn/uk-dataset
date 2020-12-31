@@ -815,60 +815,91 @@ class WebScrape():
                     bar() # progress the progress bar
 
     def firUirTmaCtaData():
+        def getBoundary(space): # creates a boundary useable in vatSys from AIRAC data
+            lat = 1
+            fullBoundary = ''
+            for s in space:
+                if s[1] == "W" or s[1] == "S":
+                    symbol = "-"
+                else:
+                    symbol = "+"
+
+                if lat == 1:
+                    coordString = symbol + s[0] + ".00"
+                    lat = 0
+                else:
+                    coordString += symbol + s[0]
+                    fullBoundary += coordString + ".00/"
+                    lat = 1
+
+            return fullBoundary.rstrip('/')
+
         print("Parsing EG-ENR-2.1 Data (FIR, UIR, TMA AND CTA)...")
         getENR21 = Airac.getTable("EG-ENR-2.1-en-GB.html")
         listENR21 = getENR21.find_all("td")
-        for row in listENR21:
-            # find all FIR spaces
-            firTitle = Airac.search("([A-Z]*)(\sFIR)", "TAIRSPACE;TXT_NAME", str(row))
-            firSpace = Airac.search("([\d]{6,7}[N|E|S|W])", "TAIRSPACE_VERTEX;GEO_[(LAT)|(LONG)]", str(row))
-            if firTitle:
-                print(firTitle)
-                print(firSpace)
+        barLength = len(listENR21)
+        with alive_bar(barLength) as bar: # Define the progress bar
+            for row in listENR21:
+                # find all FIR spaces
+                firTitle = Airac.search("([A-Z]*\sFIR)", "TAIRSPACE;TXT_NAME", str(row))
+                firSpace = Airac.search("([\d]{6,7})([N|E|S|W]{1})", "TAIRSPACE_VERTEX;GEO_L", str(row))
+                firUpper = Airac.search("(?<=\>)([\d]{2,3})", "TAIRSPACE_LAYER;VAL_DIST_VER_UPPER", str(row))
+                firLower = Airac.search("(?<=\>)([\d]{2,3})", "TAIRSPACE_LAYER;VAL_DIST_VER_LOWER", str(row))
+                if not firUpper:
+                    firUpper = Airac.search("(?<=\>)([\d]{2,3})", "TAIRSPACE_VOLUME;VAL_DIST_VER_UPPER", str(row))
+                    firLower = Airac.search("(?<=\>)([\d]{2,3})", "TAIRSPACE_VOLUME;VAL_DIST_VER_LOWER", str(row))
+                    if not firLower:
+                        firLower = "0"
 
-            # find all CTA spaces
-            ctaTitle = Airac.search("([A-Z\s]*)(\sCTA\s)([\d]?)", "TAIRSPACE;TXT_NAME", str(row))
-            ctaSpaceLat = Airac.search("([\d]{6}[N|S])", "TAIRSPACE_VERTEX;GEO_LAT", str(row))
-            ctaSpaceLon = Airac.search("([\d]{7}[E|W])", "TAIRSPACE_VERTEX;GEO_LONG", str(row))
-            if ctaTitle:
-                fF = re.search(r"(\')([A-Z\s]*)(\')(.*)(\sCTA\s)(.*)([\d]{1,2}?)", str(ctaTitle))
-                try:
-                    title = str(fF.group(2)) + str(fF.group(5)) + str(fF.group(7))
-                except:
-                    title = str(fF.group(2)) + str(fF.group(5))
+                if firTitle:
+                    if firSpace:
+                        boundary = getBoundary(firSpace)
+                        sqlF = "INSERT INTO flight_information_regions (name, callsign, frequency, boundary, upper_fl, lower_fl) VALUE ('"+ str(firTitle[0]) +"', 'NONE', '000.000', '"+ str(boundary) +"', '"+ str(firUpper[0]) +"', '"+ str(firLower[0]) +"')"
+                        mysqlExec(sqlF, "insertUpdate")
+                        # lazy bit of coding for EG airspace UIR (which has the same extent as FIR)
+                        sqlU = "INSERT INTO flight_information_regions (name, callsign, frequency, boundary, upper_fl, lower_fl) VALUE ('"+ str(firTitle[0]).split()[0] +" UIR', 'NONE', '000.000', '"+ str(boundary) +"', '660', '245')"
+                        mysqlExec(sqlU, "insertUpdate")
 
-                boundary = ''
-                for lat, lon in zip(ctaSpaceLat, ctaSpaceLon):
-                    latSplit = re.search(r"([\d]{2})([\d]{4})([N|S]{1})", str(lat))
-                    lonSplit = re.search(r"([\d]{3})([\d]{4})([E|W]{1})", str(lon))
-                    latPM = Geo.plusMinus(latSplit.group(3))
-                    lonPM = Geo.plusMinus(lonSplit.group(3))
-                    boundary += str(latPM) + str(latSplit.group(1)) + "." + str(latSplit.group(2)) + str(lonPM) + str(lonSplit.group(1)) + "." + str(lonSplit.group(2) + "/") # build lat/lon string as per https://virtualairtrafficsystem.com/docs/dpk/#lat-long-format
+                # find all CTA spaces
+                ctaTitle = Airac.search("([A-Z\s]*)(\sCTA\s)([\d]?)", "TAIRSPACE;TXT_NAME", str(row))
+                ctaSpace = Airac.search("([\d]{6,7})([N|E|S|W]{1})", "TAIRSPACE_VERTEX;GEO_L", str(row))
+                ctaCircle = re.search("circle", str(row))
+                if ctaTitle:
+                    if not ctaCircle:
+                        fF = re.search(r"(\')([A-Z\s]*)(\')(.*)(\sCTA\s)(.*)([\d]{1,2}?)", str(ctaTitle))
+                        try:
+                            title = str(fF.group(2)) + str(fF.group(5)) + str(fF.group(7))
+                        except:
+                            title = str(fF.group(2)) + str(fF.group(5))
 
-                sql = "INSERT INTO control_areas (fir_id, name, boundary) VALUE ('0', '"+ str(title) +"', '"+ str(boundary) +"')"
-                mysqlExec(sql, "insertUpdate")
+                        if ctaSpace:
+                            boundary = getBoundary(ctaSpace)
 
-            # find all TMA spaces
-            tmaTitle = Airac.search("([A-Z\s]*)(\sCTA\s)([\d]?)", "TAIRSPACE;TXT_NAME", str(row))
-            tmaSpaceLat = Airac.search("([\d]{6}[N|S])", "TAIRSPACE_VERTEX;GEO_LAT", str(row))
-            tmaSpaceLon = Airac.search("([\d]{7}[E|W])", "TAIRSPACE_VERTEX;GEO_LONG", str(row))
-            if tmaTitle:
-                fF = re.search(r"(\')([A-Z\s]*)(\')(.*)(\sTMA\s)(.*)([\d]{1,2}?)", str(tmaTitle))
-                if fF:
-                    title = str(fF.group(2)) + str(fF.group(5)) + str(fF.group(7))
-                #else:
-                #    title = str(fF.group(2)) + str(fF.group(5))
+                            sql = "INSERT INTO control_areas (fir_id, name, boundary) VALUE ('0', '"+ str(title) +"', '"+ str(boundary) +"')"
+                            mysqlExec(sql, "insertUpdate")
+                    else:
+                        print(str(ctaTitle) + " complex CTA")
 
-                boundary = ''
-                for lat, lon in zip(tmaSpaceLat, tmaSpaceLon):
-                    latSplit = re.search(r"([\d]{2})([\d]{4})([N|S]{1})", str(lat))
-                    lonSplit = re.search(r"([\d]{3})([\d]{4})([E|W]{1})", str(lon))
-                    latPM = Geo.plusMinus(latSplit.group(3))
-                    lonPM = Geo.plusMinus(lonSplit.group(3))
-                    boundary += str(latPM) + str(latSplit.group(1)) + "." + str(latSplit.group(2)) + str(lonPM) + str(lonSplit.group(1)) + "." + str(lonSplit.group(2) + "/") # build lat/lon string as per https://virtualairtrafficsystem.com/docs/dpk/#lat-long-format
+                # find all TMA spaces
+                tmaTitle = Airac.search("([A-Z\s]*)(\sTMA\s)([\d]?)", "TAIRSPACE;TXT_NAME", str(row))
+                tmaSpace = Airac.search("([\d]{6,7})([N|E|S|W]{1})", "TAIRSPACE_VERTEX;GEO_L", str(row))
+                tmaCircle = re.search("circle", str(row))
+                if tmaTitle:
+                    if not tmaCircle:
+                        fF = re.search(r"(\')([A-Z\s]*)(\')(.*)(\sTMA\s)(.*)([\d]{1,2}?)", str(tmaTitle))
+                        try:
+                            title = str(fF.group(2)) + str(fF.group(5)) + str(fF.group(7))
+                        except:
+                            title = str(fF.group(2)) + str(fF.group(5))
 
-                sql = "INSERT INTO terminal_control_areas (fir_id, name, boundary) VALUE ('0', '"+ str(title) +"', '"+ str(boundary) +"')"
-                mysqlExec(sql, "insertUpdate")
+                        if tmaSpace:
+                            boundary = getBoundary(tmaSpace)
+
+                            sql = "INSERT INTO terminal_control_areas (fir_id, name, boundary) VALUE ('0', '"+ str(title) +"', '"+ str(boundary) +"')"
+                            mysqlExec(sql, "insertUpdate")
+                    else:
+                        print(str(tmaTitle) + " complex TMA")
+                bar()
 
     def processAd06Data():
         print("Parsing EG-AD-0.1 data to obtain ICAO designators...")
