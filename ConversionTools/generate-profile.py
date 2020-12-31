@@ -571,7 +571,7 @@ class Profile():
         sql = "SELECT * FROM airways"
         listAirways = mysqlExec(sql, "selectMany")
         for airway in listAirways:
-            xmlAirway = xtress.SubElement(xmlAirways, 'Airway')
+            xmlAirway = xtree.SubElement(xmlAirways, 'Airway')
             xmlAirway.set('Name', airway[1])
             xmlAirway.text = airway[2]
 
