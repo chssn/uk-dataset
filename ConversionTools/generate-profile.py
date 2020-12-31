@@ -592,7 +592,7 @@ class Profile():
             # Back everything up first!
             sqlA = "BACKUP DATABASE uk-dataset TO DISK 'backup.sql'"
             #cursor.execute(sqlA)
-            tables = ["aerodromes", "aerodrome_frequencies", "aerodrome_runways", "aerodrome_runways_sid", "aerodrome_runways_star", "fixes", "navaids", "control_areas", "terminal_control_areas"]
+            tables = ["aerodromes", "aerodrome_frequencies", "aerodrome_runways", "aerodrome_runways_sid", "aerodrome_runways_star", "fixes", "navaids", "control_areas", "terminal_control_areas", "flight_information_regions", "airways"]
             for t in tables:
                 truncate = "TRUNCATE TABLE " + t
                 cursor.execute(truncate)
