@@ -363,11 +363,12 @@ class Profile():
         xmlAllTma = Xml.root('AllCta') # create XML document Maps\ALL_TMA
         xmlAllTmaMap = Xml.constructMapHeader(xmlAllTma, 'System', 'ALL_TMA', '2', 0)
 
-        # Define subtag SystemRunways - https://virtualairtrafficsystem.com/docs/dpk/#systemrunways
+        # Define subtag SystemRunways, SidStar, Intersections, Airports and Airways - https://virtualairtrafficsystem.com/docs/dpk/#systemrunways
         xmlSystemRunways = xtree.SubElement(xmlAirspace, 'SystemRunways')
         xmlSidStar = xtree.SubElement(xmlAirspace, 'SIDSTARs')
         xmlIntersections = xtree.SubElement(xmlAirspace, 'Intersections')
         xmlAirports = xtree.SubElement(xmlAirspace, 'Airports')
+        xmlAirways = xtree.SubElement(xmlAirspace, 'Airways')
 
         # Construct the XML element as per https://virtualairtrafficsystem.com/docs/dpk/#systemrunways
         # List all the verified aerodromes
@@ -566,6 +567,13 @@ class Profile():
             xmlTma.set('Name', tma[2])
             xmlTma.set('Pattern', 'Dashed')
             xmlTma.text = tma[3].rstrip('/')
+
+        sql = "SELECT * FROM airways"
+        listAirways = mysqlExec(sql, "selectMany")
+        for airway in listAirways:
+            xmlAirway = xtress.SubElement(xmlAirways, 'Airway')
+            xmlAirway.set('Name', airway[1])
+            xmlAirway.text = airway[2]
 
         allAirportsTree = xtree.ElementTree(xmlAllAirports)
         allAirportsTree.write('Build/Maps/ALL_AIRPORTS.xml', encoding="utf-8", xml_declaration=True)
@@ -974,6 +982,7 @@ if menuOption == '1':
     WebScrape.parseENR3("5")
 elif menuOption == '2':
     Profile.constructXml()
+    Profile.createFrequencies()
     Profile.createRadars()
 elif menuOption == '3':
     Profile.clearDatabase()
