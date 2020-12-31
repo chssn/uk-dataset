@@ -932,6 +932,20 @@ class WebScrape():
                 #getLinks = re.findall(r'(?<=aip\/pdf\/ad\/)'+ icao + '')
                 # IDEA: Need to code this bit properly - placeholder for now
 
+    def parseENR3(section):
+        print("Parsing EG-ENR-3."+ section +" data to obtain ATS routes...")
+        getENR3 = Airac.getTable("EG-ENR-3."+ section +"-en-GB.html")
+        listTables = getENR3.find_all("tbody")
+        for row in listTables:
+            getAirwayName = Airac.search("([A-Z]{1,2}[\d]{1,4})", "TEN_ROUTE_RTE;TXT_DESIG", str(row))
+            getAirwayRoute = Airac.search("([A-Z]{3,5})", "T(DESIGNATED_POINT|DME|VOR|NDB);CODE_ID", str(row))
+            printRoute = ''
+            if getAirwayName:
+                for point in getAirwayRoute:
+                    printRoute += str(point[0]) + "/"
+                sql = "INSERT INTO airways (name, route) VALUES ('"+ str(getAirwayName[0]) +"', '"+ str(printRoute).rstrip('/') +"')"
+                mysqlExec(sql, "insertUpdate")
+
 
 # Main Menu
 print("")
@@ -955,6 +969,9 @@ if menuOption == '1':
     #WebScrape.parseUKMil() # placeholder
     WebScrape.main()
     WebScrape.firUirTmaCtaData()
+    WebScrape.parseENR3("1")
+    WebScrape.parseENR3("3")
+    WebScrape.parseENR3("5")
 elif menuOption == '2':
     Profile.constructXml()
     Profile.createRadars()
@@ -962,6 +979,10 @@ elif menuOption == '3':
     Profile.clearDatabase()
 elif menuOption == '4':
     Geo.kmlMappingConvert(args.geo)
+elif menuOption == '9':
+    #Profile.createFrequencies()
+    #WebScrape.firUirTmaCtaData()
+    WebScrape.parseENR3("5")
 else:
     print("Nothing to do here\n")
     cmdParse.print_help()
