@@ -4,35 +4,35 @@
     <Lat>+57.3835</Lat>
     <Long>-002.1000</Long>
   </Radar>
-  <Radar Name="Belfast City Airport" Type="SMR_ADSB" Elevation="15" MaxRange="50">
+  <Radar Name="Belfast City Airport" Type="SMR_ADSB" Elevation="15" MaxRange="5">
     <Lat>+54.3658</Lat>
     <Long>-005.5251</Long>
   </Radar>
-  <Radar Name="Belfast International" Type="SMR_ADSB" Elevation="56" MaxRange="50">
+  <Radar Name="Belfast International" Type="SMR_ADSB" Elevation="56" MaxRange="5">
     <Lat>+54.3921</Lat>
     <Long>-006.1222</Long>
   </Radar>
-  <Radar Name="Birmingham International Airport" Type="SMR_ADSB" Elevation="57" MaxRange="50">
+  <Radar Name="Birmingham International Airport" Type="SMR_ADSB" Elevation="57" MaxRange="5">
     <Lat>+52.2700</Lat>
     <Long>-001.4500</Long>
   </Radar>
-  <Radar Name="Bournemouth International Airport" Type="SMR_ADSB" Elevation="66" MaxRange="50">
+  <Radar Name="Bournemouth International Airport" Type="SMR_ADSB" Elevation="66" MaxRange="5">
     <Lat>+50.4659</Lat>
     <Long>-001.5035</Long>
   </Radar>
-  <Radar Name="Bristol Airport" Type="SMR_ADSB" Elevation="66" MaxRange="50">
+  <Radar Name="Bristol Airport" Type="SMR_ADSB" Elevation="66" MaxRange="5">
     <Lat>+51.2300</Lat>
     <Long>-002.4300</Long>
   </Radar>
-  <Radar Name="Cambridge Airport" Type="SMR_ADSB" Elevation="43" MaxRange="50">
+  <Radar Name="Cambridge Airport" Type="SMR_ADSB" Elevation="43" MaxRange="5">
     <Lat>+52.1200</Lat>
     <Long>+000.1100</Long>
   </Radar>
-  <Radar Name="Cardiff International Airport" Type="SMR_ADSB" Elevation="56" MaxRange="50">
+  <Radar Name="Cardiff International Airport" Type="SMR_ADSB" Elevation="56" MaxRange="5">
     <Lat>+51.2341</Lat>
     <Long>-003.2112</Long>
   </Radar>
-  <Radar Name="Coventry Airport" Type="SMR_ADSB" Elevation="50" MaxRange="50">
+  <Radar Name="Coventry Airport" Type="SMR_ADSB" Elevation="50" MaxRange="5">
     <Lat>+52.2200</Lat>
     <Long>-001.2800</Long>
   </Radar>
@@ -40,47 +40,47 @@
     <Lat>+52.5438</Lat>
     <Long>+001.2059</Long>
   </Radar>
-  <Radar Name="Durham Tees Valley Airport" Type="SMR_ADSB" Elevation="46" MaxRange="50">
+  <Radar Name="Durham Tees Valley Airport" Type="SMR_ADSB" Elevation="46" MaxRange="5">
     <Lat>+54.3100</Lat>
     <Long>-001.2500</Long>
   </Radar>
-  <Radar Name="East Midlands International Airport" Type="SMR_ADSB" Elevation="42" MaxRange="50">
+  <Radar Name="East Midlands International Airport" Type="SMR_ADSB" Elevation="42" MaxRange="5">
     <Lat>+52.5000</Lat>
     <Long>-001.2000</Long>
   </Radar>
-  <Radar Name="Edinburgh Airport" Type="SMR_ADSB" Elevation="72" MaxRange="50">
+  <Radar Name="Edinburgh Airport" Type="SMR_ADSB" Elevation="72" MaxRange="5">
     <Lat>+55.5705</Lat>
     <Long>-003.2245</Long>
   </Radar>
-  <Radar Name="Exeter and Devon Airport" Type="SMR_ADSB" Elevation="46" MaxRange="50">
+  <Radar Name="Exeter and Devon Airport" Type="SMR_ADSB" Elevation="46" MaxRange="5">
     <Lat>+50.4400</Lat>
     <Long>-003.2500</Long>
   </Radar>
-  <Radar Name="Farnborough Aerodrome" Type="SMR_ADSB" Elevation="90" MaxRange="50">
+  <Radar Name="Farnborough Aerodrome" Type="SMR_ADSB" Elevation="90" MaxRange="5">
     <Lat>+51.1600</Lat>
     <Long>-000.4600</Long>
   </Radar>
-  <Radar Name="Glasgow Airport" Type="SMR_ADSB" Elevation="67" MaxRange="50">
+  <Radar Name="Glasgow Airport" Type="SMR_ADSB" Elevation="67" MaxRange="5">
     <Lat>+55.5229</Lat>
     <Long>-004.2608</Long>
   </Radar>
-  <Radar Name="Glasgow Prestwick Inter Airport" Type="SMR_ADSB" Elevation="59" MaxRange="50">
+  <Radar Name="Glasgow Prestwick Inter Airport" Type="SMR_ADSB" Elevation="59" MaxRange="5">
     <Lat>+55.3000</Lat>
     <Long>-004.3500</Long>
   </Radar>
-  <Radar Name="Hawarden Airport" Type="SMR_ADSB" Elevation="62" MaxRange="50">
+  <Radar Name="Hawarden Airport" Type="SMR_ADSB" Elevation="62" MaxRange="5">
     <Lat>+53.1035</Lat>
     <Long>-002.5909</Long>
   </Radar>
-  <Radar Name="Hibaldstow radar station" Type="SMR_ADSB" Elevation="72" MaxRange="50">
+  <Radar Name="Hibaldstow radar station" Type="SMR_ADSB" Elevation="72" MaxRange="5">
     <Lat>+53.2951</Lat>
     <Long>-000.2914</Long>
   </Radar>
-  <Radar Name="Humberside Airport" Type="SMR_ADSB" Elevation="34" MaxRange="50">
+  <Radar Name="Humberside Airport" Type="SMR_ADSB" Elevation="34" MaxRange="5">
     <Lat>+53.3500</Lat>
     <Long>-000.2000</Long>
   </Radar>
-  <Radar Name="Inverness Airport" Type="SMR_ADSB" Elevation="56" MaxRange="50">
+  <Radar Name="Inverness Airport" Type="SMR_ADSB" Elevation="56" MaxRange="5">
     <Lat>+57.3233</Lat>
     <Long>-004.0251</Long>
   </Radar>
@@ -88,55 +88,55 @@
     <Lat>+56.0420</Lat>
     <Long>-003.4345</Long>
   </Radar>
-  <Radar Name="Leeds Bradford International Airport" Type="SMR_ADSB" Elevation="52" MaxRange="50">
+  <Radar Name="Leeds Bradford International Airport" Type="SMR_ADSB" Elevation="52" MaxRange="5">
     <Lat>+53.5100</Lat>
     <Long>-001.3900</Long>
   </Radar>
-  <Radar Name="Liverpool Airport" Type="SMR_ADSB" Elevation="41" MaxRange="50">
+  <Radar Name="Liverpool Airport" Type="SMR_ADSB" Elevation="41" MaxRange="5">
     <Lat>+53.1952</Lat>
     <Long>-002.5141</Long>
   </Radar>
-  <Radar Name="London Gatwick Airport" Type="SMR_ADSB" Elevation="98" MaxRange="50">
+  <Radar Name="London Gatwick Airport" Type="SMR_ADSB" Elevation="98" MaxRange="5">
     <Lat>+51.0846</Lat>
     <Long>-000.1038</Long>
   </Radar>
-  <Radar Name="London Heathrow Airport" Type="SMR_ADSB" Elevation="131" MaxRange="50">
+  <Radar Name="London Heathrow Airport" Type="SMR_ADSB" Elevation="131" MaxRange="5">
     <Lat>+51.2738</Lat>
     <Long>-000.2622</Long>
   </Radar>
-  <Radar Name="Stansted Airport" Type="SMR_ADSB" Elevation="92" MaxRange="50">
+  <Radar Name="Stansted Airport" Type="SMR_ADSB" Elevation="92" MaxRange="5">
     <Lat>+51.5313</Lat>
     <Long>+000.1349</Long>
   </Radar>
-  <Radar Name="Manchester Airport" Type="SMR_ADSB" Elevation="92" MaxRange="50">
+  <Radar Name="Manchester Airport" Type="SMR_ADSB" Elevation="92" MaxRange="5">
     <Lat>+53.2026</Lat>
     <Long>-002.1658</Long>
   </Radar>
-  <Radar Name="Newcastle International Airport" Type="SMR_ADSB" Elevation="42" MaxRange="50">
+  <Radar Name="Newcastle International Airport" Type="SMR_ADSB" Elevation="42" MaxRange="5">
     <Lat>+55.0227</Lat>
     <Long>-001.4127</Long>
   </Radar>
-  <Radar Name="Newquay Cornwall Airport" Type="SMR_ADSB" Elevation="33" MaxRange="50">
+  <Radar Name="Newquay Cornwall Airport" Type="SMR_ADSB" Elevation="33" MaxRange="5">
     <Lat>+50.2626</Lat>
     <Long>-004.5943</Long>
   </Radar>
-  <Radar Name="Norwich Airport" Type="SMR_ADSB" Elevation="55" MaxRange="50">
+  <Radar Name="Norwich Airport" Type="SMR_ADSB" Elevation="55" MaxRange="5">
     <Lat>+52.4000</Lat>
     <Long>-001.1700</Long>
   </Radar>
-  <Radar Name="Oxford Airport" Type="SMR_ADSB" Elevation="66" MaxRange="50">
+  <Radar Name="Oxford Airport" Type="SMR_ADSB" Elevation="66" MaxRange="5">
     <Lat>+51.5015</Lat>
     <Long>-001.1939</Long>
   </Radar>
-  <Radar Name="Robin Hood Airport (Doncaster)" Type="SMR_ADSB" Elevation="41" MaxRange="50">
+  <Radar Name="Robin Hood Airport (Doncaster)" Type="SMR_ADSB" Elevation="41" MaxRange="5">
     <Lat>+53.2828</Lat>
     <Long>-001.0111</Long>
   </Radar>
-  <Radar Name="Southampton International Airport" Type="SMR_ADSB" Elevation="42" MaxRange="50">
+  <Radar Name="Southampton International Airport" Type="SMR_ADSB" Elevation="42" MaxRange="5">
     <Lat>+50.5700</Lat>
     <Long>-001.2100</Long>
   </Radar>
-  <Radar Name="London Southend Airport" Type="SMR_ADSB" Elevation="52" MaxRange="50">
+  <Radar Name="London Southend Airport" Type="SMR_ADSB" Elevation="52" MaxRange="5">
     <Lat>+51.3408</Lat>
     <Long>+000.4202</Long>
   </Radar>
@@ -144,7 +144,7 @@
     <Lat>+53.4606</Lat>
     <Long>-002.5927</Long>
   </Radar>
-  <Radar Name="Sumburgh Airport" Type="SMR_ADSB" Elevation="34" MaxRange="50">
+  <Radar Name="Sumburgh Airport" Type="SMR_ADSB" Elevation="34" MaxRange="5">
     <Lat>+59.5204</Lat>
     <Long>-001.1623</Long>
   </Radar>
