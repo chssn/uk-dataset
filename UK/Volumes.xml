@@ -1,20 +1,21 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <Volumes>
-  <Boundary Name="London_FIR">
-    +55.0000+005.0000/
-    +51.3000+002.0000/
-    +51.0700+002.0000/
-    +51.0000+001.2800/
-    +50.4000+001.2800/
-    +50.0000-000.1500/
-    +50.0000-002.0000/
-    +48.5000-008.0000/
-    +51.0000-008.0000/
-    +52.2000-005.3000/
-    +55.0000-005.3000/
-    +55.0000+005.0000
-  </Boundary>
+  <Boundary Name="London_FIR">+550000.00+0050000.00/+513000.00+0020000.00/+510700.00+0020000.00/+510000.00+0012800.00/+504000.00+0012800.00/+500000.00-0001500.00/+500000.00-0020000.00/+485000.00-0080000.00/+510000.00-0080000.00/+522000.00-0053000.00/+550000.00-0053000.00/+550000.00+0050000.00</Boundary>
+  <Boundary Name="Scottish_FIR">+610000.00+0000000.00/+600000.00+0000000.00/+570000.00+0050000.00/+550000.00+0050000.00/+550000.00-0053000.00/+535500.00-0053000.00/+542500.00-0081000.00/+552000.00-0065500.00/+552500.00-0072000.00/+552000.00-0081500.00/+544500.00-0090000.00/+543400.00-0100000.00/+610000.00-0100000.00/+610000.00+0000000.00</Boundary>
+  <Boundary Name="Shanwick_FIR">+610000.00-0300000.00/+610000.00-0100000.00/+543400.00-0100000.00/+540000.00-0150000.00/+510000.00-0150000.00/+510000.00-0080000.00/+450000.00-0080000.00/+450000.00-0300000.00/+610000.00-0300000.00</Boundary>
   <Volume Name="London FIR" LowerLimit="19500" UpperLimit="24500">
     <Boundaries>London_FIR</Boundaries>
+  </Volume>
+  <Volume Name="London UIR" LowerLimit="24500" UpperLimit="66000">
+    <Boundaries>London_FIR</Boundaries>
+  </Volume>
+  <Volume Name="Scottish FIR" LowerLimit="19500" UpperLimit="24500">
+    <Boundaries>Scottish_FIR</Boundaries>
+  </Volume>
+  <Volume Name="Scottish UIR" LowerLimit="24500" UpperLimit="66000">
+    <Boundaries>Scottish_FIR</Boundaries>
+  </Volume>
+  <Volume Name="Shanwick FIR" LowerLimit="0" UpperLimit="5500">
+    <Boundaries>Shanwick_FIR</Boundaries>
   </Volume>
 </Volumes>
