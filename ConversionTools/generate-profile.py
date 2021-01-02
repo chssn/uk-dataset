@@ -774,54 +774,6 @@ class WebScrape():
             Airac.enr44(listENR44)
             bar() # progress the progress bar
 
-        # IDEA: This is currently scraping the *.ese file from VATSIM-UK. Need to find a better way of doing this. Too much hard code here and it's lazy!
-            ese = open("UK.ese", "r")
-            for line in ese:
-                # Pull out all SIDs
-                if line.startswith("SID"):
-                    element = line.split(":")
-                    aerodrome = str(element[1])
-                    runway = str(element[2])
-                    sid = str(element[3])
-                    routeComment = str(element[4])
-                    routeSplit = routeComment.split(";")
-                    route = routeSplit[0]
-
-                    if not sid.startswith('#'): # try and exclude any commented out sections from the ese file
-                        sql = "SELECT aerodrome_runways.id FROM aerodromes INNER JOIN aerodrome_runways ON aerodromes.id = aerodrome_runways.aerodrome_id WHERE aerodromes.icao_designator = '"+ aerodrome +"' AND aerodrome_runways.runway = '"+ runway +"' LIMIT 1"
-                        rwyId = mysqlExec(sql, "selectOne")
-
-                        try:
-                            sql = "INSERT INTO aerodrome_runways_sid (runway_id, sid, route) SELECT * FROM (SELECT '"+ str(rwyId[0]) +"' AS selRwyId, '"+ sid +"' AS selSid, '"+ route +"' AS selRoute) AS tmp WHERE NOT EXISTS (SELECT runway_id FROM aerodrome_runways_sid WHERE runway_id =  "+ str(rwyId[0]) +" AND sid = '"+ sid +"' AND route = '"+ route +"') LIMIT 1"
-                            mysqlExec(sql, "insertUpdate")
-                        except:
-                            print(Fore.RED + "Aerodrome ICAO " + aerodrome + " not recognised" + Style.RESET_ALL)
-                            print(line)
-
-                    bar() # progress the progress bar
-
-                elif line.startswith("STAR"):
-                    element = line.split(":")
-                    aerodrome = str(element[1])
-                    runway = str(element[2])
-                    star = str(element[3])
-                    routeComment = str(element[4])
-                    routeSplit = routeComment.split(";")
-                    route = routeSplit[0]
-
-                    if not star.startswith('#'): # try and exclude any commented out sections from the ese file
-                        sql = "SELECT aerodrome_runways.id FROM aerodromes INNER JOIN aerodrome_runways ON aerodromes.id = aerodrome_runways.aerodrome_id WHERE aerodromes.icao_designator = '"+ aerodrome +"' AND aerodrome_runways.runway = '"+ runway +"' LIMIT 1"
-                        rwyId = mysqlExec(sql, "selectOne")
-
-                        try:
-                            sql = "INSERT INTO aerodrome_runways_star (runway_id, star, route) SELECT * FROM (SELECT '"+ str(rwyId[0]) +"' AS selRwyId, '"+ star +"' AS selSid, '"+ route +"' AS selRoute) AS tmp WHERE NOT EXISTS (SELECT runway_id FROM aerodrome_runways_star WHERE runway_id =  "+ str(rwyId[0]) +" AND star = '"+ star +"' AND route = '"+ route +"') LIMIT 1"
-                            mysqlExec(sql, "insertUpdate")
-                        except:
-                            print(Fore.RED + "Aerodrome ICAO " + aerodrome + " not recognised" + Style.RESET_ALL)
-                            print(line)
-
-                    bar() # progress the progress bar
-
     def firUirTmaCtaData():
         def getBoundary(space): # creates a boundary useable in vatSys from AIRAC data
             lat = 1
@@ -954,6 +906,69 @@ class WebScrape():
                 sql = "INSERT INTO airways (name, route) VALUES ('"+ str(getAirwayName[0]) +"', '"+ str(printRoute).rstrip('/') +"')"
                 mysqlExec(sql, "insertUpdate")
 
+class EuroScope:
+    def parse(file):
+        file = open(file, "r")
+        output = ""
+        for f in file:
+            coord = re.search(r"(N|S)([\d]{3})\.([\d]{2})\.([\d]{2})(\.[\d]{3})\s(E|W)([\d]{3})\.([\d]{2})\.([\d]{2})(\.[\d]{3})", f)
+            latSign = Geo.plusMinus(coord.group(1))
+            lonSign = Geo.plusMinus(coord.group(6))
+
+            output += latSign + coord.group(2).lstrip("0") + coord.group(3) + coord.group(4)  + coord.group(5) + lonSign + coord.group(7) + coord.group(8) + coord.group(9)  + coord.group(10) + "/"
+
+        print(output.rstrip("/"))
+
+    # IDEA: This is currently scraping the *.ese file from VATSIM-UK. Need to find a better way of doing this. Too much hard code here and it's lazy!
+    def parseEse():
+        ese = open("UK.ese", "r")
+        for line in ese:
+            # Pull out all SIDs
+            if line.startswith("SID"):
+                element = line.split(":")
+                aerodrome = str(element[1])
+                runway = str(element[2])
+                sid = str(element[3])
+                routeComment = str(element[4])
+                routeSplit = routeComment.split(";")
+                route = routeSplit[0]
+
+                if not sid.startswith('#'): # try and exclude any commented out sections from the ese file
+                    sql = "SELECT aerodrome_runways.id FROM aerodromes INNER JOIN aerodrome_runways ON aerodromes.id = aerodrome_runways.aerodrome_id WHERE aerodromes.icao_designator = '"+ aerodrome +"' AND aerodrome_runways.runway = '"+ runway +"' LIMIT 1"
+                    rwyId = mysqlExec(sql, "selectOne")
+
+                    try:
+                        sql = "INSERT INTO aerodrome_runways_sid (runway_id, sid, route) SELECT * FROM (SELECT '"+ str(rwyId[0]) +"' AS selRwyId, '"+ sid +"' AS selSid, '"+ route +"' AS selRoute) AS tmp WHERE NOT EXISTS (SELECT runway_id FROM aerodrome_runways_sid WHERE runway_id =  "+ str(rwyId[0]) +" AND sid = '"+ sid +"' AND route = '"+ route +"') LIMIT 1"
+                        mysqlExec(sql, "insertUpdate")
+                    except:
+                        print(Fore.RED + "Aerodrome ICAO " + aerodrome + " not recognised" + Style.RESET_ALL)
+                        print(line)
+
+                bar() # progress the progress bar
+
+            elif line.startswith("STAR"):
+                element = line.split(":")
+                aerodrome = str(element[1])
+                runway = str(element[2])
+                star = str(element[3])
+                routeComment = str(element[4])
+                routeSplit = routeComment.split(";")
+                route = routeSplit[0]
+
+                if not star.startswith('#'): # try and exclude any commented out sections from the ese file
+                    sql = "SELECT aerodrome_runways.id FROM aerodromes INNER JOIN aerodrome_runways ON aerodromes.id = aerodrome_runways.aerodrome_id WHERE aerodromes.icao_designator = '"+ aerodrome +"' AND aerodrome_runways.runway = '"+ runway +"' LIMIT 1"
+                    rwyId = mysqlExec(sql, "selectOne")
+
+                    try:
+                        sql = "INSERT INTO aerodrome_runways_star (runway_id, star, route) SELECT * FROM (SELECT '"+ str(rwyId[0]) +"' AS selRwyId, '"+ star +"' AS selSid, '"+ route +"' AS selRoute) AS tmp WHERE NOT EXISTS (SELECT runway_id FROM aerodrome_runways_star WHERE runway_id =  "+ str(rwyId[0]) +" AND star = '"+ star +"' AND route = '"+ route +"') LIMIT 1"
+                        mysqlExec(sql, "insertUpdate")
+                    except:
+                        print(Fore.RED + "Aerodrome ICAO " + aerodrome + " not recognised" + Style.RESET_ALL)
+                        print(line)
+
+                bar() # progress the progress bar
+
+
 
 # Main Menu
 print("")
@@ -991,7 +1006,7 @@ elif menuOption == '4':
 elif menuOption == '9':
     #Profile.createFrequencies()
     #WebScrape.firUirTmaCtaData()
-    WebScrape.parseENR3("5")
+    EuroScope.parse("East.txt")
 else:
     print("Nothing to do here\n")
     cmdParse.print_help()
