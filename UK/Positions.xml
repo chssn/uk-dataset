@@ -3,11 +3,6 @@
   <Position Name="LON_CTR" Type="ASD" DefaultCenter="+52.8311111-001.3280556" DefaultRange="600">
     <Sectors>
       <Sector Name="LON_CTR" />
-      <Sector Name="LON_SC_CTR" />
-      <Sector Name="LON_S_CTR" />
-      <Sector Name="LTC_CTR" />
-      <Sector Name="LTC_S_CTR" />
-      <Sector Name="LTC_SW_CTR" />
     </Sectors>
     <Maps>
       <Map Name="ALL_CTA" />
@@ -18,7 +13,6 @@
       <Map Name="ALL_ROUTES_HIGH" />
       <Map Name="ALL_POINTS_HIGH" />
       <Map Name="FIR_BDRY" />
-      <Map Name="UPPER_SECTOR_FREQS" />
     </Maps>
     <Strips Mode="State" Sort="Time">
       <Window Type="State" State="Jurisdiction" Visible="true" />
