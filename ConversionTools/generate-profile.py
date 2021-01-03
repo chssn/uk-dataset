@@ -5,6 +5,7 @@ import math
 import re
 import os
 import xml.etree.ElementTree as xtree
+import pandas as pd
 import urllib3
 import mysql.connector
 import mysqlconnect # mysql connection details
@@ -376,6 +377,7 @@ class Profile():
         sql = "SELECT * FROM aerodromes WHERE verified = '1' ORDER BY icao_designator"
         listAerodromes = mysqlExec(sql, "selectMany")
         for aerodrome in listAerodromes:
+            mapPoint = set() # create a set to store all SID/STAR waypoints for this aerodrome
             # Set airport name
             xmlAerodrome = xtree.SubElement(xmlSystemRunways, 'Airport')
             xmlAerodrome.set('Name', aerodrome[1])
@@ -430,6 +432,31 @@ class Profile():
                 xmlMapsRunwayThresh.set('ExtendedCentrelineTickInterval', "1")
                 xmlMapsRunwayThreshOpp = xtree.SubElement(xmlMapsRunwayMapRwy, 'Threshold')
 
+                # add SIDs into the runway map
+                sids = Navigraph.sidStar("sids.txt", aerodrome[1], runway[2])
+
+                xmlMapsRunwaySid = Xml.constructMapHeader(xmlMapsRunway, 'System', aerodrome[1] + '_TWR_RWY' + runway[2] + "_SID", '1', aerodrome[3], 1)
+                for sid in sids['Route']:
+                    xmlMapsRunwayLine = xtree.SubElement(xmlMapsRunwaySid, 'Line')
+                    xmlMapsRunwayLine.text = sid
+
+                    sidSplit = sid.split('/')
+                    for point in sidSplit:
+                        mapPoint.add(point)
+
+                # add STARs into the runway map
+                stars = Navigraph.sidStar("stars.txt", aerodrome[1], runway[2])
+
+                xmlMapsRunwayStar = Xml.constructMapHeader(xmlMapsRunway, 'System', aerodrome[1] + '_TWR_RWY' + runway[2] + "_STAR", '1', aerodrome[3], 1)
+                for star in stars['Route']:
+                    xmlMapsRunwayLine = xtree.SubElement(xmlMapsRunwayStar, 'Line')
+                    xmlMapsRunwayLine.set('Pattern', 'Dotted')
+                    xmlMapsRunwayLine.text = star
+
+                    starSplit = star.split('/')
+                    for point in starSplit:
+                        mapPoint.add(point)
+
                 sqlOpp = "SELECT * FROM aerodrome_runways WHERE aerodrome_id = '"+ str(aerodrome[0]) +"' AND runway = '"+ str(oppEnd) +"'"
                 oppRunway = mysqlExec(sqlOpp, "selectOne")
                 if oppRunway:
@@ -440,6 +467,16 @@ class Profile():
                     xmlMapsRunwayThreshOpp.set('Name', str(oppEnd))
                     xmlMapsRunwayThreshOpp.set('Position', str(oppRunway[3]))
 
+                    # create map points and titles
+                    xmlMapsRunwayPointsLabels = Xml.constructMapHeader(xmlMapsRunway, 'System', aerodrome[1] + '_TWR_RWY' + runway[2] + '_NAMES', '2', aerodrome[3], 1)
+                    xmlMapsRunwayPointsLabelsL = xtree.SubElement(xmlMapsRunwayPointsLabels, 'Label')
+                    xmlMapsRunwayPoints = xtree.SubElement(xmlMapsRunwayMap, 'Symbol')
+                    xmlMapsRunwayPoints.set('Type', 'HollowStar')
+                    for point in mapPoint:
+                        xmlMapsRunwayPointsPoint = xtree.SubElement(xmlMapsRunwayPoints, 'Point')
+                        xmlMapsRunwayPointsPoint.text = point
+                        xmlMapsRunwayPointsLP = xtree.SubElement(xmlMapsRunwayPointsLabelsL, 'Point')
+                        xmlMapsRunwayPointsLP.text = point
                     # create folder structure if not exists
                     filename = 'Build/Maps/' + aerodrome[1] + '/' + aerodrome[1] + '_TWR_RWY' + runway[2] + '.xml'
                     os.makedirs(os.path.dirname(filename), exist_ok=True)
@@ -452,7 +489,7 @@ class Profile():
                 xmlAirportRunway = xtree.SubElement(xmlAirport, 'Runway')
                 xmlAirportRunway.set('Name', runway[2])
                 xmlAirportRunway.set('Position', runway[3])
-                print("-- Constructing XML for runway " + runway[2])
+                #print("-- Constructing XML for runway " + runway[2])
 
                 # Now the SIDs for that runway
                 sqlB = "SELECT * FROM aerodrome_runways_sid WHERE runway_id = '"+ str(runway[0]) +"' AND buildcheck != '"+ str(checkID) +"' ORDER BY sid"
@@ -461,7 +498,7 @@ class Profile():
                     for sid in listSids:
                         xmlSid = xtree.SubElement(xmlRunway, 'SID')
                         xmlSid.set('Name', sid[2])
-                        print("---- Constructing XML for SID " + sid[2])
+                        #print("---- Constructing XML for SID " + sid[2])
 
                         # Build in the extra bits for the SIDSTARs section - https://virtualairtrafficsystem.com/docs/dpk/#sidstars
                         # Check to see if multiple runways are using the same SID
@@ -475,7 +512,7 @@ class Profile():
                             xmlRoute.set('Runway', str(rS[0]))
                             xmlRoute.text = sid[3]
                             runwaySelect += str(rS[0])
-                            print("------ Constructing XML for SID " + sid[2] + " on runway " + str(rS[0]))
+                            #print("------ Constructing XML for SID " + sid[2] + " on runway " + str(rS[0]))
 
                             # update the database SID entry with the checkID
                             sqlU = "UPDATE aerodrome_runways_sid SET buildcheck = '"+ str(checkID) +"' WHERE runway_id = '"+ str(runway[0]) +"' AND sid = '"+ str(sid[2]) +"'"
@@ -499,7 +536,7 @@ class Profile():
                     for star in listStars:
                         xmlStar = xtree.SubElement(xmlRunway, 'STAR')
                         xmlStar.set('Name', star[2])
-                        print("---- Constructing XML for STAR " + star[2])
+                        #print("---- Constructing XML for STAR " + star[2])
 
                         # Build in the extra bits for the SIDSTARs section - https://virtualairtrafficsystem.com/docs/dpk/#sidstars
                         xmlSidStarStar = xtree.SubElement(xmlSidStar, 'STAR')
@@ -923,52 +960,70 @@ class EuroScope:
     def parseEse():
         ese = open("UK.ese", "r")
         for line in ese:
-            # Pull out all SIDs
-            if line.startswith("SID"):
-                element = line.split(":")
-                aerodrome = str(element[1])
-                runway = str(element[2])
-                sid = str(element[3])
-                routeComment = str(element[4])
-                routeSplit = routeComment.split(";")
-                route = routeSplit[0]
+            # Pull out all SID and STAR
+            sidStar = re.search(r'(SID|STAR):([A-Z]{4}):([\d]{2}):([\dA-Z]{3,7}):([\dA-Z\s]{2,})\n', line)
+            if sidStar:
+                type = sidStar.group(1)
+                aerodrome = sidStar.group(2)
+                runway = sidStar.group(3)
+                name = sidStar.group(4)
+                route = sidStar.group(5)
 
-                if not sid.startswith('#'): # try and exclude any commented out sections from the ese file
-                    sql = "SELECT aerodrome_runways.id FROM aerodromes INNER JOIN aerodrome_runways ON aerodromes.id = aerodrome_runways.aerodrome_id WHERE aerodromes.icao_designator = '"+ aerodrome +"' AND aerodrome_runways.runway = '"+ runway +"' LIMIT 1"
-                    rwyId = mysqlExec(sql, "selectOne")
+                sql = "SELECT aerodrome_runways.id FROM aerodromes INNER JOIN aerodrome_runways ON aerodromes.id = aerodrome_runways.aerodrome_id WHERE aerodromes.icao_designator = '"+ aerodrome +"' AND aerodrome_runways.runway = '"+ runway +"' LIMIT 1"
+                rwyId = mysqlExec(sql, "selectOne")
 
-                    try:
-                        sql = "INSERT INTO aerodrome_runways_sid (runway_id, sid, route) SELECT * FROM (SELECT '"+ str(rwyId[0]) +"' AS selRwyId, '"+ sid +"' AS selSid, '"+ route +"' AS selRoute) AS tmp WHERE NOT EXISTS (SELECT runway_id FROM aerodrome_runways_sid WHERE runway_id =  "+ str(rwyId[0]) +" AND sid = '"+ sid +"' AND route = '"+ route +"') LIMIT 1"
-                        mysqlExec(sql, "insertUpdate")
-                    except:
-                        print(Fore.RED + "Aerodrome ICAO " + aerodrome + " not recognised" + Style.RESET_ALL)
-                        print(line)
+                def sqlSidStar(search):
+                    table = search.lower()
+                    if str(type) == search:
+                        try:
+                            sql = "INSERT INTO aerodrome_runways_"+ table +" (runway_id, "+ table +", route) SELECT * FROM (SELECT '"+ str(rwyId[0]) +"' AS selRwyId, '"+ name +"' AS selSid, '"+ route +"' AS selRoute) AS tmp WHERE NOT EXISTS (SELECT runway_id FROM aerodrome_runways_"+ table +" WHERE runway_id =  "+ str(rwyId[0]) +" AND "+ table +" = '"+ name +"' AND route = '"+ route +"') LIMIT 1"
+                            mysqlExec(sql, "insertUpdate")
+                        except:
+                            print(Fore.RED + "Aerodrome ICAO " + aerodrome + " not recognised" + Style.RESET_ALL)
+                            print(line)
 
-                bar() # progress the progress bar
+                sqlSidStar("SID")
+                sqlSidStar("STAR")
 
-            elif line.startswith("STAR"):
-                element = line.split(":")
-                aerodrome = str(element[1])
-                runway = str(element[2])
-                star = str(element[3])
-                routeComment = str(element[4])
-                routeSplit = routeComment.split(";")
-                route = routeSplit[0]
+class Navigraph:
+    def sidStar(file, icaoIn, rwyIn):
+        dfColumns=['ICAO','Runway','Name','Route']
+        df = pd.DataFrame(columns=dfColumns)
+        #print(df.to_string())
+        with open(file, 'r') as text:
+            content = text.read() # read everything
+            aerodromeData = re.split(r'\[', content) # split by [
+            for data in aerodromeData:
+                aerodromeIcao = re.search(r'([A-Z]{4})(\]\n)', data) # get the ICAO aerodrome designator
+                if aerodromeIcao:
+                    icao = aerodromeIcao.group(1)
+                    if icao == icaoIn:
+                        lineSearch = re.findall(r'(T[\s]+)([A-Z\d]{5,})([\s]+[A-Z\d]{5,}[\s]+)([\d]{2}[L|R|C]?)(\,.*)?\n', data)
 
-                if not star.startswith('#'): # try and exclude any commented out sections from the ese file
-                    sql = "SELECT aerodrome_runways.id FROM aerodromes INNER JOIN aerodrome_runways ON aerodromes.id = aerodrome_runways.aerodrome_id WHERE aerodromes.icao_designator = '"+ aerodrome +"' AND aerodrome_runways.runway = '"+ runway +"' LIMIT 1"
-                    rwyId = mysqlExec(sql, "selectOne")
+                        if lineSearch:
+                            for line in lineSearch:
+                                srdName = line[1]
+                                srdRunway = line[3]
 
-                    try:
-                        sql = "INSERT INTO aerodrome_runways_star (runway_id, star, route) SELECT * FROM (SELECT '"+ str(rwyId[0]) +"' AS selRwyId, '"+ star +"' AS selSid, '"+ route +"' AS selRoute) AS tmp WHERE NOT EXISTS (SELECT runway_id FROM aerodrome_runways_star WHERE runway_id =  "+ str(rwyId[0]) +" AND star = '"+ star +"' AND route = '"+ route +"') LIMIT 1"
-                        mysqlExec(sql, "insertUpdate")
-                    except:
-                        print(Fore.RED + "Aerodrome ICAO " + aerodrome + " not recognised" + Style.RESET_ALL)
-                        print(line)
+                                # for each SID, get the route
+                                routeSearch = re.findall(rf'^({line[1]})\s+([\dA-Z]{{3,5}})', data, re.M)
 
-                bar() # progress the progress bar
+                                if routeSearch:
+                                    concatRoute = ''
+                                    for route in routeSearch:
+                                        concatRoute += route[1] + "/"
+                                        routeName = route[0]
 
+                                    if line[4]:
+                                        starRunways = line[4].split(',')
+                                        for rwy in starRunways:
+                                            dfOut = {'ICAO': icao, 'Runway': rwy, 'Name': routeName, 'Route': concatRoute.rstrip('/')}
+                                            df = df.append(dfOut, ignore_index=True)
 
+                                    dfOut = {'ICAO': icao, 'Runway': srdRunway, 'Name': routeName, 'Route': concatRoute.rstrip('/')}
+                                    df = df.append(dfOut, ignore_index=True)
+
+            return df[(df.Runway == rwyIn)]
 
 # Main Menu
 print("")
@@ -980,6 +1035,7 @@ print("(1) - Perform a webscrape to obtain current AIRAC data.")
 print("(2) - Build XML files from the existing database.")
 print("(3) - Truncate the existing database.")
 print("(4) - Convert a Google Earth KML file - run with -g option to pass KML filename.")
+print("(5) - Convert EuroScope files.")
 print("")
 menuOption = input("Please select an option: ")
 
@@ -1003,10 +1059,16 @@ elif menuOption == '3':
     Profile.clearDatabase()
 elif menuOption == '4':
     Geo.kmlMappingConvert(args.geo)
+elif menuOption == '5':
+    EuroScope.parseEse()
 elif menuOption == '9':
     #Profile.createFrequencies()
     #WebScrape.firUirTmaCtaData()
-    EuroScope.parse("East.txt")
+    sids = Navigraph.sidStar("stars.txt", "EGKK", "08R")
+    print(sids.head)
+
+    for s in sids['Route']:
+        print(s)
 else:
     print("Nothing to do here\n")
     cmdParse.print_help()
