@@ -35,17 +35,6 @@ args = cmdParse.parse_args()
 
 class Airac():
     def getUrl():
-        def getCurrentCycle(): # try and work out the current AIRAC cycle
-            address = "https://www.nm.eurocontrol.int/RAD/common/airac_dates.html"
-
-            http = urllib3.PoolManager()
-            error = http.request("GET", address)
-            if (error.status == 404):
-                return 404
-
-            page = requests.get(address)
-            return BeautifulSoup(page.content, "lxml")
-
         # Base NATS URL
         #cycle = "" # BUG: need something to calculate current cycle and autofill the base URL
         baseUrl = "https://www.aurora.nats.co.uk/htmlAIP/Publications/"
@@ -203,85 +192,6 @@ class Geo():
 
         allGround = xtree.ElementTree(xmlGround)
         allGround.write('Build/Maps/'+ aerodromeIcao + '_SMR.xml', encoding="utf-8", xml_declaration=True)
-
-    def add_distance(lat, lon, bearing, distance):
-        def dms2dec(dms_str, lat): # convert AIRAC ddmmss.ss or dddmmss.ss into decimal degrees
-            if lat:
-                split = re.match(r'([+|-]?)([0-9]{2})([0-9]{2})(.*)', str(dms_str))
-            else:
-                split = re.match(r'([+|-]?)([0-9]{3})([0-9]{2})(.*)', str(dms_str))
-
-            dms_str = re.sub(r'\s', '', dms_str)
-
-            sign = -1 if split.group(1) == "-" else 1
-
-            degree = split.group(2)
-            minute = split.group(3)
-            second = split.group(4)
-
-            return sign * (int(degree) + float(minute) / 60 + float(second) / 3600)
-
-        def dec2dms(dms_str, lat): # convert AIRAC ddmmss.ss or dddmmss.ss into decimal degrees
-            split = str(dms_str).split('.')
-
-            if float(dms_str) < 0:
-                split[0] = split[0] * -1
-                sign = "-"
-            else:
-                sign = "+"
-
-            if lat:
-                degree = split[0].zfill(2)
-            else:
-                degree = split[0].zfill(3)
-
-            minuteA = "0." + str(split[1])
-            minuteB = float(minuteA) * 60
-            minuteC = round(minuteB, 0)
-            minuteD = str(minuteC).split('.')
-
-            secondA = str(minuteB).split('.')
-            secondB = "0." + str(secondA[1])
-            secondC = float(secondB) * 60
-            secondD = round(secondC, 2)
-
-            decSecA = str(secondD).split('.')
-
-            return sign + str(degree) + str(minuteD[0]).zfill(2) + str(decSecA[0]).zfill(2) + '.' + decSecA[1]
-
-        EARTH_RADIUS = 6378137
-        # convert Latitude and Longitude
-        # into radians for calculation
-        latitude = math.radians(dms2dec(lat, 1))
-        longitute = math.radians(dms2dec(lon, 0))
-
-        # calculate next latitude
-        next_latitude = math.asin(math.sin(latitude) *
-                        math.cos(distance/EARTH_RADIUS) +
-                        math.cos(latitude) *
-                        math.sin(distance/EARTH_RADIUS) *
-                        math.cos(math.radians(bearing)))
-
-        # calculate next longitude
-        next_longitude = longitute + (math.atan2(math.sin(math.radians(bearing)) *
-                                                 math.sin(distance/EARTH_RADIUS) *
-                                                 math.cos(latitude),
-                                                 math.cos(distance/EARTH_RADIUS) -
-                                                 math.sin(latitude) *
-                                                 math.sin(next_latitude)
-                                                )
-                                     )
-
-        # convert points into decimal degrees
-        new_lat = math.degrees(next_latitude)
-        new_lon = math.degrees(next_longitude)
-
-        # convert decimal degrees into degrees, minutes and seconds
-        dms_lat = dec2dms(new_lat, 1)
-        dms_lon = dec2dms(new_lon, 0)
-
-        # print new latitude and longitude
-        return dms_lat + dms_lon
 
     def backBearing(brg):
         if (float(brg) - 180) < 0:
