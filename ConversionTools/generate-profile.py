@@ -331,7 +331,7 @@ class Profile():
                 xmlMapsRunwayThreshOpp = xtree.SubElement(xmlMapsRunwayMapRwy, 'Threshold')
 
                 # add SIDs into the runway map
-                sids = Navigraph.sidStar("sids.txt", aerodrome[1], runway[2])
+                sids = Navigraph.sidStar("Navigraph/sids.txt", aerodrome[1], runway[2])
 
                 xmlMapsRunwaySid = Xml.constructMapHeader(xmlMapsRunway, 'System', aerodrome[1] + '_TWR_RWY' + runway[2] + "_SID", '1', aerodrome[3])
                 for sid in sids['Route']:
@@ -357,7 +357,7 @@ class Profile():
                     xmlRoute.text = slashToSpace
 
                 # add STARs into the runway map
-                stars = Navigraph.sidStar("stars.txt", aerodrome[1], runway[2])
+                stars = Navigraph.sidStar("Navigraph/stars.txt", aerodrome[1], runway[2])
 
                 xmlMapsRunwayStar = Xml.constructMapHeader(xmlMapsRunway, 'System', aerodrome[1] + '_TWR_RWY' + runway[2] + "_STAR", '1', aerodrome[3])
                 for star in stars['Route']:
