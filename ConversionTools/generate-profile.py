@@ -9,6 +9,7 @@ import pandas as pd
 import urllib3
 import mysql.connector
 import mysqlconnect # mysql connection details
+import xmlschema
 from defusedxml import defuse_stdlib
 from datetime import datetime
 from bs4 import BeautifulSoup
@@ -212,13 +213,9 @@ class Xml():
 
         return xml
 
-    def constructMapHeader(root, mapType, name, priority, center, sub=0): # ref https://virtualairtrafficsystem.com/docs/dpk/#map-element
+    def constructMapHeader(rootName, mapType, name, priority, center): # ref https://virtualairtrafficsystem.com/docs/dpk/#map-element
         # creates the neccessary header for XML documents in the \Maps folder
-        if not sub:
-            mainHeader = xtree.SubElement(root, 'Maps')
-            mapHeader = xtree.SubElement(mainHeader, 'Map')
-        elif sub:
-            mapHeader = xtree.SubElement(root, 'Map')
+        mapHeader = xtree.SubElement(rootName, 'Map')
 
         mapHeader.set('Type', mapType) # The type primarily will affect the colour vatSys uses to paint the map. Colours are defined in Colours.xml.
         mapHeader.set('Name', name) # The title of the Map (as displayed to the user).
@@ -228,52 +225,18 @@ class Xml():
 
         return mapHeader
 
-def mysqlExec(sql, sqlType):
-    try:
-        if sqlType == "insertUpdate":
-            cursor.execute(sql)
-            mysqlconnect.db.commit()
-        elif sqlType == "selectOne":
-            cursor.execute(sql)
-            return cursor.fetchone()
-        elif sqlType == "selectMany":
-            cursor.execute(sql)
-            return cursor.fetchall()
-    except mysql.connector.Error as err:
-        print(err)
+    def elementPoint(sub, text):
+        point = xtree.SubElement(sub, 'Point')
+        point.text = text
+        return point
 
 class Profile():
     def constructXml():    # Define XML top level tag
+        mapCenter = "+53.7-1.5"
         now = datetime.now()
         checkID = datetime.timestamp(now) # generate unix timestamp to help verify if a row has already been added
 
         xmlAirspace = Xml.root('Airspace') # create XML document Airspace.xml
-
-        xmlAllAirports = Xml.root('AllAirports') # create XML document Maps\ALL_AIRPORTS
-        xmlAllAirportsMap = Xml.constructMapHeader(xmlAllAirports, 'System2', 'ALL_AIRPORTS', '2', '+53.7-1.5')
-        xmlAllAirportsLabel = xtree.SubElement(xmlAllAirportsMap, 'Label')
-        xmlAllAirportsLabel.set('HasLeader', 'true') # has a line connecting the point and label
-        xmlAllAirportsLabel.set('LabelOrientation', 'NW') # where the label will be positioned in relation to the point
-        xmlAllAirportsSymbol = xtree.SubElement(xmlAllAirportsMap, 'Symbol')
-        xmlAllAirportsSymbol.set('Type', 'Reticle') # https://virtualairtrafficsystem.com/docs/dpk/#symbol-element
-
-        xmlAllNavaids = Xml.root('AllNavaids') # create XML document Maps\ALL_NAVAIDS
-
-        xmlAllNavaidsMap = Xml.constructMapHeader(xmlAllNavaids, 'System', 'ALL_NAVAIDS_NAMES', '0', '+53.7-1.5')
-        xmlAllNavaidsLabel = xtree.SubElement(xmlAllNavaidsMap, 'Label')
-        xmlAllNavaidsLabel.set('HasLeader', 'true') # has a line connecting the point and label
-        xmlAllNavaidsMapSym = Xml.constructMapHeader(xmlAllNavaids, 'System', 'ALL_NAVAIDS', '0', '+53.7-1.5')
-        xmlAllNavaidsSymbol = xtree.SubElement(xmlAllNavaidsMapSym, 'Symbol')
-        xmlAllNavaidsSymbol.set('Type', 'Hexagon') # https://virtualairtrafficsystem.com/docs/dpk/#symbol-element
-        xmlAllNavaidsSymbolH = xtree.SubElement(xmlAllNavaidsMapSym, 'Symbol')
-        xmlAllNavaidsSymbolH.set('Type', 'DotFillCircle') # https://virtualairtrafficsystem.com/docs/dpk/#symbol-element
-
-        xmlAllCta = Xml.root('AllCta') # create XML document Maps\ALL_CTA
-        xmlAllCtaMap = Xml.constructMapHeader(xmlAllCta, 'System', 'ALL_CTA', '2', 0)
-
-        xmlAllTma = Xml.root('AllCta') # create XML document Maps\ALL_TMA
-        xmlAllTmaMap = Xml.constructMapHeader(xmlAllTma, 'System', 'ALL_TMA', '2', 0)
-
         # Define subtag SystemRunways, SidStar, Intersections, Airports and Airways - https://virtualairtrafficsystem.com/docs/dpk/#systemrunways
         xmlSystemRunways = xtree.SubElement(xmlAirspace, 'SystemRunways')
         xmlSidStar = xtree.SubElement(xmlAirspace, 'SIDSTARs')
@@ -281,27 +244,52 @@ class Profile():
         xmlAirports = xtree.SubElement(xmlAirspace, 'Airports')
         xmlAirways = xtree.SubElement(xmlAirspace, 'Airways')
 
+        # create XML document Maps\ALL_AIRPORTS
+        xmlAllAirports = Xml.root('Maps')
+        xmlAllAirportsMap = Xml.constructMapHeader(xmlAllAirports, 'System2', 'ALL_AIRPORTS', '2', mapCenter)
+        xmlAllAirportsLabel = xtree.SubElement(xmlAllAirportsMap, 'Label')
+        xmlAllAirportsLabel.set('HasLeader', 'true') # has a line connecting the point and label
+        xmlAllAirportsLabel.set('LabelOrientation', 'NW') # where the label will be positioned in relation to the point
+        xmlAllAirportsSymbol = xtree.SubElement(xmlAllAirportsMap, 'Symbol')
+        xmlAllAirportsSymbol.set('Type', 'Reticle') # https://virtualairtrafficsystem.com/docs/dpk/#symbol-element
+
+        # create XML document Maps\ALL_NAVAIDS
+        xmlAllNavaids = Xml.root('Maps')
+        xmlAllNavaidsMap = Xml.constructMapHeader(xmlAllNavaids, 'System', 'ALL_NAVAIDS_NAMES', '0', mapCenter)
+        xmlAllNavaidsLabel = xtree.SubElement(xmlAllNavaidsMap, 'Label')
+        xmlAllNavaidsLabel.set('HasLeader', 'true') # has a line connecting the point and label
+        xmlAllNavaidsMapSym = Xml.constructMapHeader(xmlAllNavaidsMap, 'System', 'ALL_NAVAIDS', '0', mapCenter)
+        xmlAllNavaidsSymbol = xtree.SubElement(xmlAllNavaidsMapSym, 'Symbol')
+        xmlAllNavaidsSymbol.set('Type', 'Hexagon') # https://virtualairtrafficsystem.com/docs/dpk/#symbol-element
+        xmlAllNavaidsSymbolH = xtree.SubElement(xmlAllNavaidsMapSym, 'Symbol')
+        xmlAllNavaidsSymbolH.set('Type', 'DotFillCircle') # https://virtualairtrafficsystem.com/docs/dpk/#symbol-element
+
+        # create XML document Maps\ALL_CTA
+        xmlAllCta = Xml.root('Maps')
+        xmlAllCtaMap = Xml.constructMapHeader(xmlAllCta, 'System', 'ALL_CTA', '2', mapCenter)
+
+        # create XML document Maps\ALL_TMA
+        xmlAllTma = Xml.root('Maps')
+        xmlAllTmaMap = Xml.constructMapHeader(xmlAllTma, 'System', 'ALL_TMA', '2', mapCenter)
+
         # Construct the XML element as per https://virtualairtrafficsystem.com/docs/dpk/#systemrunways
         # List all the verified aerodromes
-        #sql = "SELECT * FROM aerodromes WHERE verified = '1' AND icao_designator = 'EGKK'"
         sql = "SELECT * FROM aerodromes WHERE verified = '1' ORDER BY icao_designator"
         listAerodromes = mysqlExec(sql, "selectMany")
         for aerodrome in listAerodromes:
             mapPoint = set() # create a set to store all SID/STAR waypoints for this aerodrome
             # Set airport name
+            print(Fore.BLUE + "Constructing XML for " + aerodrome[1] + " ("+ str(aerodrome[0]) +")" + Style.RESET_ALL)
             xmlAerodrome = xtree.SubElement(xmlSystemRunways, 'Airport')
             xmlAerodrome.set('Name', aerodrome[1])
-            print(Fore.BLUE + "Constructing XML for " + aerodrome[1] + " ("+ str(aerodrome[0]) +")" + Style.RESET_ALL)
             xmlAirport = xtree.SubElement(xmlAirports, 'Airport')
             xmlAirport.set('ICAO', aerodrome[1])
             xmlAirport.set('Position', aerodrome[3])
             xmlAirport.set('Elevation', str(aerodrome[4]))
 
             # Set points in Maps\ALL_AIRPORTS.xml
-            xmlAllAirportsLabelPoint = xtree.SubElement(xmlAllAirportsLabel, 'Point')
-            xmlAllAirportsLabelPoint.text = aerodrome[1]
-            xmlAllAirportsSymbolPoint = xtree.SubElement(xmlAllAirportsSymbol, 'Point')
-            xmlAllAirportsSymbolPoint.text = aerodrome[1]
+            Xml.elementPoint(xmlAllAirportsLabel, aerodrome[1])
+            Xml.elementPoint(xmlAllAirportsSymbol, aerodrome[1])
 
             # Now for the runways that form part of the aerodrome
             sqlA = "SELECT * FROM aerodrome_runways WHERE aerodrome_id = '"+ str(aerodrome[0]) +"' ORDER BY runway"
@@ -330,7 +318,7 @@ class Profile():
                     oppEnd = str(oppEnd).zfill(2)
 
                 xmlMapsRunway = Xml.root('Maps')
-                xmlMapsRunwayMap = Xml.constructMapHeader(xmlMapsRunway, 'System', aerodrome[1] + '_TWR_RWY' + runway[2], '1', aerodrome[3], 1)
+                xmlMapsRunwayMap = Xml.constructMapHeader(xmlMapsRunway, 'System', aerodrome[1] + '_TWR_RWY' + runway[2], '1', aerodrome[3])
                 xmlMapsRunwayMapRwy = xtree.SubElement(xmlMapsRunwayMap, 'Runway')
                 xmlMapsRunwayMapRwy.set('Name', runway[2])
                 xmlMapsRunwayThresh = xtree.SubElement(xmlMapsRunwayMapRwy, 'Threshold')
@@ -345,7 +333,7 @@ class Profile():
                 # add SIDs into the runway map
                 sids = Navigraph.sidStar("sids.txt", aerodrome[1], runway[2])
 
-                xmlMapsRunwaySid = Xml.constructMapHeader(xmlMapsRunway, 'System', aerodrome[1] + '_TWR_RWY' + runway[2] + "_SID", '1', aerodrome[3], 1)
+                xmlMapsRunwaySid = Xml.constructMapHeader(xmlMapsRunway, 'System', aerodrome[1] + '_TWR_RWY' + runway[2] + "_SID", '1', aerodrome[3])
                 for sid in sids['Route']:
                     xmlMapsRunwayLine = xtree.SubElement(xmlMapsRunwaySid, 'Line')
                     xmlMapsRunwayLine.text = sid
@@ -354,10 +342,24 @@ class Profile():
                     for point in sidSplit:
                         mapPoint.add(point)
 
+                for i in sids.index:
+                    xmlSid = xtree.SubElement(xmlRunway, 'SID')
+                    xmlSid.set('Name', sids['Name'][i])
+
+                    xmlSidStarSid = xtree.SubElement(xmlSidStar, 'SID')
+                    xmlSidStarSid.set('Name', sids['Name'][i])
+                    xmlSidStarSid.set('Airport', sids['ICAO'][i])
+                    xmlSidStarSid.set('Runways', sids['Runway'][i])
+
+                    xmlRoute = xtree.SubElement(xmlSidStarSid, 'Route')
+                    xmlRoute.set('Runway', sids['Runway'][i])
+                    slashToSpace = sids['Route'][i].replace('/', ' ')
+                    xmlRoute.text = slashToSpace
+
                 # add STARs into the runway map
                 stars = Navigraph.sidStar("stars.txt", aerodrome[1], runway[2])
 
-                xmlMapsRunwayStar = Xml.constructMapHeader(xmlMapsRunway, 'System', aerodrome[1] + '_TWR_RWY' + runway[2] + "_STAR", '1', aerodrome[3], 1)
+                xmlMapsRunwayStar = Xml.constructMapHeader(xmlMapsRunway, 'System', aerodrome[1] + '_TWR_RWY' + runway[2] + "_STAR", '1', aerodrome[3])
                 for star in stars['Route']:
                     xmlMapsRunwayLine = xtree.SubElement(xmlMapsRunwayStar, 'Line')
                     xmlMapsRunwayLine.set('Pattern', 'Dotted')
@@ -367,26 +369,35 @@ class Profile():
                     for point in starSplit:
                         mapPoint.add(point)
 
+                for i in stars.index:
+                    xmlSid = xtree.SubElement(xmlRunway, 'STAR')
+                    xmlSid.set('Name', stars['Name'][i])
+
+                    xmlSidStarStar = xtree.SubElement(xmlSidStar, 'STAR')
+                    xmlSidStarStar.set('Name', stars['Name'][i])
+                    xmlSidStarStar.set('Airport', stars['ICAO'][i])
+                    xmlSidStarStar.set('Runways', stars['Runway'][i])
+
+                    xmlRoute = xtree.SubElement(xmlSidStarStar, 'Route')
+                    xmlRoute.set('Runway', stars['Runway'][i])
+                    slashToSpace = stars['Route'][i].replace('/', ' ')
+                    xmlRoute.text = slashToSpace
+
                 sqlOpp = "SELECT * FROM aerodrome_runways WHERE aerodrome_id = '"+ str(aerodrome[0]) +"' AND runway = '"+ str(oppEnd) +"'"
                 oppRunway = mysqlExec(sqlOpp, "selectOne")
                 if oppRunway:
-                    #oppCoord = re.match(r'([+|-]{1}[\d]{6}\.[\d]{2})([+|-]{1}[\d]{7}\.[\d]{2})', runway[3])
-                    #oppLat = oppCoord.group(1)
-                    #oppLon = oppCoord.group(2)
-                    #oppPosition = Geo.add_distance(oppLat, oppLon, runway[5], runway[6])
                     xmlMapsRunwayThreshOpp.set('Name', str(oppEnd))
                     xmlMapsRunwayThreshOpp.set('Position', str(oppRunway[3]))
 
                     # create map points and titles
-                    xmlMapsRunwayPointsLabels = Xml.constructMapHeader(xmlMapsRunway, 'System', aerodrome[1] + '_TWR_RWY' + runway[2] + '_NAMES', '2', aerodrome[3], 1)
+                    xmlMapsRunwayPointsLabels = Xml.constructMapHeader(xmlMapsRunway, 'System', aerodrome[1] + '_TWR_RWY' + runway[2] + '_NAMES', '2', aerodrome[3])
                     xmlMapsRunwayPointsLabelsL = xtree.SubElement(xmlMapsRunwayPointsLabels, 'Label')
-                    xmlMapsRunwayPoints = xtree.SubElement(xmlMapsRunwayMap, 'Symbol')
+                    xmlMapsRunwayPoints = xtree.SubElement(xmlMapsRunwayPointsLabels, 'Symbol')
                     xmlMapsRunwayPoints.set('Type', 'HollowStar')
                     for point in mapPoint:
-                        xmlMapsRunwayPointsPoint = xtree.SubElement(xmlMapsRunwayPoints, 'Point')
-                        xmlMapsRunwayPointsPoint.text = point
-                        xmlMapsRunwayPointsLP = xtree.SubElement(xmlMapsRunwayPointsLabelsL, 'Point')
-                        xmlMapsRunwayPointsLP.text = point
+                        Xml.elementPoint(xmlMapsRunwayPoints, point)
+                        Xml.elementPoint(xmlMapsRunwayPointsLabelsL, point)
+
                     # create folder structure if not exists
                     filename = 'Build/Maps/' + aerodrome[1] + '/' + aerodrome[1] + '_TWR_RWY' + runway[2] + '.xml'
                     os.makedirs(os.path.dirname(filename), exist_ok=True)
@@ -399,71 +410,6 @@ class Profile():
                 xmlAirportRunway = xtree.SubElement(xmlAirport, 'Runway')
                 xmlAirportRunway.set('Name', runway[2])
                 xmlAirportRunway.set('Position', runway[3])
-                #print("-- Constructing XML for runway " + runway[2])
-
-                # Now the SIDs for that runway
-                sqlB = "SELECT * FROM aerodrome_runways_sid WHERE runway_id = '"+ str(runway[0]) +"' AND buildcheck != '"+ str(checkID) +"' ORDER BY sid"
-                try:
-                    listSids = mysqlExec(sqlB, "selectMany")
-                    for sid in listSids:
-                        xmlSid = xtree.SubElement(xmlRunway, 'SID')
-                        xmlSid.set('Name', sid[2])
-                        #print("---- Constructing XML for SID " + sid[2])
-
-                        # Build in the extra bits for the SIDSTARs section - https://virtualairtrafficsystem.com/docs/dpk/#sidstars
-                        # Check to see if multiple runways are using the same SID
-                        sqlC = "SELECT aerodrome_runways.runway, aerodrome_runways_sid.id FROM aerodrome_runways INNER JOIN aerodrome_runways_sid ON aerodrome_runways.id = aerodrome_runways_sid.runway_id WHERE aerodrome_runways_sid.sid = '"+ sid[2] +"' AND buildcheck != '"+ str(checkID) +"'"
-                        runwaySid = mysqlExec(sqlC, "selectMany")
-                        runwaySelect = ''
-                        xmlSidStarSid = xtree.SubElement(xmlSidStar, 'SID')
-
-                        for rS in runwaySid:
-                            xmlRoute = xtree.SubElement(xmlSidStarSid, 'Route')
-                            xmlRoute.set('Runway', str(rS[0]))
-                            xmlRoute.text = sid[3]
-                            runwaySelect += str(rS[0])
-                            #print("------ Constructing XML for SID " + sid[2] + " on runway " + str(rS[0]))
-
-                            # update the database SID entry with the checkID
-                            sqlU = "UPDATE aerodrome_runways_sid SET buildcheck = '"+ str(checkID) +"' WHERE runway_id = '"+ str(runway[0]) +"' AND sid = '"+ str(sid[2]) +"'"
-                            mysqlExec(sqlU, "insertUpdate")
-
-                        xmlSidStarSid.set('Name', sid[2])
-                        xmlSidStarSid.set('Airport', aerodrome[1])
-                        xmlSidStarSid.set('Runways', runwaySelect)
-
-                        #xmlTransition = xtree.SubElement(xmlSidStarSid, 'Transition')
-                        #trans = sid[3].split() # get the start of the STAR route
-                        #xmlTransition.set('Name', trans[0]) # BUG: Don't think this is the correct bit for the transition
-                        #xmlTransition.text = trans[0] # BUG: Same as line above
-                except mysql.connector.Error as err:
-                    print(err)
-
-                # Now the STARs for that runway
-                sqlD = "SELECT * FROM aerodrome_runways_star WHERE runway_id = '"+ str(runway[0]) +"' ORDER BY star"
-                try:
-                    listStars = mysqlExec(sqlD, "selectMany")
-                    for star in listStars:
-                        xmlStar = xtree.SubElement(xmlRunway, 'STAR')
-                        xmlStar.set('Name', star[2])
-                        #print("---- Constructing XML for STAR " + star[2])
-
-                        # Build in the extra bits for the SIDSTARs section - https://virtualairtrafficsystem.com/docs/dpk/#sidstars
-                        xmlSidStarStar = xtree.SubElement(xmlSidStar, 'STAR')
-                        xmlSidStarStar.set('Name', star[2])
-                        xmlSidStarStar.set('Airport', aerodrome[1])
-                        xmlSidStarStar.set('Runways', runway[2])
-
-                        #xmlTransition = xtree.SubElement(xmlSidStarStar, 'Transition')
-                        #trans = star[3].split() # get the start of the STAR route
-                        #xmlTransition.set('Name', trans[0]) # BUG: Don't think this is the correct bit for the transition
-                        #xmlTransition.text = trans[0] # BUG: Same as line above
-
-                        xmlRoute = xtree.SubElement(xmlSidStarStar, 'Route')
-                        xmlRoute.set('Runway', runway[2])
-                        xmlRoute.text = star[3]
-                except mysql.connector.Error as err:
-                    print(err)
 
         # Construct the XML element as per https://virtualairtrafficsystem.com/docs/dpk/#intersections
         # List all the verified points
@@ -935,6 +881,20 @@ class Navigraph:
 
             return df[(df.Runway == rwyIn)]
 
+def mysqlExec(sql, sqlType):
+    try:
+        if sqlType == "insertUpdate":
+            cursor.execute(sql)
+            mysqlconnect.db.commit()
+        elif sqlType == "selectOne":
+            cursor.execute(sql)
+            return cursor.fetchone()
+        elif sqlType == "selectMany":
+            cursor.execute(sql)
+            return cursor.fetchall()
+    except mysql.connector.Error as err:
+        print(err)
+
 # Main Menu
 print("")
 print("##############################")
@@ -974,11 +934,16 @@ elif menuOption == '5':
 elif menuOption == '9':
     #Profile.createFrequencies()
     #WebScrape.firUirTmaCtaData()
-    sids = Navigraph.sidStar("stars.txt", "EGKK", "08R")
+    sids = Navigraph.sidStar("sids.txt", "EGKK", "26L")
     print(sids.head)
 
     for s in sids['Route']:
         print(s)
+elif menuOption == '0':
+    file = open('Validation/schema.xsd')
+    schema = xmlschema.XMLSchema(file)
+    print(schema.is_valid)
+    schema.validate('Build/Airspace.xml')
 else:
     print("Nothing to do here\n")
     cmdParse.print_help()
