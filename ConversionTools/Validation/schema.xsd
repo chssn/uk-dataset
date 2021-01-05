@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="SID">
+    <xs:complexType mixed="true">
+      <xs:choice maxOccurs="unbounded" minOccurs="0">
+        <xs:element ref="Route"/>
+        <xs:element ref="Transition"/>
+      </xs:choice>
+      <xs:attribute type="xs:string" name="Name" use="optional"/>
+      <xs:attribute type="xs:string" name="Default" use="optional"/>
+      <xs:attribute type="xs:string" name="Type" use="optional"/>
+      <xs:attribute type="xs:string" name="Airport" use="optional"/>
+      <xs:attribute type="xs:string" name="Runways" use="optional"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Runway">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:element ref="SID" maxOccurs="unbounded" minOccurs="0"/>
+        <xs:element ref="STAR" maxOccurs="unbounded" minOccurs="0"/>
+      </xs:sequence>
+      <xs:attribute type="xs:string" name="Name" use="optional"/>
+      <xs:attribute type="xs:string" name="DataRunway" use="optional"/>
+      <xs:attribute type="xs:string" name="Position" use="optional"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="STAR">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:element ref="Transition" maxOccurs="unbounded" minOccurs="0"/>
+        <xs:element ref="Route" maxOccurs="unbounded" minOccurs="0"/>
+      </xs:sequence>
+      <xs:attribute type="xs:string" name="Name" use="optional"/>
+      <xs:attribute type="xs:string" name="OpDataFlag" use="optional"/>
+      <xs:attribute type="xs:string" name="Type" use="optional"/>
+      <xs:attribute type="xs:string" name="Airport" use="optional"/>
+      <xs:attribute type="xs:string" name="Runways" use="optional"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Airport">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:element ref="Runway" maxOccurs="unbounded" minOccurs="0"/>
+      </xs:sequence>
+      <xs:attribute type="xs:string" name="Name" use="optional"/>
+      <xs:attribute type="xs:string" name="ICAO" use="optional"/>
+      <xs:attribute type="xs:string" name="Position" use="optional"/>
+      <xs:attribute type="xs:short" name="Elevation" use="optional"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Airway">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute type="xs:string" name="Name" use="optional"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Point">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute type="xs:string" name="Name" use="optional"/>
+          <xs:attribute type="xs:string" name="Type" use="optional"/>
+          <xs:attribute type="xs:string" name="NavaidType" use="optional"/>
+          <xs:attribute type="xs:float" name="Frequency" use="optional"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Route">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute type="xs:string" name="Runway" use="optional"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Transition">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute type="xs:string" name="Name" use="optional"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="SystemRunways">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Airport" maxOccurs="unbounded" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Airways">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Airway" maxOccurs="unbounded" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Intersections">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Point" maxOccurs="unbounded" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="SIDSTARs">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="SID" maxOccurs="unbounded" minOccurs="0"/>
+        <xs:element ref="STAR" maxOccurs="unbounded" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Airports">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Airport" maxOccurs="unbounded" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Airspace">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="SystemRunways"/>
+        <xs:element ref="Airways"/>
+        <xs:element ref="Intersections"/>
+        <xs:element ref="SIDSTARs"/>
+        <xs:element ref="Airports"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
