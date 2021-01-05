@@ -3,6 +3,8 @@ UK.ese
 test.py
 __pycache__/
 Build/
+Navigraph/
+Testing/
 uk.json
 UK.xml
 UK_COASTLINE.xml
