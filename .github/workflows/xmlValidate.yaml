@@ -13,5 +13,5 @@ jobs:
     - name: Lint info.xml
       uses: ChristophWurst/xmllint-action@v1
       with:
-        xml-file: Airspace.xml
+        xml-file: ConversionTools/Build/Airspace.xml
         xml-schema-file: ./info.xsd
