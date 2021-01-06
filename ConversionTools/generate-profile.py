@@ -34,7 +34,7 @@ cmdParse.add_argument('-d', '--debug', help='runs the code defined in the debug 
 cmdParse.add_argument('-v', '--verbose', action='store_true')
 args = cmdParse.parse_args()
 
-class Airac():
+class Airac:
     def getUrl():
         # Base NATS URL
         #cycle = "" # BUG: need something to calculate current cycle and autofill the base URL
@@ -95,7 +95,7 @@ class Airac():
 
         return result
 
-class Geo():
+class Geo:
     def convertCoords(row):
         # Get coordinates for the navaid
         coordinates = {}
@@ -201,7 +201,7 @@ class Geo():
             bB = float(brg) - 180.00
         return round(bB, 2)
 
-class Xml():
+class Xml:
     def root(name):
         # Define the XML root tag
         xml = xtree.Element(name)
@@ -230,7 +230,7 @@ class Xml():
         point.text = text
         return point
 
-class Profile():
+class Profile:
     def constructXml():    # Define XML top level tag
         mapCenter = "+53.7-1.5"
 
@@ -557,7 +557,7 @@ class Profile():
             radarTree = xtree.ElementTree(xmlAllRadars)
             radarTree.write('Build/Radars.xml', encoding="utf-8", xml_declaration=True)
 
-class WebScrape():
+class WebScrape:
     def main():
         # Count the number of ICAO designators (may not actually be a verified aerodrome)
         sql = "SELECT COUNT(icao_designator) AS NumberofAerodromes FROM aerodromes"
