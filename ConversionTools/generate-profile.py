@@ -141,13 +141,13 @@ class Geo():
         with open(fileIn) as fobj:
             folder = parser.parse(fobj).getroot().Document
 
-        xmlGroundMapRwy = Xml.constructMapHeader(xmlGroundMap, 'Ground_RWY', aerodromeIcao + '_SMR_RWY', '1', '+510853.0-0001125.0', 1)
-        xmlGroundMapTwy = Xml.constructMapHeader(xmlGroundMap, 'Ground_TWY', aerodromeIcao + '_SMR_TWY', '2', '+510853.0-0001125.0', 1)
-        xmlGroundMapBld = Xml.constructMapHeader(xmlGroundMap, 'Ground_BLD', aerodromeIcao + '_SMR_BLD', '1', '+510853.0-0001125.0', 1)
-        xmlGroundMapApr = Xml.constructMapHeader(xmlGroundMap, 'Ground_APR', aerodromeIcao + '_SMR_APR', '3', '+510853.0-0001125.0', 1)
-        xmlGroundMapBak = Xml.constructMapHeader(xmlGroundMap, 'Ground_BAK', aerodromeIcao + '_SMR_BAK', '4', '+510853.0-0001125.0', 1)
-        xmlGroundMapInf = Xml.constructMapHeader(xmlGroundMap, 'Ground_INF', aerodromeIcao + '_SMR_INF', '0', '+510853.0-0001125.0', 1)
-        xmlGroundMapHld = Xml.constructMapHeader(xmlGroundMap, 'Ground_INF', aerodromeIcao + '_SMR_HLD', '0', '+510853.0-0001125.0', 1)
+        xmlGroundMapRwy = Xml.constructMapHeader(xmlGroundMap, 'Ground_RWY', aerodromeIcao + '_SMR_RWY', '1', '+510853.0-0001125.0')
+        xmlGroundMapTwy = Xml.constructMapHeader(xmlGroundMap, 'Ground_TWY', aerodromeIcao + '_SMR_TWY', '2', '+510853.0-0001125.0')
+        xmlGroundMapBld = Xml.constructMapHeader(xmlGroundMap, 'Ground_BLD', aerodromeIcao + '_SMR_BLD', '1', '+510853.0-0001125.0')
+        xmlGroundMapApr = Xml.constructMapHeader(xmlGroundMap, 'Ground_APR', aerodromeIcao + '_SMR_APR', '3', '+510853.0-0001125.0')
+        xmlGroundMapBak = Xml.constructMapHeader(xmlGroundMap, 'Ground_BAK', aerodromeIcao + '_SMR_BAK', '4', '+510853.0-0001125.0')
+        xmlGroundMapInf = Xml.constructMapHeader(xmlGroundMap, 'Ground_INF', aerodromeIcao + '_SMR_INF', '0', '+510853.0-0001125.0')
+        xmlGroundMapHld = Xml.constructMapHeader(xmlGroundMap, 'Ground_INF', aerodromeIcao + '_SMR_HLD', '0', '+510853.0-0001125.0')
 
         xmlGroundMapInfLabel = xtree.SubElement(xmlGroundMapInf, 'Label')
         xmlGroundMapInfLabel.set('HasLeader', 'False')
@@ -232,8 +232,6 @@ class Xml():
 class Profile():
     def constructXml():    # Define XML top level tag
         mapCenter = "+53.7-1.5"
-        now = datetime.now()
-        checkID = datetime.timestamp(now) # generate unix timestamp to help verify if a row has already been added
 
         xmlAirspace = Xml.root('Airspace') # create XML document Airspace.xml
         # Define subtag SystemRunways, SidStar, Intersections, Airports and Airways - https://virtualairtrafficsystem.com/docs/dpk/#systemrunways
@@ -612,7 +610,7 @@ class WebScrape():
                         lonPM = Geo.plusMinus(lonSplit.group(2))
                         loc = str(latPM) + str(latSplit.group(1)) + str(lonPM) + str(lonSplit.group(1)) # build lat/lon string as per https://virtualairtrafficsystem.com/docs/dpk/#lat-long-format
 
-                        sql = "INSERT INTO aerodrome_runways (aerodrome_id, runway, location, elevation, bearing, length) VALUE ('"+ str(aerodrome[0]) +"', '"+ str(rwy) +"', '"+ str(loc) +"', '"+ str(elev) +"', '"+ str(brg.rstrip('°')) +"', '"+ str(len) +"')"
+                        sql = "INSERT INTO aerodrome_runways (aerodrome_id, runway, location, elevation, bearing, length) VALUE ('"+ str(aerodrome[0]) +"', '"+ str(rwy) +"', '"+ str(loc) +"', '"+ str(elev) +"', '"+ str(brg.rstrip('°')) +"', '"+ str(rwyLen) +"')"
                         mysqlExec(sql, "insertUpdate")
 
                     # Parse air traffic services
@@ -799,8 +797,8 @@ class WebScrape():
                 mysqlExec(sql, "insertUpdate")
 
 class EuroScope:
-    def parse(file):
-        file = open(file, "r")
+    def parse(fileIn):
+        file = open(fileIn, "r")
         output = ""
         for f in file:
             coord = re.search(r"(N|S)([\d]{3})\.([\d]{2})\.([\d]{2})(\.[\d]{3})\s(E|W)([\d]{3})\.([\d]{2})\.([\d]{2})(\.[\d]{3})", f)
@@ -828,7 +826,6 @@ class Navigraph:
 
                         if lineSearch:
                             for line in lineSearch:
-                                srdName = line[1]
                                 srdRunway = line[3]
 
                                 # for each SID, get the route
