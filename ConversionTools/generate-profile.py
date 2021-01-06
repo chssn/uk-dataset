@@ -3,6 +3,7 @@ import argparse
 import requests
 import re
 import os
+import fnmatch
 import xml.etree.ElementTree as xtree
 import pandas as pd
 import urllib3
@@ -848,6 +849,25 @@ class Navigraph:
 
             return df[(df.Runway == rwyIn)]
 
+class ValidateXml:
+    """docstring for ValidateXml."""
+
+    def __init__(self, schema):
+        with open(schema) as sFile:
+            self.schema = xmlschema.XMLSchema(sFile)
+
+    def validateDir(self, searchDir, matchFile):
+        with alive_bar() as bar:
+            for subdir, dirs, files in os.walk(searchDir):
+                for filename in files:
+                    filepath = subdir + os.sep + filename
+                    if fnmatch.fnmatch(filename, matchFile + '.xml'):
+                        bar()
+                        if self.schema.is_valid(filepath) is False:
+                            self.schema.validate(filepath)
+
+        print(Fore.GREEN + "OK" + Style.RESET_ALL + " - All tests passed for " + searchDir + matchFile)
+
 def mysqlExec(sql, sqlType):
     try:
         if sqlType == "insertUpdate":
@@ -873,6 +893,7 @@ print("(2) - Build XML files from the existing database.")
 print("(3) - Truncate the existing database.")
 print("(4) - Convert a Google Earth KML file - run with -g option to pass KML filename.")
 print("(5) - Convert EuroScope files.")
+print("(6) - Validate XML files.")
 print("")
 menuOption = input("Please select an option: ")
 
@@ -898,6 +919,11 @@ elif menuOption == '4':
     Geo.kmlMappingConvert(args.geo)
 elif menuOption == '5':
     print("Not Defined")
+elif menuOption == '6':
+    twrMap = ValidateXml("Validation/twrmap.xsd")
+    twrMap.validateDir("Build/Maps", "*TWR*")
+    airspace = ValidateXml("Validation/airspace.xsd")
+    airspace.validateDir("Build", "Airspace")
 elif menuOption == '9':
     #Profile.createFrequencies()
     #WebScrape.firUirTmaCtaData()
@@ -906,11 +932,6 @@ elif menuOption == '9':
 
     for s in sids['Route']:
         print(s)
-elif menuOption == '0':
-    file = open('Validation/schema.xsd')
-    schema = xmlschema.XMLSchema(file)
-    print(schema.is_valid)
-    schema.validate('Build/Airspace.xml')
 else:
     print("Nothing to do here\n")
     cmdParse.print_help()

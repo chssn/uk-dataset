@@ -1,0 +1,70 @@
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="Threshold">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute type="xs:string" name="Name" use="required"/>
+          <xs:attribute type="xs:string" name="Position" use="required"/>
+          <xs:attribute type="xs:float" name="ExtendedCentrelineTrack" use="optional"/>
+          <xs:attribute type="xs:byte" name="ExtendedCentrelineLength" use="optional"/>
+          <xs:attribute type="xs:byte" name="ExtendedCentrelineTickInterval" use="optional"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Runway">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Threshold" maxOccurs="unbounded" minOccurs="1"/>
+      </xs:sequence>
+      <xs:attribute type="xs:string" name="Name" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Line">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute type="xs:string" name="Pattern" use="optional"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Point" type="xs:string"/>
+  <xs:element name="Label">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Point" maxOccurs="unbounded" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Symbol">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Point" maxOccurs="unbounded" minOccurs="0"/>
+      </xs:sequence>
+      <xs:attribute type="xs:string" name="Type"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Map">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Runway" minOccurs="0"/>
+        <xs:element ref="Line" maxOccurs="unbounded" minOccurs="0"/>
+        <xs:element ref="Label" minOccurs="0"/>
+        <xs:element ref="Symbol" minOccurs="0"/>
+      </xs:sequence>
+      <xs:attribute type="xs:string" name="Type" use="required" fixed="System"/>
+      <xs:attribute type="xs:string" name="Name" use="required"/>
+      <xs:attribute type="xs:byte" name="Priority" use="required"/>
+      <xs:attribute type="xs:string" name="Center" use="optional"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Maps">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Map" maxOccurs="unbounded" minOccurs="0"/>
+      </xs:sequence>
+      <xs:attribute type="xs:string" name="generated" use="optional"/>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
