@@ -1,7 +1,6 @@
 #! /usr/bin/python3
 import argparse
 import requests
-import math
 import re
 import os
 import xml.etree.ElementTree as xtree
@@ -605,7 +604,7 @@ class WebScrape():
                         print(aerodromeRunwaysBearing)
                         print(aerodromeRunwaysLen)
 
-                    for rwy, lat, lon, elev, brg, len in zip(aerodromeRunways, aerodromeRunwaysLat, aerodromeRunwaysLong, aerodromeRunwaysElev, aerodromeRunwaysBearing, aerodromeRunwaysLen):
+                    for rwy, lat, lon, elev, brg, rwyLen in zip(aerodromeRunways, aerodromeRunwaysLat, aerodromeRunwaysLong, aerodromeRunwaysElev, aerodromeRunwaysBearing, aerodromeRunwaysLen):
                         # Add runway to the aerodromeDB
                         latSplit = re.search(r"([\d]{6}\.[\d]{2})([N|S]{1})", str(lat))
                         lonSplit = re.search(r"([\d]{7}\.[\d]{2})([E|W]{1})", str(lon))
@@ -812,35 +811,6 @@ class EuroScope:
 
         print(output.rstrip("/"))
 
-    # IDEA: This is currently scraping the *.ese file from VATSIM-UK. Need to find a better way of doing this. Too much hard code here and it's lazy!
-    def parseEse():
-        ese = open("UK.ese", "r")
-        for line in ese:
-            # Pull out all SID and STAR
-            sidStar = re.search(r'(SID|STAR):([A-Z]{4}):([\d]{2}):([\dA-Z]{3,7}):([\dA-Z\s]{2,})\n', line)
-            if sidStar:
-                type = sidStar.group(1)
-                aerodrome = sidStar.group(2)
-                runway = sidStar.group(3)
-                name = sidStar.group(4)
-                route = sidStar.group(5)
-
-                sql = "SELECT aerodrome_runways.id FROM aerodromes INNER JOIN aerodrome_runways ON aerodromes.id = aerodrome_runways.aerodrome_id WHERE aerodromes.icao_designator = '"+ aerodrome +"' AND aerodrome_runways.runway = '"+ runway +"' LIMIT 1"
-                rwyId = mysqlExec(sql, "selectOne")
-
-                def sqlSidStar(search):
-                    table = search.lower()
-                    if str(type) == search:
-                        try:
-                            sql = "INSERT INTO aerodrome_runways_"+ table +" (runway_id, "+ table +", route) SELECT * FROM (SELECT '"+ str(rwyId[0]) +"' AS selRwyId, '"+ name +"' AS selSid, '"+ route +"' AS selRoute) AS tmp WHERE NOT EXISTS (SELECT runway_id FROM aerodrome_runways_"+ table +" WHERE runway_id =  "+ str(rwyId[0]) +" AND "+ table +" = '"+ name +"' AND route = '"+ route +"') LIMIT 1"
-                            mysqlExec(sql, "insertUpdate")
-                        except:
-                            print(Fore.RED + "Aerodrome ICAO " + aerodrome + " not recognised" + Style.RESET_ALL)
-                            print(line)
-
-                sqlSidStar("SID")
-                sqlSidStar("STAR")
-
 class Navigraph:
     def sidStar(file, icaoIn, rwyIn):
         dfColumns=['ICAO','Runway','Name','Route']
@@ -930,7 +900,7 @@ elif menuOption == '3':
 elif menuOption == '4':
     Geo.kmlMappingConvert(args.geo)
 elif menuOption == '5':
-    EuroScope.parseEse()
+    print("Not Defined")
 elif menuOption == '9':
     #Profile.createFrequencies()
     #WebScrape.firUirTmaCtaData()
