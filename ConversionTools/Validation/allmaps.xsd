@@ -1,0 +1,60 @@
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="Point">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute type="xs:string" name="Name" use="optional"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Label">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Point" maxOccurs="unbounded" minOccurs="0"/>
+      </xs:sequence>
+      <xs:attribute type="xs:string" name="HasLeader" use="optional"/>
+      <xs:attribute type="xs:string" name="LabelOrientation" use="optional"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Symbol">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Point" maxOccurs="unbounded" minOccurs="0"/>
+      </xs:sequence>
+      <xs:attribute type="xs:string" name="Type" use="optional"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Line">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute type="xs:string" name="Name" use="optional"/>
+          <xs:attribute type="xs:string" name="Pattern" use="optional"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Map">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Label" minOccurs="0"/>
+        <xs:element ref="Symbol" maxOccurs="unbounded" minOccurs="0"/>
+        <xs:element ref="Line" maxOccurs="unbounded" minOccurs="0"/>
+        <xs:element ref="Map" minOccurs="0"/>
+      </xs:sequence>
+      <xs:attribute type="xs:string" name="Type" use="optional"/>
+      <xs:attribute type="xs:string" name="Name" use="optional"/>
+      <xs:attribute type="xs:byte" name="Priority" use="optional"/>
+      <xs:attribute type="xs:string" name="Center" use="optional"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Maps">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Map" maxOccurs="unbounded" minOccurs="0"/>
+      </xs:sequence>
+      <xs:attribute type="xs:string" name="generated"/>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

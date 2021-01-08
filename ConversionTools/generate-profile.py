@@ -867,7 +867,7 @@ class ValidateXml:
                             print(filepath)
                             self.schema.validate(filepath)
 
-        print(Fore.GREEN + "OK" + Style.RESET_ALL + " - All tests passed for " + searchDir + matchFile)
+        print(Fore.GREEN + "    OK" + Style.RESET_ALL + " - All tests passed for " + searchDir + matchFile)
 
 def mysqlExec(sql, sqlType):
     try:
@@ -885,9 +885,9 @@ def mysqlExec(sql, sqlType):
 
 # Main Menu
 print("")
-print("##############################")
-print("# vatSys XML Builder v0.1b   #")
-print("##############################")
+print("###################################")
+print("# vatSys XML Builder v0.11.0-beta #")
+print("###################################")
 print("")
 print("(1) - Perform a webscrape to obtain current AIRAC data.")
 print("(2) - Build XML files from the existing database.")
@@ -921,10 +921,21 @@ elif menuOption == '4':
 elif menuOption == '5':
     print("Not Defined")
 elif menuOption == '6':
+    # Validation of XML files with XSD schema
     twrMap = ValidateXml("Validation/twrmap.xsd")
     twrMap.validateDir("Build/Maps", "*TWR*")
+
     airspace = ValidateXml("Validation/airspace.xsd")
     airspace.validateDir("Build", "Airspace")
+
+    radar = ValidateXml("Validation/radars.xsd")
+    radar.validateDir("Build", "Radars")
+
+    sectors = ValidateXml("Validation/sectors.xsd")
+    sectors.validateDir("Build", "Sectors")
+
+    allMaps = ValidateXml("Validation/allmaps.xsd")
+    allMaps.validateDir("Build/Maps", "ALL_*")
 elif menuOption == '9':
     #Profile.createFrequencies()
     #WebScrape.firUirTmaCtaData()

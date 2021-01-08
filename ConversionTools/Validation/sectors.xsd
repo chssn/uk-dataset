@@ -1,0 +1,27 @@
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="ResponsibleSectors" type="xs:string"/>
+  <xs:element name="Sector">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="ResponsibleSectors"/>
+      </xs:sequence>
+      <xs:attribute type="xs:string" name="FullName" use="required"/>
+      <xs:attribute type="frequency" name="Frequency" use="required"/>
+      <xs:attribute type="xs:string" name="Callsign" use="required"/>
+      <xs:attribute type="xs:string" name="Name" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Sectors">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Sector" maxOccurs="unbounded" minOccurs="0"/>
+      </xs:sequence>
+      <xs:attribute type="xs:string" name="generated"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:simpleType name="frequency">
+  <xs:restriction base="xs:string">
+    <xs:pattern value="[\d]{3}\.[\d]{3}"/>
+  </xs:restriction>
+</xs:simpleType>
+</xs:schema>
