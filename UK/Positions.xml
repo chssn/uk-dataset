@@ -97,4 +97,72 @@
       <Sector Name="EGKK_DEL" />
     </Sectors>
   </Position>
+  <Position Name="EGPH_TWR" Type="ASD" DefaultCenter="+555700.0-0032221.0" DefaultRange="50" MagneticVariation="0.53">
+    <Maps>
+      <Map Name="EGPH/EGPH_SMR" />
+      <Map Name="EGPH/EGPH_TWR_RWY06" />
+      <Map Name="EGPH/EGPH_TWR_RWY24" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGPH" Frequency="0" />
+      <Window Airport="EGPH" />
+    </ATIS>
+    <Strips Mode="Beacon" Sort="Time">
+      <Window Type="ADEP" Beacon="EGPH" Visible="true" />
+      <Window Type="ADES" Beacon="EGPH" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>London Gatwick Tower</Line>
+      <Line>ATIS available on 121.950</Line>
+      <Line>vatSys Demo</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGPH_TWR" />
+      <Sector Name="EGPH_GND" />
+      <Sector Name="EGPH_DEL" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Name="EGPH" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGPH_GND" Type="ASMGCS" ASMGCSAirport="EGPH" DefaultCenter="+555700.0-0032221.0" DefaultRange="2" MagneticVariation="0.53" Rotation="10">
+    <Maps>
+      <Map Name="EGPH/EGPH_SMR" />
+      <Map Name="EGPH/EGPH_SMR_RWY" />
+      <Map Name="EGPH/EGPH_SMR_TWY" />
+      <Map Name="EGPH/EGPH_SMR_BLD" />
+      <Map Name="EGPH/EGPH_SMR_APR" />
+      <Map Name="EGPH/EGPH_SMR_BAK" />
+      <Map Name="EGPH/EGPH_SMR_INF" />
+      <Map Name="EGPH/EGPH_SMR_HLD" />
+    </Maps>
+    <Strips Mode="Beacon" Sort="Alpha">
+      <Window Type="ADEP" Beacon="EGPH" Visible="true" />
+    </Strips>
+    <Sectors>
+      <Sector Name="EGPH_GND" />
+      <Sector Name="EGPH_DEL" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Name="EGPH" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGPH_DEL" Type="ASMGCS" ASMGCSAirport="EGPH" DefaultCenter="+555700.0-0032221.0" DefaultRange="2" MagneticVariation="0.53" Rotation="10">
+    <Maps>
+      <Map Name="EGPH/EGPH_SMR" />
+      <Map Name="EGPH/EGPH_SMR_RWY" />
+      <Map Name="EGPH/EGPH_SMR_TWY" />
+      <Map Name="EGPH/EGPH_SMR_BLD" />
+      <Map Name="EGPH/EGPH_SMR_APR" />
+      <Map Name="EGPH/EGPH_SMR_BAK" />
+      <Map Name="EGPH/EGPH_SMR_INF" />
+      <Map Name="EGPH/EGPH_SMR_HLD" />
+    </Maps>
+    <Strips Mode="Beacon" Sort="Alpha">
+      <Window Type="ADEP" Beacon="EGPH" Visible="true" />
+    </Strips>
+    <Sectors>
+      <Sector Name="EGPH_DEL" />
+    </Sectors>
+  </Position>
 </Positions>
