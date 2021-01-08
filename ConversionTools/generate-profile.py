@@ -864,6 +864,7 @@ class ValidateXml:
                     if fnmatch.fnmatch(filename, matchFile + '.xml'):
                         bar()
                         if self.schema.is_valid(filepath) is False:
+                            print(filepath)
                             self.schema.validate(filepath)
 
         print(Fore.GREEN + "OK" + Style.RESET_ALL + " - All tests passed for " + searchDir + matchFile)
