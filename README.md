@@ -4,5 +4,5 @@
 Download the contents of the UK Dataset folder into your vatSys profile folder and away you go.
 
   1. LON_CTR is there in a very basic functionality.
-  2. TWR view for EGKK.
+  2. TWR view for EGKK and EGPH.
   3. ASMGCS for EGKK and EGPH.
