@@ -386,23 +386,25 @@ class Profile:
                 if oppRunway:
                     xmlMapsRunwayThreshOpp.set('Name', str(oppEnd))
                     xmlMapsRunwayThreshOpp.set('Position', str(oppRunway[3]))
-
-                    # create map points and titles
-                    xmlMapsRunwayPointsLabels = Xml.constructMapHeader(xmlMapsRunway, 'System', aerodrome[1] + '_TWR_RWY' + runway[2] + '_NAMES', '2', aerodrome[3])
-                    xmlMapsRunwayPointsLabelsL = xtree.SubElement(xmlMapsRunwayPointsLabels, 'Label')
-                    xmlMapsRunwayPoints = xtree.SubElement(xmlMapsRunwayPointsLabels, 'Symbol')
-                    xmlMapsRunwayPoints.set('Type', 'HollowStar')
-                    for point in mapPoint:
-                        Xml.elementPoint(xmlMapsRunwayPoints, point)
-                        Xml.elementPoint(xmlMapsRunwayPointsLabelsL, point)
-
-                    # create folder structure if not exists
-                    filename = 'Build/Maps/' + aerodrome[1] + '/' + aerodrome[1] + '_TWR_RWY' + runway[2] + '.xml'
-                    os.makedirs(os.path.dirname(filename), exist_ok=True)
-                    xmlMapsRunwayTree = xtree.ElementTree(xmlMapsRunway)
-                    xmlMapsRunwayTree.write(filename, encoding="utf-8", xml_declaration=True)
                 else:
                     print(Fore.RED + "No opposite runway for " + runway[3] + " at " + aerodrome[1] + Style.RESET_ALL)
+                    xmlMapsRunwayThreshOpp.set('Name', str(oppEnd))
+                    xmlMapsRunwayThreshOpp.set('Position', str(runway[3]))
+
+                # create map points and titles
+                xmlMapsRunwayPointsLabels = Xml.constructMapHeader(xmlMapsRunway, 'System', aerodrome[1] + '_TWR_RWY' + runway[2] + '_NAMES', '2', aerodrome[3])
+                xmlMapsRunwayPointsLabelsL = xtree.SubElement(xmlMapsRunwayPointsLabels, 'Label')
+                xmlMapsRunwayPoints = xtree.SubElement(xmlMapsRunwayPointsLabels, 'Symbol')
+                xmlMapsRunwayPoints.set('Type', 'HollowStar')
+                for point in mapPoint:
+                    Xml.elementPoint(xmlMapsRunwayPoints, point)
+                    Xml.elementPoint(xmlMapsRunwayPointsLabelsL, point)
+
+                # create folder structure if not exists
+                filename = 'Build/Maps/' + aerodrome[1] + '/' + aerodrome[1] + '_TWR_RWY' + runway[2] + '.xml'
+                os.makedirs(os.path.dirname(filename), exist_ok=True)
+                xmlMapsRunwayTree = xtree.ElementTree(xmlMapsRunway)
+                xmlMapsRunwayTree.write(filename, encoding="utf-8", xml_declaration=True)
 
                 # add runway into the airspace.xml file
                 xmlAirportRunway = xtree.SubElement(xmlAirport, 'Runway')
