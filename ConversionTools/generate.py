@@ -156,10 +156,9 @@ class Webscrape:
         return BeautifulSoup(page.content, "lxml")
 
     def parseAd01Data(self):
+        print("Parsing "+ self.country +"-AD-0.1 data to obtain ICAO designators...")
         dfColumns = ['icao_designator','verified','location','elevation','name','magnetic_variation']
         df = pd.DataFrame(columns=dfColumns)
-
-        print("Parsing "+ self.country +"-AD-0.1 data to obtain ICAO designators...")
         getAerodromeList = self.getTableSoup(self.country + "-AD-0.1-en-GB.html")
         listAerodromeList = getAerodromeList.find_all("h3")
         barLength = len(listAerodromeList)
@@ -168,9 +167,6 @@ class Webscrape:
                 getAerodrome = re.search(rf"({self.country}[A-Z]{{2}})(\n[\s\S]{{7}}\n[\s\S]{{8}})([A-Z]{{4}}.*)(\n[\s\S]{{6}}<\/a>)", str(row)) # search for aerodrome icao designator and name
                 if getAerodrome:
                     # Place each aerodrome into the DB
-                    #sql = "INSERT INTO aerodromes (icao_designator, verified, location, elevation, name) VALUES ('"+ str(getAerodrome[1]) +"' , 0, 0, 0, '"+ str(getAerodrome[3]) +"')"
-                    #mysqlExec(sql, "insert")
-
                     dfOut = {'icao_designator': str(getAerodrome[1]),'verified': 0,'location': 0,'elevation': 0,'name': str(getAerodrome[3]),'magnetic_variation': 0}
                     df = df.append(dfOut, ignore_index=True)
                 bar()
@@ -178,31 +174,29 @@ class Webscrape:
 
     def parseAd02Data(self, dfAd01):
         print("Parsing "+ self.country +"-AD-2.x data to obtain aerodrome data...")
+        dfColumns = ['icao_designator','runway','location','elevation','bearing','length']
+        dfRwy = pd.DataFrame(columns=dfColumns)
+
+        dfColumns = ['icao_designator','callsign_type','frequency']
+        dfSrv = pd.DataFrame(columns=dfColumns)
 
         # Select all aerodromes in the database
-        #sql = "SELECT id, icao_designator FROM aerodromes ORDER BY icao_designator"
-        #getAerodromes = mysqlExec(sql, "all")
         barLength = len(dfAd01.index)
         with alive_bar(barLength) as bar: # Define the progress bar
-            for aerodrome in getAerodromes:
-                aeroId = aerodrome[0]
-                aeroIcao = aerodrome[1]
+            for index, row in dfAd01.iterrows():
+                aeroIcao = row['icao_designator']
                 # Select all runways in this aerodrome
                 getRunways = self.getTableSoup(self.country + "-AD-2."+ aeroIcao +"-en-GB.html")
                 if getRunways !=404:
                     print("  Parsing AD-2 data for " + aeroIcao)
-                    aerodromeAd0202 = getRunways.find(id=aerodrome[1] + "-AD-2.2")
-                    aerodromeAd0212 = getRunways.find(id=aerodrome[1] + "-AD-2.12")
-                    aerodromeAd0218 = getRunways.find(id=aerodrome[1] + "-AD-2.18")
+                    aerodromeAd0202 = getRunways.find(id=aeroIcao + "-AD-2.2")
+                    aerodromeAd0212 = getRunways.find(id=aeroIcao + "-AD-2.12")
+                    aerodromeAd0218 = getRunways.find(id=aeroIcao + "-AD-2.18")
 
                     # Find current magnetic variation for this aerodrome
                     aerodromeMagVar = self.search("([\d]{1}\.[\d]{2}).([W|E]{1})", "TAD_HP;VAL_MAG_VAR", str(aerodromeAd0202))
                     pM = Geo.plusMinus(aerodromeMagVar[0][1])
                     floatMagVar = pM + aerodromeMagVar[0][0]
-
-                    # Add verified flag and magnetic variation for this aerodrome
-                    sql = "UPDATE aerodromes SET verified = 1, magnetic_variation = '"+ str(floatMagVar) +"' WHERE id = '"+ str(aeroId) +"'"
-                    mysqlExec(sql, "insert")
 
                     # Find lat/lon/elev for aerodrome
                     aerodromeLat = re.search(r'(Lat: )(<span class="SD" id="ID_[\d]{7}">)([\d]{6})([N|S]{1})', str(aerodromeAd0202))
@@ -213,8 +207,10 @@ class Webscrape:
                     lonPM = Geo.plusMinus(aerodromeLon.group(4))
                     fullLocation = latPM + aerodromeLat.group(3) + ".00" + lonPM + aerodromeLon.group(3) + ".00" # AD-2.2 gives aerodrome location as DDMMSS / DDDMMSS
 
-                    sql = "UPDATE aerodromes SET location = '"+ str(fullLocation) +"', elevation = '"+ aerodromeElev[2] +"' WHERE id = '"+ str(aeroId) +"'"
-                    mysqlExec(sql, "insert")
+                    dfAd01.at[index, 'verified'] = 1
+                    dfAd01.at[index, 'magnetic_variation'] = str(floatMagVar)
+                    dfAd01.at[index, 'location'] = str(fullLocation)
+                    dfAd01.at[index, 'elevation'] = str(aerodromeElev[2])
 
                     # Find runway locations
                     aerodromeRunways = self.search("([\d]{2}[L|C|R]?)", "TRWY_DIRECTION;TXT_DESIG", str(aerodromeAd0212))
@@ -232,8 +228,8 @@ class Webscrape:
                         lonPM = Geo.plusMinus(lonSplit.group(2))
                         loc = str(latPM) + str(latSplit.group(1)) + str(lonPM) + str(lonSplit.group(1)) # build lat/lon string as per https://virtualairtrafficsystem.com/docs/dpk/#lat-long-format
 
-                        sql = "INSERT INTO aerodrome_runways (aerodrome_id, runway, location, elevation, bearing, length) VALUE ('"+ str(aeroId) +"', '"+ str(rwy) +"', '"+ str(loc) +"', '"+ str(elev) +"', '"+ str(brg.rstrip('°')) +"', '"+ str(rwyLen) +"')"
-                        mysqlExec(sql, "insert")
+                        dfOut = {'icao_designator': str(aeroIcao),'runway': str(rwy),'location': str(loc),'elevation': str(elev),'bearing': str(brg.rstrip('°')),'length': str(rwyLen)}
+                        dfRwy = dfRwy.append(dfOut, ignore_index=True)
 
                     # Find air traffic services
                     aerodromeServices = self.search("(APPROACH|GROUND|DELIVERY|TOWER|DIRECTOR|INFORMATION)", "TCALLSIGN_DETAIL", str(aerodromeAd0218))
@@ -244,14 +240,12 @@ class Webscrape:
                         callSignType = mysqlExec(callSignId, "one")
                         csModify = re.search(r"([\d]{1,8})", str(callSignType))
 
-                        sql = "INSERT INTO aerodrome_frequencies (aerodrome_id, callsign_type_id, frequency) VALUE ('"+ str(aeroId) +"', '"+ str(csModify.group(1)) +"', '"+ str(frq) +"')"
-                        mysqlExec(sql, "insert")
+                        dfOut = {'icao_designator': str(aeroIcao),'callsign_type': str(csModify.group(1)),'frequency': str(frq)}
+                        dfSrv = dfSrv.append(dfOut, ignore_index=True)
                 else:
-                    # Remove verify flag for this aerodrome
-                    sql = "UPDATE aerodromes SET verified = 0 WHERE id = '"+ str(aerodrome[0]) +"'"
-                    mysqlExec(sql, "insert")
-                    print(Fore.RED + "Aerodrome " + aerodrome[1] + " does not exist" + Style.RESET_ALL)
+                    print(Fore.RED + "Aerodrome " + aeroIcao + " does not exist" + Style.RESET_ALL)
                 bar()
+        return [dfAd01, dfRwy, dfSrv]
 
     def parseEnr02Data(self):
         def getBoundary(space): # creates a boundary useable in vatSys from AIRAC data
@@ -273,13 +267,21 @@ class Webscrape:
 
             return fullBoundary.rstrip('/')
 
+        dfColumns = ['name', 'callsign', 'frequency', 'boundary', 'upper_fl', 'lower_fl']
+        dfFir = pd.DataFrame(columns=dfColumns)
+        dfUir = pd.DataFrame(columns=dfColumns)
+
+        dfColumns = ['fir_id', 'name', 'boundary']
+        dfCta = pd.DataFrame(columns=dfColumns)
+        dfTma = pd.DataFrame(columns=dfColumns)
+
         print("Parsing "+ self.country +"-ENR-2.1 Data (FIR, UIR, TMA AND CTA)...")
         getData = self.getTableSoup(self.country + "-ENR-2.1-en-GB.html")
         searchData = getData.find_all("td")
         barLength = len(searchData)
         with alive_bar(barLength) as bar: # Define the progress bar
             for row in searchData:
-                # find all FIR spaces
+                # find all FIR/UIR spaces
                 firTitle = self.search("([A-Z]*\sFIR)", "TAIRSPACE;TXT_NAME", str(row))
                 firSpace = self.search("([\d]{6,7})([N|E|S|W]{1})", "TAIRSPACE_VERTEX;GEO_L", str(row))
                 firUpper = self.search("(?<=\>)([\d]{2,3})", "TAIRSPACE_LAYER;VAL_DIST_VER_UPPER", str(row))
@@ -293,11 +295,12 @@ class Webscrape:
                 if firTitle:
                     if firSpace:
                         boundary = getBoundary(firSpace)
-                        sqlF = "INSERT INTO flight_information_regions (name, callsign, frequency, boundary, upper_fl, lower_fl) VALUE ('"+ str(firTitle[0]) +"', 'NONE', '000.000', '"+ str(boundary) +"', '"+ str(firUpper[0]) +"', '"+ str(firLower[0]) +"')"
-                        mysqlExec(sqlF, "insertUpdate")
+                        dfOut = {'name': str(firTitle[0]),'callsign': 'NONE','frequency': '000.000', 'boundary': str(boundary), 'upper_fl': str(firUpper[0]), 'lower_fl': str(firLower[0])}
+                        dfFir = dfFir.append(dfOut, ignore_index=True)
+
                         # lazy bit of coding for EG airspace UIR (which has the same extent as FIR)
-                        sqlU = "INSERT INTO flight_information_regions (name, callsign, frequency, boundary, upper_fl, lower_fl) VALUE ('"+ str(firTitle[0]).split()[0] +" UIR', 'NONE', '000.000', '"+ str(boundary) +"', '660', '245')"
-                        mysqlExec(sqlU, "insertUpdate")
+                        dfOut = {'name': str(firTitle[0]).split()[0] + ' UIR','callsign': 'NONE','frequency': '000.000', 'boundary': str(boundary), 'upper_fl': '660', 'lower_fl': '245'}
+                        dfUir = dfUir.append(dfOut, ignore_index=True)
 
                 # find all CTA spaces
                 ctaTitle = self.search("([A-Z\s]*)(\sCTA\s)([\d]?)", "TAIRSPACE;TXT_NAME", str(row))
@@ -314,8 +317,8 @@ class Webscrape:
                         if ctaSpace:
                             boundary = getBoundary(ctaSpace)
 
-                            sql = "INSERT INTO control_areas (fir_id, name, boundary) VALUE ('0', '"+ str(title) +"', '"+ str(boundary) +"')"
-                            mysqlExec(sql, "insertUpdate")
+                            dfOut = {'fir_id': '0', 'name': str(title), 'boundary': str(boundary)}
+                            dfCta = dfCta.append(dfOut, ignore_index=True)
                     else:
                         print(str(ctaTitle) + " complex CTA")
 
@@ -334,13 +337,16 @@ class Webscrape:
                         if tmaSpace:
                             boundary = getBoundary(tmaSpace)
 
-                            sql = "INSERT INTO terminal_control_areas (fir_id, name, boundary) VALUE ('0', '"+ str(title) +"', '"+ str(boundary) +"')"
-                            mysqlExec(sql, "insertUpdate")
+                            dfOut = {'fir_id': '0', 'name': str(title), 'boundary': str(boundary)}
+                            dfTma = dfTma.append(dfOut, ignore_index=True)
                     else:
                         print(str(tmaTitle) + " complex TMA")
                 bar()
+        return [dfFir, dfUir, dfCta, dfTma]
 
     def parseEnr03Data(self, section):
+        dfColumns = ['name', 'route']
+        dfEnr03 = pd.DataFrame(columns=dfColumns)
         print("Parsing "+ self.country +"-ENR-3."+ section +" data to obtain ATS routes...")
         getENR3 = self.getTableSoup(self.country + "-ENR-3."+ section +"-en-GB.html")
         listTables = getENR3.find_all("tbody")
@@ -353,11 +359,16 @@ class Webscrape:
                 if getAirwayName:
                     for point in getAirwayRoute:
                         printRoute += str(point[0]) + "/"
-                    sql = "INSERT INTO airways (name, route) VALUES ('"+ str(getAirwayName[0]) +"', '"+ str(printRoute).rstrip('/') +"')"
-                    mysqlExec(sql, "insertUpdate")
+                    dfOut = {'name': str(getAirwayName[0]), 'route': str(printRoute).rstrip('/')}
+                    dfEnr03 = dfEnr03.append(dfOut, ignore_index=True)
                 bar()
+        return dfEnr03
 
     def parseEnr04Data(self, sub):
+        dfColumns = ['name', 'type', 'coords']
+        dfNav = pd.DataFrame(columns=dfColumns)
+        dfColumns = ['name', 'coords']
+        dfFix = pd.DataFrame(columns=dfColumns)
         print("Parsing "+ self.country +"-ENR-4."+ sub +" Data (RADIO NAVIGATION AIDS - EN-ROUTE)...")
         getData = self.getTableSoup(self.country + "-ENR-4."+ sub +"-en-GB.html")
         listData = getData.find_all("tr", class_ = "Table-row-type-3")
@@ -384,24 +395,27 @@ class Webscrape:
                     #    name[1] = "VOR"
 
                     # Add navaid to the aerodromeDB
-                    sql = "INSERT INTO navaids (name, type, coords) SELECT * FROM (SELECT '"+ str(name[2]) +"' AS srcName, '"+ str(name[1]) +"' AS srcType, '"+ str(fullLocation) +"' AS srcCoord) AS tmp WHERE NOT EXISTS (SELECT name FROM navaids WHERE name =  '"+ str(name[2]) +"' AND type =  '"+ str(name[1]) +"' AND coords = '"+ str(fullLocation) +"') LIMIT 1"
-                    mysqlExec(sql, "insert")
+                    dfOut = {'name': str(name[2]), 'type': str(name[1]), 'coords': str(fullLocation)}
+                    dfNav = dfNav.append(dfOut, ignore_index=True)
                 elif sub == "4":
                     # Add fix to the aerodromeDB
-                    sql = "INSERT INTO fixes (name, coords) SELECT * FROM (SELECT '"+ str(name[1]) +"' AS srcName, '"+ str(fullLocation) +"' AS srcCoord) AS tmp WHERE NOT EXISTS (SELECT name FROM fixes WHERE name =  '"+ str(name[1]) +"' AND coords = '"+ str(fullLocation) +"') LIMIT 1"
-                    mysqlExec(sql, "insert")
+                    dfOut = {'name': str(name[1]), 'coords': str(fullLocation)}
+                    dfFix = dfFix.append(dfOut, ignore_index=True)
                 bar()
+        return [dfNav, dfFix]
 
     def run(self):
         #Database.clear()
-        dataA = self.parseAd01Data()
-        self.parseAd02Data(dataA)
-        #self.parseEnr02Data()
-        #self.parseEnr03Data('1')
-        #self.parseEnr03Data('3')
-        #self.parseEnr03Data('5')
-        #self.parseEnr04Data('1')
-        #self.parseEnr04Data('4')
+        Ad01 = self.parseAd01Data()
+        Ad02 = self.parseAd02Data(Ad01)
+        Enr02 = self.parseEnr02Data()
+        Enr031 = self.parseEnr03Data('1')
+        Enr033 = self.parseEnr03Data('3')
+        Enr035 = self.parseEnr03Data('5')
+        Enr041 = self.parseEnr04Data('1')
+        Enr044 = self.parseEnr04Data('4')
+
+        return [Ad02, Enr02, Enr031, Enr033, Enr035, Enr041, Enr044]
 
     @staticmethod
     def search(find, name, string):
@@ -502,4 +516,4 @@ class Geo:
 # Defuse XML
 defuse_stdlib()
 new = Webscrape()
-new.run()
+print(new.run())
