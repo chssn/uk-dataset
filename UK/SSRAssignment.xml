@@ -14,7 +14,8 @@
   </Bin>
   <!-- Military Flights -->
   <Bin>
-    <Rule Remarks="(\/|\b)(RAAF|MILITARY|USAF|RAF|RAN|ARMY)\b"/>
+    <Rule Remarks="(\/|\b)(RAAF|MILITARY|USAF|RAF|RAN|ARMY|RN)\b"/>
+      <Rule Callsign="(RFR|RRR|KRH|KRF|RRF|NVY|NOH|KIN|LCS|COH|WAD|AAC|AKG|BDN|KNY|KRT|LOP|LOS|LPD|RIN|RRS|SMZ|SMX|SYO|SYS|THL|TQF|VYT|WTN|WYT)" />
     <Codes Start="0062" End="0077"/>
   </Bin>
   <!-- Domestic Flights -->
