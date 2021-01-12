@@ -74,7 +74,6 @@ class Webscrape:
         cycle = Airac()
         self.cycleUrl = cycle.url()
         self.country = "EG"
-        self.database = Database()
 
     def getTableSoup(self, uri):
         # Parse the given table into a beautifulsoup object
@@ -179,6 +178,43 @@ class Webscrape:
                     print(Fore.RED + "Aerodrome " + aeroIcao + " does not exist" + Style.RESET_ALL)
                 bar()
         return [dfAd01, dfRwy, dfSrv]
+
+    def parseEnr016Data(self, dfAd01):
+        print("Parsing "+ self.country + "-AD-1.6 data to obtan SSR code allocation plan")
+        dfColumns = ['start','end','depart','arrive', 'string']
+        df = pd.DataFrame(columns=dfColumns)
+
+        webpage = self.getTableSoup(self.country + "-ENR-1.6-en-GB.html")
+        getDiv = webpage.find("div", id = "ENR-1.6.2.6")
+        getTr = getDiv.find_all('tr')
+        barLength = len(getTr)
+        with alive_bar(barLength) as bar: # Define the progress bar
+            for row in getTr:
+                getP = row.find_all('p')
+                if len(getP) > 1:
+                    text = re.search(r"([\d]{4})...([\d]{4})", getP[0].text) # this will just return ranges and ignore all discreet codes in the table
+                    if text:
+                        start = text.group(1)
+                        end = text.group(2)
+
+                        # create an array of words to search through to try and match code range to destination airport
+                        locArray = getP[1].text.split()
+                        for loc in locArray:
+                            strip = re.search(r"([A-Za-z]{3,10})", loc)
+                            if strip:
+                                # search the dataframe containing icao_codes
+                                name = dfAd01[dfAd01['name'].str.contains(strip.group(1), case=False, na=False)]
+                                if len(name.index) == 1:
+                                    dfOut = {'start': start,'end': end,'depart': "EG[A-Z]{2}",'arrive': name.iloc[0]['icao_designator'],'string': strip.group(1)}
+                                    df = df.append(dfOut, ignore_index=True)
+                                elif strip.group(1) == "RAF" or strip.group(1) == "Military" or strip.group(1) == "RNAS" or strip.group(1) == "NATO":
+                                    dfOut = {'start': start,'end': end,'depart': 0,'arrive': 'Military','string': strip.group(1)}
+                                    df = df.append(dfOut, ignore_index=True)
+                                elif strip.group(1) == "Transit":
+                                    dfOut = {'start': start,'end': end,'depart': 'EG[A-Z]{2}','arrive': locArray[2],'string': strip.group(1)}
+                                    df = df.append(dfOut, ignore_index=True)
+                bar()
+        return(df)
 
     def parseEnr02Data(self):
         def getBoundary(space): # creates a boundary useable in vatSys from AIRAC data
@@ -338,9 +374,9 @@ class Webscrape:
         return [dfNav, dfFix]
 
     def run(self):
-        #Database.clear()
         Ad01 = self.parseAd01Data()
         Ad02 = self.parseAd02Data(Ad01)
+        Enr016 = self.parseEnr016Data(Ad01)
         Enr02 = self.parseEnr02Data()
         Enr031 = self.parseEnr03Data('1')
         Enr033 = self.parseEnr03Data('3')
@@ -348,7 +384,7 @@ class Webscrape:
         Enr041 = self.parseEnr04Data('1')
         Enr044 = self.parseEnr04Data('4')
 
-        return [Ad02, Enr02, Enr031, Enr033, Enr035, Enr041, Enr044]
+        return [Ad02, Enr016, Enr02, Enr031, Enr033, Enr035, Enr041, Enr044]
 
     @staticmethod
     def search(find, name, string):
