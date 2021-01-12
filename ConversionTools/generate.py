@@ -10,8 +10,6 @@ import fnmatch
 import xml.etree.ElementTree as xtree
 import pandas as pd
 import urllib3
-import mysql.connector
-import mysqlconnect # mysql connection details
 import xmlschema
 from datetime import date
 from defusedxml import defuse_stdlib
@@ -21,71 +19,6 @@ from time import time, ctime
 from alive_progress import alive_bar
 from pykml import parser
 from shapely.geometry import MultiPoint
-
-cursor = mysqlconnect.db.cursor()
-
-def mysqlExec(sql, sqlType):
-    try:
-        if sqlType == "insert":
-            cursor.execute(sql)
-            mysqlconnect.db.commit()
-        elif sqlType == "one":
-            cursor.execute(sql)
-            return cursor.fetchone()
-        elif sqlType == "all":
-            cursor.execute(sql)
-            return cursor.fetchall()
-    except mysql.connector.Error as err:
-        print(err)
-
-class Database:
-    '''Class for database functions NOT WORKING'''
-
-    def __init__(self):
-        self.cursor = mysqlconnect.db.cursor()
-
-    def insert(self, sql):
-        self.cursor.execute(sql)
-        mysqlconnect.db.commit()
-
-    def selectOne(self, sql):
-        self.cursor.execute(sql)
-        return self.cursor.fetchone()
-
-    def selectAll(self, sql):
-        self.cursor.execute(sql)
-        return self.cursor.fetchall()
-
-    def exec(self, sql, action):
-        try:
-            if action == "insert":
-                self.insert(sql)
-            elif action == "one":
-                self.selectOne(sql)
-            elif action == "all":
-                self.selectAll(sql)
-        except mysql.connector.Error as err:
-            print(err)
-
-    def close(self):
-        self.cursor.close()
-
-    def clear():
-        print(Fore.RED + "!!!WARNING!!!" + Style.RESET_ALL)
-        print("This will truncate (delete) the contents of all tables in this database.")
-        print("Are you sure you wish to contine?")
-        print("Please type 'confirm' to continue or any other option to leave the database intact: ")
-        confirmation = input()
-        if confirmation == "confirm":
-            # Back everything up first!
-            sqlA = "BACKUP DATABASE uk-dataset TO DISK 'backup.sql'"
-            #cursor.execute(sqlA)
-            tables = ["aerodromes", "aerodrome_frequencies", "aerodrome_runways", "aerodrome_runways_sid", "aerodrome_runways_star", "fixes", "navaids", "control_areas", "terminal_control_areas", "flight_information_regions", "airways"]
-            for t in tables:
-                truncate = "TRUNCATE TABLE " + t
-                cursor.execute(truncate)
-        else:
-            print("No data has been deleted. We think...")
 
 class Airac:
     '''Class for general functions relating to AIRAC'''
@@ -236,11 +169,11 @@ class Webscrape:
                     serviceFrequency = self.search("([\d]{3}\.[\d]{3})", "TFREQUENCY", str(aerodromeAd0218))
 
                     for srv, frq in zip(aerodromeServices, serviceFrequency):
-                        callSignId = "SELECT id FROM standard_callsigns WHERE description = '"+ str(srv) +"' LIMIT 1"
-                        callSignType = mysqlExec(callSignId, "one")
-                        csModify = re.search(r"([\d]{1,8})", str(callSignType))
+                        #callSignId = "SELECT id FROM standard_callsigns WHERE description = '"+ str(srv) +"' LIMIT 1"
+                        #callSignType = mysqlExec(callSignId, "one")
+                        #csModify = re.search(r"([\d]{1,8})", str(callSignType))
 
-                        dfOut = {'icao_designator': str(aeroIcao),'callsign_type': str(csModify.group(1)),'frequency': str(frq)}
+                        dfOut = {'icao_designator': str(aeroIcao),'callsign_type': str(srv),'frequency': str(frq)}
                         dfSrv = dfSrv.append(dfOut, ignore_index=True)
                 else:
                     print(Fore.RED + "Aerodrome " + aeroIcao + " does not exist" + Style.RESET_ALL)
