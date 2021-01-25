@@ -202,16 +202,17 @@ class Webscrape:
                         for loc in locArray:
                             strip = re.search(r"([A-Za-z]{3,10})", loc)
                             if strip:
+                                dep = "EG\w{2}"
                                 # search the dataframe containing icao_codes
                                 name = dfAd01[dfAd01['name'].str.contains(strip.group(1), case=False, na=False)]
                                 if len(name.index) == 1:
-                                    dfOut = {'start': start,'end': end,'depart': "EG[A-Z]{2}",'arrive': name.iloc[0]['icao_designator'],'string': strip.group(1)}
+                                    dfOut = {'start': start,'end': end,'depart': dep,'arrive': name.iloc[0]['icao_designator'],'string': strip.group(1)}
                                     df = df.append(dfOut, ignore_index=True)
                                 elif strip.group(1) == "RAF" or strip.group(1) == "Military" or strip.group(1) == "RNAS" or strip.group(1) == "NATO":
-                                    dfOut = {'start': start,'end': end,'depart': 0,'arrive': 'Military','string': strip.group(1)}
+                                    dfOut = {'start': start,'end': end,'depart': dep,'arrive': 'Military','string': strip.group(1)}
                                     df = df.append(dfOut, ignore_index=True)
                                 elif strip.group(1) == "Transit":
-                                    dfOut = {'start': start,'end': end,'depart': 'EG[A-Z]{2}','arrive': locArray[2],'string': strip.group(1)}
+                                    dfOut = {'start': start,'end': end,'depart': dep,'arrive': locArray[2],'string': strip.group(1)}
                                     df = df.append(dfOut, ignore_index=True)
                 bar()
         return(df)
@@ -335,9 +336,7 @@ class Webscrape:
 
     def parseEnr04Data(self, sub):
         dfColumns = ['name', 'type', 'coords']
-        dfNav = pd.DataFrame(columns=dfColumns)
-        dfColumns = ['name', 'coords']
-        dfFix = pd.DataFrame(columns=dfColumns)
+        df = pd.DataFrame(columns=dfColumns)
         print("Parsing "+ self.country +"-ENR-4."+ sub +" Data (RADIO NAVIGATION AIDS - EN-ROUTE)...")
         getData = self.getTableSoup(self.country + "-ENR-4."+ sub +"-en-GB.html")
         listData = getData.find_all("tr", class_ = "Table-row-type-3")
@@ -365,32 +364,203 @@ class Webscrape:
 
                     # Add navaid to the aerodromeDB
                     dfOut = {'name': str(name[2]), 'type': str(name[1]), 'coords': str(fullLocation)}
-                    dfNav = dfNav.append(dfOut, ignore_index=True)
                 elif sub == "4":
                     # Add fix to the aerodromeDB
-                    dfOut = {'name': str(name[1]), 'coords': str(fullLocation)}
-                    dfFix = dfFix.append(dfOut, ignore_index=True)
+                    dfOut = {'name': str(name[1]), 'type': 'FIX', 'coords': str(fullLocation)}
+
+                df = df.append(dfOut, ignore_index=True)
                 bar()
-        return [dfNav, dfFix]
+        return df
 
     def run(self):
-        Ad01 = self.parseAd01Data()
-        Ad02 = self.parseAd02Data(Ad01)
-        Enr016 = self.parseEnr016Data(Ad01)
-        Enr02 = self.parseEnr02Data()
-        Enr031 = self.parseEnr03Data('1')
-        Enr033 = self.parseEnr03Data('3')
-        Enr035 = self.parseEnr03Data('5')
-        Enr041 = self.parseEnr04Data('1')
-        Enr044 = self.parseEnr04Data('4')
+        Ad01 = self.parseAd01Data() # returns single dataframe
+        Ad02 = self.parseAd02Data(Ad01) # returns dfAd01, dfRwy, dfSrv
+        Enr016 = self.parseEnr016Data(Ad01) # returns single dataframe
+        Enr02 = self.parseEnr02Data() # returns dfFir, dfUir, dfCta, dfTma
+        Enr031 = self.parseEnr03Data('1') # returns single dataframe
+        Enr033 = self.parseEnr03Data('3') # returns single dataframe
+        Enr035 = self.parseEnr03Data('5') # returns single dataframe
+        Enr041 = self.parseEnr04Data('1') # returns single dataframe
+        Enr044 = self.parseEnr04Data('4') # returns single dataframe
 
-        return [Ad02, Enr016, Enr02, Enr031, Enr033, Enr035, Enr041, Enr044]
+        Ad01.to_csv('Dataframes/Ad01.csv')
+        Ad02[1].to_csv('Dataframes/Ad02-Runways.csv')
+        Ad02[1].to_csv('Dataframes/Ad02-Services.csv')
+        Enr016.to_csv('Dataframes/Enr016.csv')
+        Enr02[0].to_csv('DataFrames/Enr02-FIR.csv')
+        Enr02[1].to_csv('DataFrames/Enr02-UIR.csv')
+        Enr02[2].to_csv('DataFrames/Enr02-CTA.csv')
+        Enr02[3].to_csv('DataFrames/Enr02-TMA.csv')
+        Enr031.to_csv('DataFrames/Enr031.csv')
+        Enr033.to_csv('DataFrames/Enr033.csv')
+        Enr035.to_csv('DataFrames/Enr035.csv')
+        Enr041.to_csv('DataFrames/Enr041.csv')
+        Enr044.to_csv('DataFrames/Enr044.csv')
+
+        return [Ad01, Ad02, Enr016, Enr02, Enr031, Enr033, Enr035, Enr041, Enr044]
 
     @staticmethod
     def search(find, name, string):
         searchString = find + "(?=<\/span>.*>" + name + ")"
         result = re.findall(rf"{str(searchString)}", str(string))
         return result
+
+class Builder:
+    '''Class to build xml files from the dataframes for vatSys'''
+
+    def __init__(self, fileImport=0):
+        self.mapCentre = "+53.7-1.5"
+        # if there are dataframe files present then use those, else run the webscraper
+        if fileImport == 1:
+            scrape = []
+            scrape.append(pd.read_csv('Dataframes/Ad01.csv', index_col=0))
+            scrape.append(pd.read_csv('Dataframes/Ad02-Runways.csv', index_col=0))
+            scrape.append(pd.read_csv('Dataframes/Ad02-Services.csv', index_col=0))
+            scrape.append(pd.read_csv('Dataframes/Enr016.csv', index_col=0))
+            scrape.append(pd.read_csv('DataFrames/Enr02-FIR.csv', index_col=0))
+            scrape.append(pd.read_csv('DataFrames/Enr02-UIR.csv', index_col=0))
+            scrape.append(pd.read_csv('DataFrames/Enr02-CTA.csv', index_col=0))
+            scrape.append(pd.read_csv('DataFrames/Enr02-TMA.csv', index_col=0))
+            scrape.append(pd.read_csv('DataFrames/Enr031.csv', index_col=0))
+            scrape.append(pd.read_csv('DataFrames/Enr033.csv', index_col=0))
+            scrape.append(pd.read_csv('DataFrames/Enr035.csv', index_col=0))
+            scrape.append(pd.read_csv('DataFrames/Enr041.csv', index_col=0))
+            scrape.append(pd.read_csv('DataFrames/Enr044.csv', index_col=0))
+            self.scrape = scrape
+        else:
+            initWebscrape = Webscrape()
+            self.scrape = initWebscrape.run()
+
+    def run(self):
+        airspace = self.buildAirspaceXml()
+        allAirports = self.buildMapsAllAirportsXml()
+        allNavaids = self.buildMapsAllNavaidsXml()
+        allCta = self.buildOtherTopLevelMaps('ALL_CTA', '2')
+        allTma = self.buildOtherTopLevelMaps('ALL_TMA', '2')
+
+        dfAd01 = self.scrape[0]
+        dfVerified = dfAd01.loc[dfAd01['verified'] == 1] # select all verified aerodromes (verified as in a page was found in the eAIP corresponding to the icao_designator)
+        barLength = len(dfVerified.index)
+
+        with alive_bar(barLength) as bar: # Define the progress bar
+            for index, row in dfVerified.iterrows():
+                print(Fore.BLUE + "Constructing XML for " + row['icao_designator'] + " ("+ row['name'] +")" + Style.RESET_ALL)
+                # set airport name (icao) under Airspace/SystemRunways
+                xmlAerodrome = xtree.SubElement(airspace[0], 'Airport')
+                xmlAerodrome.set('Name',row['icao_designator'])
+                # set airport name (icao) under Airspace/Airports
+                xmlAirport = xtree.SubElement(airspace[3], 'Airport')
+                xmlAirport.set('ICAO', row['icao_designator'])
+                xmlAirport.set('Position', row['location'])
+                xmlAirport.set('Elevation', row['elevation'])
+                # Set points in Maps\ALL_AIRPORTS.xml
+                self.elementPoint(allAirports[0], row['icao_designator']) # set label
+                self.elementPoint(allAirports[1], row['icao_designator']) # set symbol
+
+                dfAd02Runways = self.scrape[1]
+                dfAd02RunwaysFilter = dfAd02Runways.loc[dfAd02Runways['icao_designator'] == row['icao_designator']] # select all runways that belong to this aerodrome
+
+                for indexRwy, rwy in dfAd02RunwaysFilter.iterrows():
+                    xmlRunway = xtree.SubElement(xmlAerodrome, 'Runway')
+                    xmlRunway.set('Name', rwy['runway'])
+                    xmlRunway.set('DataRunway', rwy['runway'])
+
+                    # create XML maps for each runway
+                    #figure out the other end of the runway first
+                    oppEndSplit = re.match(r'([\d]{2})([L|R|C])?', rwy['runway'])
+                    if int(oppEndSplit.group(1)) < 18:
+                        oppEnd = int(oppEndSplit.group(1)) + 18
+                    else:
+                        oppEnd = int(oppEndSplit.group(1)) - 18
+
+                    if oppEndSplit.group(2):
+                        if oppEndSplit.group(2) == "L":
+                            oppEnd = str(oppEnd).zfill(2) + "R"
+                        elif oppEndSplit.group(2) == "R":
+                            oppEnd = str(oppEnd).zfill(2) + "L"
+                        elif oppEndSplit.group(2) == "C":
+                            oppEnd = str(oppEnd).zfill(2) + "C"
+                    else:
+                        oppEnd = str(oppEnd).zfill(2)
+                bar()
+
+    def buildAirspaceXml(self):
+        xmlAirspace = self.root('Airspace') # create XML document Airspace.xml
+
+        # Define subtag SystemRunways, SidStar, Intersections, Airports and Airways - https://virtualairtrafficsystem.com/docs/dpk/#systemrunways
+        xmlSystemRunways = xtree.SubElement(xmlAirspace, 'SystemRunways')
+        xmlSidStar = xtree.SubElement(xmlAirspace, 'SIDSTARs')
+        xmlIntersections = xtree.SubElement(xmlAirspace, 'Intersections')
+        xmlAirports = xtree.SubElement(xmlAirspace, 'Airports')
+        xmlAirways = xtree.SubElement(xmlAirspace, 'Airways')
+
+        return [xmlSystemRunways, xmlSidStar, xmlIntersections, xmlAirports, xmlAirways]
+
+    def buildMapsAllAirportsXml(self):
+        # create XML document Maps\ALL_AIRPORTS
+        xmlAllAirports = self.root('Maps')
+        xmlAllAirportsMap = self.constructMapHeader(xmlAllAirports, 'System2', 'ALL_AIRPORTS', '2', self.mapCentre)
+
+        xmlAllAirportsLabel = xtree.SubElement(xmlAllAirportsMap, 'Label')
+        xmlAllAirportsLabel.set('HasLeader', 'true') # has a line connecting the point and label
+        xmlAllAirportsLabel.set('LabelOrientation', 'NW') # where the label will be positioned in relation to the point
+        xmlAllAirportsSymbol = xtree.SubElement(xmlAllAirportsMap, 'Symbol')
+        xmlAllAirportsSymbol.set('Type', 'Reticle') # https://virtualairtrafficsystem.com/docs/dpk/#symbol-element
+
+        return [xmlAllAirportsLabel, xmlAllAirportsSymbol]
+
+    def buildMapsAllNavaidsXml(self):
+        # create XML document Maps\ALL_NAVAIDS
+        xmlAllNavaids = self.root('Maps')
+        xmlAllNavaidsMap = self.constructMapHeader(xmlAllNavaids, 'System', 'ALL_NAVAIDS_NAMES', '0', self.mapCentre)
+        xmlAllNavaidsMapSym = self.constructMapHeader(xmlAllNavaidsMap, 'System', 'ALL_NAVAIDS', '0', self.mapCentre)
+
+        xmlAllNavaidsLabel = xtree.SubElement(xmlAllNavaidsMap, 'Label')
+        xmlAllNavaidsLabel.set('HasLeader', 'true') # has a line connecting the point and label
+
+        xmlAllNavaidsSymbol = xtree.SubElement(xmlAllNavaidsMapSym, 'Symbol')
+        xmlAllNavaidsSymbol.set('Type', 'Hexagon') # https://virtualairtrafficsystem.com/docs/dpk/#symbol-element
+        xmlAllNavaidsSymbolH = xtree.SubElement(xmlAllNavaidsMapSym, 'Symbol')
+        xmlAllNavaidsSymbolH.set('Type', 'DotFillCircle') # https://virtualairtrafficsystem.com/docs/dpk/#symbol-element
+
+        return [xmlAllNavaidsLabel, xmlAllNavaidsSymbol, xmlAllNavaidsSymbolH]
+
+    def buildOtherTopLevelMaps(self, mapName, priority):
+        xmlRoot = self.root('Maps')
+        xmlMap = self.constructMapHeader(xmlRoot, 'System', mapName, priority, self.mapCentre)
+
+        return xmlMap
+
+    @staticmethod
+    def root(name):
+        # Define the XML root tag
+        xml = xtree.Element(name)
+        xml.set('xmlns:xsd', 'http://www.w3.org/2001/XMLSchema')
+        xml.set('xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance')
+
+        # Set a tag for XML generation time
+        xml.set('generated', ctime(time()))
+
+        return xml
+
+    @staticmethod
+    def constructMapHeader(rootName, mapType, name, priority, center): # ref https://virtualairtrafficsystem.com/docs/dpk/#map-element
+        # creates the neccessary header for XML documents in the \Maps folder
+        mapHeader = xtree.SubElement(rootName, 'Map')
+
+        mapHeader.set('Type', mapType) # The type primarily will affect the colour vatSys uses to paint the map. Colours are defined in Colours.xml.
+        mapHeader.set('Name', name) # The title of the Map (as displayed to the user).
+        mapHeader.set('Priority', priority) # An integer specifying the z-axis layering of the map, 0 being drawn on top of everything else.
+        if center:
+            mapHeader.set('Center', center) # An approximate center point of the map, used to deconflict in the event of multiple Waypoints with the same name.
+
+        return mapHeader
+
+    @staticmethod
+    def elementPoint(sub, text):
+        point = xtree.SubElement(sub, 'Point')
+        point.text = text
+        return point
 
 class Geo:
     '''Class to store various geo tools'''
@@ -484,5 +654,5 @@ class Geo:
 
 # Defuse XML
 defuse_stdlib()
-new = Webscrape()
-print(new.run())
+new = Builder(1)
+new.run()
