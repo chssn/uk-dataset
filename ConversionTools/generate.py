@@ -24,6 +24,7 @@ from shapely.geometry import Point as sPoint
 from shapely.ops import transform
 from functools import partial
 from geopy.point import Point
+from geopy.distance import geodesic
 
 class Airac:
     '''Class for general functions relating to AIRAC'''
@@ -592,14 +593,35 @@ class Builder:
                     dfAd02RunwaysOpp = self.scrape[1]
                     dfAd02RunwaysOppFilter = dfAd02RunwaysOpp.loc[(dfAd02RunwaysOpp['icao_designator'] == row['icao_designator']) & (dfAd02RunwaysOpp['runway'] == str(oppEnd))] # select all runways that belong to this aerodrome
 
-                    for indexOppRwy, oppRwy in dfAd02RunwaysOppFilter.iterrows():
-                        if oppRwy.any:
-                            xmlMapsRunwayThreshOpp.set('Name', str(oppEnd))
-                            xmlMapsRunwayThreshOpp.set('Position', oppRwy['location'])
-                        else:
-                            print(Fore.RED + "No opposite runway for " + rwy['runway'] + " at " + row['icao_designator'] + Style.RESET_ALL)
-                            xmlMapsRunwayThreshOpp.set('Name', str(oppEnd))
-                            xmlMapsRunwayThreshOpp.set('Position', rwy['runway'])
+                    if(len(dfAd02RunwaysOppFilter) > 0):
+                        for indexOppRwy, oppRwy in dfAd02RunwaysOppFilter.iterrows():
+                            if oppRwy.any:
+                                xmlMapsRunwayThreshOpp.set('Name', str(oppEnd))
+                                xmlMapsRunwayThreshOpp.set('Position', oppRwy['location'])
+                    else:
+                        print(Fore.RED + "No opposite runway for " + rwy['runway'] + " at " + row['icao_designator'] + Style.RESET_ALL)
+                        xmlMapsRunwayThreshOpp.set('Name', str(oppEnd))
+                        oppDist = int(rwy['length']) / 1000 # get runway distance in KM
+                        dmsExplode = re.search(r'([+-]{1})([\d]{2})([\d]{2})([\d]{2}\.[\d]{2})([+-]{1})([\d]{3})([\d]{2})([\d]{2}\.[\d]{2})', rwy['location'])
+                        lat = Point.parse_degrees(dmsExplode.group(2), dmsExplode.group(3), dmsExplode.group(4), Geo.northSouth(dmsExplode.group(1)))
+                        lon = Point.parse_degrees(dmsExplode.group(6), dmsExplode.group(7), dmsExplode.group(8), Geo.eastWest(dmsExplode.group(5)))
+                        oppCoord = geodesic(kilometers=oppDist).destination(Point(lat, lon), rwy['bearing']).format_decimal()
+                        splt = oppCoord.split(', ')
+                        p = Point(splt[0], splt[1])
+                        dmsFormat = p.format(deg_char='', min_char='', sec_char='')
+                        dmsSplit = dmsFormat.split()
+
+                        def splitRound(floatIn):
+                            roundIt = round(float(floatIn), 2)
+                            splitIt = str(roundIt).split('.')
+                            buildIt = str(splitIt[0]).zfill(2) + "." + splitIt[1]
+                            return buildIt
+
+                        roundLat = splitRound(dmsSplit[2])
+                        roundLon = splitRound(dmsSplit[6])
+                        space = Geo.plusMinus(dmsSplit[3].rstrip(',')) + dmsSplit[0].zfill(2) + dmsSplit[1].zfill(2) + str(roundLat) + Geo.plusMinus(dmsSplit[7]) + dmsSplit[4].zfill(3) + dmsSplit[5].zfill(2) + str(roundLon)
+
+                        xmlMapsRunwayThreshOpp.set('Position', space)
 
                     # create map points and titles
                     xmlMapsRunwayPointsLabels = self.constructMapHeader(xmlMapsRunway, 'System', row['icao_designator'] + '_TWR_RWY_' + rwy['runway'] + '_NAMES', '2', rwy['location'])
@@ -1097,7 +1119,26 @@ class ValidateXml:
 
         print(Fore.GREEN + "    OK" + Style.RESET_ALL + " - All tests passed for " + searchDir + matchFile)
 
+    @staticmethod
+    def run():
+        # Validation of XML files with XSD schema
+        twrMap = ValidateXml("Validation/twrmap.xsd")
+        twrMap.validateDir("Build/Maps", "*TWR*")
+
+        airspace = ValidateXml("Validation/airspace.xsd")
+        airspace.validateDir("Build", "Airspace")
+
+        radar = ValidateXml("Validation/radars.xsd")
+        radar.validateDir("Build", "Radars")
+
+        sectors = ValidateXml("Validation/sectors.xsd")
+        sectors.validateDir("Build", "Sectors")
+
+        allMaps = ValidateXml("Validation/allmaps.xsd")
+        allMaps.validateDir("Build/Maps", "ALL_*")
+
 # Defuse XML
 defuse_stdlib()
 new = Builder(1)
 new.run()
+ValidateXml.run()
