@@ -180,10 +180,10 @@
     </Colour>
     <Colour id="ASDBackground">
       <Use>ASD Backgrounds</Use>
-      <Name>MidGrey</Name>
-      <R>127</R>
-      <G>127</G>
-      <B>127</B>
+      <Name>Black</Name>
+      <R>28</R>
+      <G>28</G>
+      <B>28</B>
     </Colour>
     <Colour id="CPDLCSendButton">
       <Use>CPDLC Hot-Send Button</Use>
@@ -215,10 +215,10 @@
     </Colour>
     <Colour id="PostJurisdiction">
       <Use>PostJurisdiction</Use>
-      <Name>Black</Name>
-      <R>0</R>
-      <G>0</G>
-      <B>0</B>
+      <Name>DarkBlue</Name>
+      <R>59</R>
+      <G>89</G>
+      <B>110</B>
     </Colour>
     <Colour id="JurisdictionIQL">
       <Use>JurisdictionIQL</Use>
@@ -250,17 +250,17 @@
     </Colour>
     <Colour id="NonJurisdiction">
       <Use>Non Jurisdiction Tracks and Strips</Use>
-      <Name>Black</Name>
-      <R>0</R>
-      <G>0</G>
-      <B>0</B>
+      <Name>DarkBlue</Name>
+      <R>59</R>
+      <G>89</G>
+      <B>110</B>
     </Colour>
     <Colour id="NonJurisdictionLabel">
       <Use>Non Jurisdiction Labels</Use>
-      <Name>VeryDarkGrey</Name>
-      <R>55</R>
-      <G>55</G>
-      <B>55</B>
+      <Name>DarkBlue</Name>
+      <R>59</R>
+      <G>89</G>
+      <B>110</B>
     </Colour>
     <Colour id="CFLHighlight">
       <Use>New CFL Selection</Use>
@@ -348,10 +348,10 @@
     </Colour>
     <Colour id="Infill">
       <Use>Filled Area Map</Use>
-      <Name>MidGrey</Name>
-      <R>133</R>
-      <G>133</G>
-      <B>133</B>
+      <Name>DarkGrey</Name>
+      <R>90</R>
+      <G>90</G>
+      <B>90</B>
     </Colour>
     <Colour id="SecondaryMap">
       <Use>Alternative System Map</Use>

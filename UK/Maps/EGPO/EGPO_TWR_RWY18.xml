@@ -1,2 +1,0 @@
-<?xml version='1.0' encoding='utf-8'?>
-<Maps xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" generated="Wed Dec 30 16:32:55 2020"><Map Type="System" Name="EGPO_TWR_RWY18" Priority="1" Center="+581256.0-0061952.0"><Runway Name="18"><Threshold Name="18" Position="+581327.77-0061957.85" ExtendedCentrelineTrack="354.28" ExtendedCentrelineLength="10" ExtendedCentrelineTickInterval="1" /><Threshold Name="00" Position="+581213.28-0002043.69" /></Runway></Map></Maps>

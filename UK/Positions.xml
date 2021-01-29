@@ -79,24 +79,6 @@
       <Airport Name="EGKK" />
     </ArrivalLists>
   </Position>
-  <Position Name="EGKK_DEL" Type="ASMGCS" ASMGCSAirport="EGKK" DefaultCenter="+510853.0-0001125.0" DefaultRange="2" MagneticVariation="0.53" Rotation="10">
-    <Maps>
-      <Map Name="EGKK/EGKK_SMR" />
-      <Map Name="EGKK/EGKK_SMR_RWY" />
-      <Map Name="EGKK/EGKK_SMR_TWY" />
-      <Map Name="EGKK/EGKK_SMR_BLD" />
-      <Map Name="EGKK/EGKK_SMR_APR" />
-      <Map Name="EGKK/EGKK_SMR_BAK" />
-      <Map Name="EGKK/EGKK_SMR_INF" />
-      <Map Name="EGKK/EGKK_SMR_HLD" />
-    </Maps>
-    <Strips Mode="Beacon" Sort="Alpha">
-      <Window Type="ADEP" Beacon="EGKK" Visible="true" />
-    </Strips>
-    <Sectors>
-      <Sector Name="EGKK_DEL" />
-    </Sectors>
-  </Position>
   <Position Name="EGPH_TWR" Type="ASD" DefaultCenter="+555700.0-0032221.0" DefaultRange="50" MagneticVariation="0.53">
     <Maps>
       <Map Name="EGPH/EGPH_SMR" />
@@ -146,23 +128,5 @@
     <ArrivalLists>
       <Airport Name="EGPH" />
     </ArrivalLists>
-  </Position>
-  <Position Name="EGPH_DEL" Type="ASMGCS" ASMGCSAirport="EGPH" DefaultCenter="+555700.0-0032221.0" DefaultRange="2" MagneticVariation="0.53" Rotation="10">
-    <Maps>
-      <Map Name="EGPH/EGPH_SMR" />
-      <Map Name="EGPH/EGPH_SMR_RWY" />
-      <Map Name="EGPH/EGPH_SMR_TWY" />
-      <Map Name="EGPH/EGPH_SMR_BLD" />
-      <Map Name="EGPH/EGPH_SMR_APR" />
-      <Map Name="EGPH/EGPH_SMR_BAK" />
-      <Map Name="EGPH/EGPH_SMR_INF" />
-      <Map Name="EGPH/EGPH_SMR_HLD" />
-    </Maps>
-    <Strips Mode="Beacon" Sort="Alpha">
-      <Window Type="ADEP" Beacon="EGPH" Visible="true" />
-    </Strips>
-    <Sectors>
-      <Sector Name="EGPH_DEL" />
-    </Sectors>
   </Position>
 </Positions>
