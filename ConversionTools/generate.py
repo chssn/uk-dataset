@@ -785,7 +785,7 @@ class Builder:
         # create XML document Maps\ALL_NAVAIDS
         xmlAllNavaids = self.root('Maps')
         xmlAllNavaidsMap = self.constructMapHeader(xmlAllNavaids, 'System', 'ALL_NAVAIDS_NAMES', '0', self.mapCentre)
-        xmlAllNavaidsMapSym = self.constructMapHeader(xmlAllNavaidsMap, 'System', 'ALL_NAVAIDS', '0', self.mapCentre)
+        xmlAllNavaidsMapSym = self.constructMapHeader(xmlAllNavaids, 'System', 'ALL_NAVAIDS', '0', self.mapCentre)
 
         xmlAllNavaidsLabel = xtree.SubElement(xmlAllNavaidsMap, 'Label')
         xmlAllNavaidsLabel.set('HasLeader', 'true') # has a line connecting the point and label
