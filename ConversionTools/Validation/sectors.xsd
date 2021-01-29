@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:element name="ResponsibleSectors" type="xs:string"/>
   <xs:element name="Sector">
@@ -18,10 +19,14 @@
       </xs:sequence>
       <xs:attribute type="xs:string" name="generated"/>
     </xs:complexType>
+    <xs:unique name="UniqueFullName">
+      <xs:selector xpath="Sector" />
+      <xs:field xpath="@FullName" />
+    </xs:unique>
   </xs:element>
   <xs:simpleType name="frequency">
-  <xs:restriction base="xs:string">
-    <xs:pattern value="[\d]{3}\.[\d]{3}"/>
-  </xs:restriction>
-</xs:simpleType>
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[\d]{3}\.[\d]{3}"/>
+    </xs:restriction>
+  </xs:simpleType>
 </xs:schema>

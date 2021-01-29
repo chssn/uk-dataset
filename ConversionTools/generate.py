@@ -882,7 +882,7 @@ class Builder:
         lastType = ''
 
         # Load the services data to build Sectors.xml
-        servicesCsv = self.scrape[2]
+        servicesCsv = self.scrape[2].sort_values(by=['icao_designator', 'callsign_type'])
         barLength = len(servicesCsv.index)
 
         with alive_bar(barLength) as bar: # Define the progress bar
@@ -909,7 +909,7 @@ class Builder:
                         elif serviceType(row['callsign_type']) == "_GND":
                             xmlSectorResponsible.text = row['icao_designator'] + "_DEL"
 
-                    lastType = row['callsign_type']
+                lastType = row['callsign_type']
                 bar()
 
             sectorTree = xtree.ElementTree(xmlSectors)
