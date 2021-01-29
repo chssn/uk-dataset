@@ -11,6 +11,7 @@ import xml.etree.ElementTree as xtree
 import pandas as pd
 import urllib3
 import xmlschema
+import pyproj
 from datetime import date
 from defusedxml import defuse_stdlib
 from bs4 import BeautifulSoup
@@ -19,6 +20,10 @@ from time import time, ctime
 from alive_progress import alive_bar
 from pykml import parser
 from shapely.geometry import MultiPoint
+from shapely.geometry import Point as sPoint
+from shapely.ops import transform
+from functools import partial
+from geopy.point import Point
 
 class Airac:
     '''Class for general functions relating to AIRAC'''
@@ -218,25 +223,6 @@ class Webscrape:
         return(df)
 
     def parseEnr02Data(self):
-        def getBoundary(space): # creates a boundary useable in vatSys from AIRAC data
-            lat = 1
-            fullBoundary = ''
-            for s in space:
-                if s[1] == "W" or s[1] == "S":
-                    symbol = "-"
-                else:
-                    symbol = "+"
-
-                if lat == 1:
-                    coordString = symbol + s[0] + ".00"
-                    lat = 0
-                else:
-                    coordString += symbol + s[0]
-                    fullBoundary += coordString + ".00/"
-                    lat = 1
-
-            return fullBoundary.rstrip('/')
-
         dfColumns = ['name', 'callsign', 'frequency', 'boundary', 'upper_fl', 'lower_fl']
         dfFir = pd.DataFrame(columns=dfColumns)
         dfUir = pd.DataFrame(columns=dfColumns)
@@ -264,7 +250,7 @@ class Webscrape:
 
                 if firTitle:
                     if firSpace:
-                        boundary = getBoundary(firSpace)
+                        boundary = self.getBoundary(firSpace)
                         dfOut = {'name': str(firTitle[0]),'callsign': 'NONE','frequency': '000.000', 'boundary': str(boundary), 'upper_fl': str(firUpper[0]), 'lower_fl': str(firLower[0])}
                         dfFir = dfFir.append(dfOut, ignore_index=True)
 
@@ -285,7 +271,7 @@ class Webscrape:
                             title = str(fF.group(2)) + str(fF.group(5))
 
                         if ctaSpace:
-                            boundary = getBoundary(ctaSpace)
+                            boundary = self.getBoundary(ctaSpace)
 
                             dfOut = {'fir_id': '0', 'name': str(title), 'boundary': str(boundary)}
                             dfCta = dfCta.append(dfOut, ignore_index=True)
@@ -305,7 +291,7 @@ class Webscrape:
                             title = str(fF.group(2)) + str(fF.group(5))
 
                         if tmaSpace:
-                            boundary = getBoundary(tmaSpace)
+                            boundary = self.getBoundary(tmaSpace)
 
                             dfOut = {'fir_id': '0', 'name': str(title), 'boundary': str(boundary)}
                             dfTma = dfTma.append(dfOut, ignore_index=True)
@@ -372,6 +358,34 @@ class Webscrape:
                 bar()
         return df
 
+    def parseEnr051Data(self):
+        dfColumns = ['name', 'boundary', 'floor', 'ceiling']
+        dfEnr05 = pd.DataFrame(columns=dfColumns)
+        print("Parsing "+ self.country +"-ENR-5.1 data for PROHIBITED, RESTRICTED AND DANGER AREAS...")
+        getENR5 = self.getTableSoup(self.country + "-ENR-5.1-en-GB.html")
+        listTables = getENR5.find_all("tr")
+        barLength = len(listTables)
+        with alive_bar(barLength) as bar: # Define the progress bar
+            for row in listTables:
+                getId = self.search("((EG)\s(D|P|R)[\d]{3}[A-Z]*)", "TAIRSPACE;CODE_ID", str(row))
+                getName = self.search("([A-Z\s]*)", "TAIRSPACE;TXT_NAME", str(row))
+                getLoc = self.search("([\d]{6,7})([N|E|S|W]{1})", "TAIRSPACE_VERTEX;GEO_L", str(row))
+                getUpper = self.search("([\d]{3,5})", "TAIRSPACE_VOLUME;VAL_DIST_VER_UPPER", str(row))
+                #getLower = self.search("([\d]{3,5})|(SFC)", "TAIRSPACE_VOLUME;VAL_DIST_VER_LOWER", str(row))
+
+                if getId:
+                    for upper in getUpper:
+                        up = upper
+                    dfOut = {'name': str(getId[0][0]) + ' ' + str(getName[2]), 'boundary': self.getBoundary(getLoc), 'floor': 0, 'ceiling': str(up)}
+                    dfEnr05 = dfEnr05.append(dfOut, ignore_index=True)
+
+                bar()
+        return dfEnr05
+
+    def test(self): # testing code - remove for live
+        test = self.parseEnr051Data()
+        test.to_csv('Dataframes/Enr051.csv')
+
     def run(self):
         Ad01 = self.parseAd01Data() # returns single dataframe
         Ad02 = self.parseAd02Data(Ad01) # returns dfAd01, dfRwy, dfSrv
@@ -382,10 +396,11 @@ class Webscrape:
         Enr035 = self.parseEnr03Data('5') # returns single dataframe
         Enr041 = self.parseEnr04Data('1') # returns single dataframe
         Enr044 = self.parseEnr04Data('4') # returns single dataframe
+        Enr051 = self.parseEnr051Data() # returns single dataframe
 
         Ad01.to_csv('Dataframes/Ad01.csv')
         Ad02[1].to_csv('Dataframes/Ad02-Runways.csv')
-        Ad02[1].to_csv('Dataframes/Ad02-Services.csv')
+        Ad02[2].to_csv('Dataframes/Ad02-Services.csv')
         Enr016.to_csv('Dataframes/Enr016.csv')
         Enr02[0].to_csv('DataFrames/Enr02-FIR.csv')
         Enr02[1].to_csv('DataFrames/Enr02-UIR.csv')
@@ -396,14 +411,35 @@ class Webscrape:
         Enr035.to_csv('DataFrames/Enr035.csv')
         Enr041.to_csv('DataFrames/Enr041.csv')
         Enr044.to_csv('DataFrames/Enr044.csv')
+        Enr051.to_csv('Dataframes/Enr051.csv')
 
-        return [Ad01, Ad02, Enr016, Enr02, Enr031, Enr033, Enr035, Enr041, Enr044]
+        return [Ad01, Ad02, Enr016, Enr02, Enr031, Enr033, Enr035, Enr041, Enr044, Enr051]
 
     @staticmethod
     def search(find, name, string):
         searchString = find + "(?=<\/span>.*>" + name + ")"
         result = re.findall(rf"{str(searchString)}", str(string))
         return result
+
+    @staticmethod
+    def getBoundary(space): # creates a boundary useable in vatSys from AIRAC data
+        lat = 1
+        fullBoundary = ''
+        for s in space:
+            if s[1] == "W" or s[1] == "S":
+                symbol = "-"
+            else:
+                symbol = "+"
+
+            if lat == 1:
+                coordString = symbol + s[0] + ".00"
+                lat = 0
+            else:
+                coordString += symbol + s[0]
+                fullBoundary += coordString + ".00/"
+                lat = 1
+
+        return fullBoundary.rstrip('/')
 
 class Builder:
     '''Class to build xml files from the dataframes for vatSys'''
@@ -413,19 +449,20 @@ class Builder:
         # if there are dataframe files present then use those, else run the webscraper
         if fileImport == 1:
             scrape = []
-            scrape.append(pd.read_csv('Dataframes/Ad01.csv', index_col=0))
-            scrape.append(pd.read_csv('Dataframes/Ad02-Runways.csv', index_col=0))
-            scrape.append(pd.read_csv('Dataframes/Ad02-Services.csv', index_col=0))
-            scrape.append(pd.read_csv('Dataframes/Enr016.csv', index_col=0))
-            scrape.append(pd.read_csv('DataFrames/Enr02-FIR.csv', index_col=0))
-            scrape.append(pd.read_csv('DataFrames/Enr02-UIR.csv', index_col=0))
-            scrape.append(pd.read_csv('DataFrames/Enr02-CTA.csv', index_col=0))
-            scrape.append(pd.read_csv('DataFrames/Enr02-TMA.csv', index_col=0))
-            scrape.append(pd.read_csv('DataFrames/Enr031.csv', index_col=0))
-            scrape.append(pd.read_csv('DataFrames/Enr033.csv', index_col=0))
-            scrape.append(pd.read_csv('DataFrames/Enr035.csv', index_col=0))
-            scrape.append(pd.read_csv('DataFrames/Enr041.csv', index_col=0))
-            scrape.append(pd.read_csv('DataFrames/Enr044.csv', index_col=0))
+            scrape.append(pd.read_csv('Dataframes/Ad01.csv', index_col=0))          #0
+            scrape.append(pd.read_csv('Dataframes/Ad02-Runways.csv', index_col=0))  #1
+            scrape.append(pd.read_csv('Dataframes/Ad02-Services.csv', index_col=0)) #2
+            scrape.append(pd.read_csv('Dataframes/Enr016.csv', index_col=0))        #3
+            scrape.append(pd.read_csv('DataFrames/Enr02-FIR.csv', index_col=0))     #4
+            scrape.append(pd.read_csv('DataFrames/Enr02-UIR.csv', index_col=0))     #5
+            scrape.append(pd.read_csv('DataFrames/Enr02-CTA.csv', index_col=0))     #6
+            scrape.append(pd.read_csv('DataFrames/Enr02-TMA.csv', index_col=0))     #7
+            scrape.append(pd.read_csv('DataFrames/Enr031.csv', index_col=0))        #8
+            scrape.append(pd.read_csv('DataFrames/Enr033.csv', index_col=0))        #9
+            scrape.append(pd.read_csv('DataFrames/Enr035.csv', index_col=0))        #10
+            scrape.append(pd.read_csv('DataFrames/Enr041.csv', index_col=0))        #11
+            scrape.append(pd.read_csv('DataFrames/Enr044.csv', index_col=0))        #12
+            scrape.append(pd.read_csv('DataFrames/Enr051.csv', index_col=0))        #13
             self.scrape = scrape
         else:
             initWebscrape = Webscrape()
@@ -437,6 +474,8 @@ class Builder:
         allNavaids = self.buildMapsAllNavaidsXml()
         allCta = self.buildOtherTopLevelMaps('ALL_CTA', '2')
         allTma = self.buildOtherTopLevelMaps('ALL_TMA', '2')
+        self.buildSectors()
+        self.buildRestrictedAreas()
 
         dfAd01 = self.scrape[0]
         dfVerified = dfAd01.loc[dfAd01['verified'] == 1] # select all verified aerodromes (verified as in a page was found in the eAIP corresponding to the icao_designator)
@@ -452,7 +491,7 @@ class Builder:
                 xmlAirport = xtree.SubElement(airspace[3], 'Airport')
                 xmlAirport.set('ICAO', row['icao_designator'])
                 xmlAirport.set('Position', row['location'])
-                xmlAirport.set('Elevation', row['elevation'])
+                xmlAirport.set('Elevation', str(row['elevation']))
                 # Set points in Maps\ALL_AIRPORTS.xml
                 self.elementPoint(allAirports[0], row['icao_designator']) # set label
                 self.elementPoint(allAirports[1], row['icao_designator']) # set symbol
@@ -482,7 +521,218 @@ class Builder:
                             oppEnd = str(oppEnd).zfill(2) + "C"
                     else:
                         oppEnd = str(oppEnd).zfill(2)
+
+                    xmlMapsRunway = self.root('Maps')
+                    xmlMapsRunwayMap = self.constructMapHeader(xmlMapsRunway, 'System', row['icao_designator'] + '_TWR_RWY_' + rwy['runway'], '1', rwy['location'])
+                    xmlMapsRunwayMapRwy = xtree.SubElement(xmlMapsRunwayMap, 'Runway')
+                    xmlMapsRunwayMapRwy.set('Name', rwy['runway'])
+                    xmlMapsRunwayThresh = xtree.SubElement(xmlMapsRunwayMapRwy, 'Threshold')
+                    xmlMapsRunwayThresh.set('Name', rwy['runway'])
+                    xmlMapsRunwayThresh.set('Position', rwy['location'])
+                    centreLineTrack = Geo.backBearing(rwy['bearing'])
+                    xmlMapsRunwayThresh.set('ExtendedCentrelineTrack', str(centreLineTrack))
+                    xmlMapsRunwayThresh.set('ExtendedCentrelineLength', "10")
+                    xmlMapsRunwayThresh.set('ExtendedCentrelineTickInterval', "1")
+                    xmlMapsRunwayThreshOpp = xtree.SubElement(xmlMapsRunwayMapRwy, 'Threshold')
+
+                    # add SIDs into the runway map
+                    mapPoint = set() # create a set to store all SID/STAR waypoints for this aerodrome
+                    sids = Navigraph.sidStar("Navigraph/sids.txt", row['icao_designator'], rwy['runway'])
+
+                    xmlMapsRunwaySid = self.constructMapHeader(xmlMapsRunway, 'System', row['icao_designator'] + '_TWR_RWY_' + rwy['runway'] + "_SID", '1', rwy['location'])
+                    for sid in sids['Route']:
+                        xmlMapsRunwayLine = xtree.SubElement(xmlMapsRunwaySid, 'Line')
+                        xmlMapsRunwayLine.text = sid
+
+                        sidSplit = sid.split('/')
+                        for point in sidSplit:
+                            mapPoint.add(point)
+
+                    for i in sids.index:
+                        xmlSid = xtree.SubElement(xmlRunway, 'SID')
+                        xmlSid.set('Name', sids['Name'][i])
+
+                        xmlSidStarSid = xtree.SubElement(airspace[1], 'SID')
+                        xmlSidStarSid.set('Name', sids['Name'][i])
+                        xmlSidStarSid.set('Airport', sids['ICAO'][i])
+                        xmlSidStarSid.set('Runways', sids['Runway'][i])
+
+                        xmlRoute = xtree.SubElement(xmlSidStarSid, 'Route')
+                        xmlRoute.set('Runway', sids['Runway'][i])
+                        slashToSpace = sids['Route'][i].replace('/', ' ')
+                        xmlRoute.text = slashToSpace
+
+                    # add STARs into the runway map
+                    stars = Navigraph.sidStar("Navigraph/stars.txt", row['icao_designator'], rwy['runway'])
+
+                    xmlMapsRunwayStar = self.constructMapHeader(xmlMapsRunway, 'System', row['icao_designator'] + '_TWR_RWY_' + rwy['runway'] + "_STAR", '1', rwy['location'])
+                    for star in stars['Route']:
+                        xmlMapsRunwayLine = xtree.SubElement(xmlMapsRunwayStar, 'Line')
+                        xmlMapsRunwayLine.set('Pattern', 'Dotted')
+                        xmlMapsRunwayLine.text = star
+
+                        starSplit = star.split('/')
+                        for point in starSplit:
+                            mapPoint.add(point)
+
+                    for i in stars.index:
+                        xmlSid = xtree.SubElement(xmlRunway, 'STAR')
+                        xmlSid.set('Name', stars['Name'][i])
+
+                        xmlSidStarStar = xtree.SubElement(airspace[1], 'STAR')
+                        xmlSidStarStar.set('Name', stars['Name'][i])
+                        xmlSidStarStar.set('Airport', stars['ICAO'][i])
+                        xmlSidStarStar.set('Runways', stars['Runway'][i])
+
+                        xmlRoute = xtree.SubElement(xmlSidStarStar, 'Route')
+                        xmlRoute.set('Runway', stars['Runway'][i])
+                        slashToSpace = stars['Route'][i].replace('/', ' ')
+                        xmlRoute.text = slashToSpace
+
+                    dfAd02RunwaysOpp = self.scrape[1]
+                    dfAd02RunwaysOppFilter = dfAd02RunwaysOpp.loc[(dfAd02RunwaysOpp['icao_designator'] == row['icao_designator']) & (dfAd02RunwaysOpp['runway'] == str(oppEnd))] # select all runways that belong to this aerodrome
+
+                    for indexOppRwy, oppRwy in dfAd02RunwaysOppFilter.iterrows():
+                        if oppRwy.any:
+                            xmlMapsRunwayThreshOpp.set('Name', str(oppEnd))
+                            xmlMapsRunwayThreshOpp.set('Position', oppRwy['location'])
+                        else:
+                            print(Fore.RED + "No opposite runway for " + rwy['runway'] + " at " + row['icao_designator'] + Style.RESET_ALL)
+                            xmlMapsRunwayThreshOpp.set('Name', str(oppEnd))
+                            xmlMapsRunwayThreshOpp.set('Position', rwy['runway'])
+
+                    # create map points and titles
+                    xmlMapsRunwayPointsLabels = self.constructMapHeader(xmlMapsRunway, 'System', row['icao_designator'] + '_TWR_RWY_' + rwy['runway'] + '_NAMES', '2', rwy['location'])
+                    xmlMapsRunwayPointsLabelsL = xtree.SubElement(xmlMapsRunwayPointsLabels, 'Label')
+                    xmlMapsRunwayPoints = xtree.SubElement(xmlMapsRunwayPointsLabels, 'Symbol')
+                    xmlMapsRunwayPoints.set('Type', 'HollowStar')
+                    for point in mapPoint:
+                        self.elementPoint(xmlMapsRunwayPoints, point)
+                        self.elementPoint(xmlMapsRunwayPointsLabelsL, point)
+
+                    # create folder structure if not exists
+                    filename = 'Build/Maps/' + row['icao_designator'] + '/' + row['icao_designator'] + '_TWR_RWY_' + rwy['runway'] + '.xml'
+                    os.makedirs(os.path.dirname(filename), exist_ok=True)
+                    xmlMapsRunwayTree = xtree.ElementTree(xmlMapsRunway)
+                    xmlMapsRunwayTree.write(filename, encoding="utf-8", xml_declaration=True)
+
+                    # add runway into the airspace.xml file
+                    xmlAirportRunway = xtree.SubElement(xmlAirport, 'Runway')
+                    xmlAirportRunway.set('Name', rwy['runway'])
+                    xmlAirportRunway.set('Position', rwy['location'])
+
                 bar()
+
+        # Construct the XML element as per https://virtualairtrafficsystem.com/docs/dpk/#intersections
+        # List all the verified points (fixes)
+        dfEnr044 = self.scrape[11]
+        barLength = len(dfEnr044.index)
+
+        with alive_bar(barLength) as bar: # Define the progress bar
+            print("Constructing XML for ENR 4.4 Data")
+            for index, row in dfEnr044.iterrows():
+                # Set fix in main Airspace.xml
+                xmlFix = xtree.SubElement(airspace[2], 'Point')
+                xmlFix.set('Name', row['name'])
+                xmlFix.set('Type', 'Fix')
+                xmlFix.text = row['coords']
+
+                # Set points in Maps\ALL_AIRPORTS.xml
+                xmlAllNavaidsLabelPoint = xtree.SubElement(allNavaids[0], 'Point')
+                xmlAllNavaidsLabelPoint.set('Name', row['name'])
+                xmlAllNavaidsLabelPoint.text = row['coords']
+                xmlAllNavaidsSymbolPoint = xtree.SubElement(allNavaids[1], 'Point')
+                xmlAllNavaidsSymbolPoint.text = row['coords']
+
+                bar()
+
+        # Construct the XML element as per https://virtualairtrafficsystem.com/docs/dpk/#intersections
+        # List all the verified points (fixes)
+        dfEnr041 = self.scrape[11]
+        barLength = len(dfEnr041.index)
+
+        with alive_bar(barLength) as bar: # Define the progress bar
+            print("Constructing XML for ENR 4.1 Data")
+            for index, row in dfEnr041.iterrows():
+                # Set fix in main Airspace.xml
+                xmlFix = xtree.SubElement(airspace[2], 'Point')
+                xmlFix.set('Name', row['name'])
+                xmlFix.set('Type', 'Navaid')
+                if row['type'] == "DME":
+                    row['type'] = "NDB"
+                xmlFix.set('NavaidType', row['type'])
+                xmlFix.text = row['coords']
+
+                # Set points in Maps\ALL_AIRPORTS.xml
+                xmlAllNavaidsLabelPoint = xtree.SubElement(allNavaids[0], 'Point')
+                xmlAllNavaidsLabelPoint.set('Name', row['name'])
+                xmlAllNavaidsLabelPoint.text = row['coords']
+                xmlAllNavaidsSymbolPoint = xtree.SubElement(allNavaids[2], 'Point')
+                xmlAllNavaidsSymbolPoint.text = row['coords']
+
+                bar()
+
+        # Create CTA XML file
+        dfEnr02Cta = self.scrape[6]
+        barLength = len(dfEnr02Cta.index)
+
+        with alive_bar(barLength) as bar: # Define the progress bar
+            print("Constructing XML for ENR 2 CTA Data")
+            for index, row in dfEnr02Cta.iterrows():
+                xmlCta = xtree.SubElement(allCta, 'Line')
+                xmlCta.set('Name', row['name'])
+                xmlCta.set('Pattern', 'Dashed')
+                xmlCta.text = row['boundary'].rstrip('/')
+
+                bar()
+
+        # Create TMA XML file
+        dfEnr02Tma = self.scrape[7]
+        barLength = len(dfEnr02Tma.index)
+
+        with alive_bar(barLength) as bar: # Define the progress bar
+            print("Constructing XML for ENR 2 TMA Data")
+            for index, row in dfEnr02Tma.iterrows():
+                xmlTma = xtree.SubElement(allTma, 'Line')
+                xmlTma.set('Name', row['name'])
+                xmlTma.set('Pattern', 'Dashed')
+                xmlTma.text = row['boundary'].rstrip('/')
+
+                bar()
+
+        def addAirway(i):
+            # Add airways to the main Airspace.xml file
+            dfEnr03 = self.scrape[i]
+            barLength = len(dfEnr03.index)
+
+            with alive_bar(barLength) as bar: # Define the progress bar
+                print("Constructing XML for ENR 3 Airway Data")
+                for index, row in dfEnr03.iterrows():
+                    xmlAirway = xtree.SubElement(airspace[4], 'Airway')
+                    xmlAirway.set('Name', row['name'])
+                    xmlAirway.text = row['route']
+
+                    bar()
+
+        addAirway(8)
+        addAirway(9)
+        addAirway(10)
+
+        # Write all XML files
+        allAirportsTree = xtree.ElementTree(allAirports[2])
+        allAirportsTree.write('Build/Maps/ALL_AIRPORTS.xml', encoding="utf-8", xml_declaration=True)
+
+        allCtaTree = xtree.ElementTree(allCta)
+        allCtaTree.write('Build/Maps/ALL_CTA.xml', encoding="utf-8", xml_declaration=True)
+
+        allTmaTree = xtree.ElementTree(allTma)
+        allTmaTree.write('Build/Maps/ALL_TMA.xml', encoding="utf-8", xml_declaration=True)
+
+        allNavaidsTree = xtree.ElementTree(allNavaids[3])
+        allNavaidsTree.write('Build/Maps/ALL_NAVAIDS.xml', encoding="utf-8", xml_declaration=True)
+
+        airspaceTree = xtree.ElementTree(airspace[5])
+        airspaceTree.write('Build/Airspace.xml', encoding="utf-8", xml_declaration=True)
 
     def buildAirspaceXml(self):
         xmlAirspace = self.root('Airspace') # create XML document Airspace.xml
@@ -494,7 +744,7 @@ class Builder:
         xmlAirports = xtree.SubElement(xmlAirspace, 'Airports')
         xmlAirways = xtree.SubElement(xmlAirspace, 'Airways')
 
-        return [xmlSystemRunways, xmlSidStar, xmlIntersections, xmlAirports, xmlAirways]
+        return [xmlSystemRunways, xmlSidStar, xmlIntersections, xmlAirports, xmlAirways, xmlAirspace]
 
     def buildMapsAllAirportsXml(self):
         # create XML document Maps\ALL_AIRPORTS
@@ -507,7 +757,7 @@ class Builder:
         xmlAllAirportsSymbol = xtree.SubElement(xmlAllAirportsMap, 'Symbol')
         xmlAllAirportsSymbol.set('Type', 'Reticle') # https://virtualairtrafficsystem.com/docs/dpk/#symbol-element
 
-        return [xmlAllAirportsLabel, xmlAllAirportsSymbol]
+        return [xmlAllAirportsLabel, xmlAllAirportsSymbol, xmlAllAirports]
 
     def buildMapsAllNavaidsXml(self):
         # create XML document Maps\ALL_NAVAIDS
@@ -523,13 +773,125 @@ class Builder:
         xmlAllNavaidsSymbolH = xtree.SubElement(xmlAllNavaidsMapSym, 'Symbol')
         xmlAllNavaidsSymbolH.set('Type', 'DotFillCircle') # https://virtualairtrafficsystem.com/docs/dpk/#symbol-element
 
-        return [xmlAllNavaidsLabel, xmlAllNavaidsSymbol, xmlAllNavaidsSymbolH]
+        return [xmlAllNavaidsLabel, xmlAllNavaidsSymbol, xmlAllNavaidsSymbolH, xmlAllNavaids]
 
     def buildOtherTopLevelMaps(self, mapName, priority):
         xmlRoot = self.root('Maps')
         xmlMap = self.constructMapHeader(xmlRoot, 'System', mapName, priority, self.mapCentre)
 
         return xmlMap
+
+    def buildRestrictedAreas(self):
+        xmlRestrictedAreas = self.root("RestrictedAreas")
+        xmlAreas = xtree.SubElement(xmlRestrictedAreas, "Areas")
+
+        # Load the services data to build Sectors.xml
+        areasCsv = self.scrape[13]
+        barLength = len(areasCsv.index)
+
+        with alive_bar(barLength) as bar: # Define the progress bar
+            print("Constructing XML for AD 5.1 PROHIBITED, RESTRICTED AND DANGER AREAS")
+            for index, row in areasCsv.iterrows():
+                xmlArea = xtree.SubElement(xmlAreas, "RestrictedArea")
+                xmlArea.set("Type", "Restricted")
+                xmlArea.set("Name", row['name'])
+                xmlArea.set("AltitudeFloor", str(row['floor']))
+                xmlArea.set("AltitudeCeiling", str(row['ceiling']))
+                xmlArea.set("DAIWEnabled", "true")
+                xmlArea.set("LinePattern", "Solid")
+
+                xmlBoundary = xtree.SubElement(xmlArea, "Area")
+                # this section deals with single points and draws a pretty circle around them
+                slash = "/"
+                if slash in row['boundary']:
+                    xmlBoundary.text = row['boundary']
+                else:
+                    space = ''
+                    dmsExplode = re.search(r'([+-]{1})([\d]{2})([\d]{2})([\d]{2}\.[\d]{2})([+-]{1})([\d]{3})([\d]{2})([\d]{2}\.[\d]{2})', row['boundary'])
+                    lat = Point.parse_degrees(dmsExplode.group(2), dmsExplode.group(3), dmsExplode.group(4), Geo.northSouth(dmsExplode.group(1)))
+                    lon = Point.parse_degrees(dmsExplode.group(6), dmsExplode.group(7), dmsExplode.group(8), Geo.eastWest(dmsExplode.group(5)))
+                    circle = Geo.geodesic_point_buffer(lat, lon, 3.0)
+                    for c in circle:
+                        p = Point(c[1], c[0])
+                        dmsFormat = p.format(deg_char='', min_char='', sec_char='')
+                        dmsSplit = dmsFormat.split()
+
+                        def splitRound(floatIn):
+                            roundIt = round(float(floatIn), 2)
+                            splitIt = str(roundIt).split('.')
+                            buildIt = str(splitIt[0]).zfill(2) + "." + splitIt[1]
+                            return buildIt
+
+                        roundLat = splitRound(dmsSplit[2])
+                        roundLon = splitRound(dmsSplit[6])
+                        space += Geo.plusMinus(dmsSplit[3].rstrip(',')) + dmsSplit[0].zfill(2) + dmsSplit[1].zfill(2) + str(roundLat) + Geo.plusMinus(dmsSplit[7]) + dmsSplit[4].zfill(3) + dmsSplit[5].zfill(2) + str(roundLon) + '/'
+                    xmlBoundary.text = space.rstrip('/')
+
+                xmlActivations = xtree.SubElement(xmlArea, "Activations")
+                xmlActivation = xtree.SubElement(xmlActivations, "Activation")
+                xmlActivation.set("H24", "true")
+                xmlActivation.set("Start", "0000")
+                xmlActivation.set("End", "0000")
+
+                bar()
+
+        restrictedAreaTree = xtree.ElementTree(xmlRestrictedAreas)
+        restrictedAreaTree.write('Build/RestrictedAreas.xml', encoding="utf-8", xml_declaration=True)
+
+    def buildSectors(self): # creates the frequency secion of ATIS.xml, Sectors.xml
+        def myround(x, base=0.025): # rounds to the nearest 25KHz - simulator limitations prevent 8.33KHz spacing currently
+            flt = float(x)
+            return base * round(flt/base)
+
+        # Define service types
+        def serviceType(callSignType):
+            if callSignType == "APPROACH":
+                return "_APP"
+            elif callSignType == "DIRECTOR":
+                return "_D_APP"
+            elif callSignType == "TOWER":
+                return "_TWR"
+            elif callSignType == "GROUND":
+                return "_GND"
+            elif callSignType == "DELIVERY":
+                return "_DEL"
+
+        xmlSectors = self.root("Sectors")
+        lastType = ''
+
+        # Load the services data to build Sectors.xml
+        servicesCsv = self.scrape[2]
+        barLength = len(servicesCsv.index)
+
+        with alive_bar(barLength) as bar: # Define the progress bar
+            print("Constructing XML for AD 2 Services Data")
+            for index, row in servicesCsv.iterrows():
+                if row['callsign_type'] != lastType:
+                    freq25khz = myround(row['frequency'])
+                    if row['callsign_type'] != "INFORMATION": # don't include any ATIS frequencies in this XML file
+                        xmlSector = xtree.SubElement(xmlSectors, "Sector")
+                        xmlSector.set('FullName', row['icao_designator'] + " " + row['callsign_type']) # eg EGKK GROUND
+                        xmlSector.set('Frequency', "%.3f" % freq25khz) # format to full frequency eg 122.800
+                        xmlSector.set('Callsign', row['icao_designator'] + str(serviceType(row['callsign_type']))) # eg EGKK_GND
+                        xmlSector.set('Name', row['icao_designator'] + str(serviceType(row['callsign_type'])))
+                        #print(freq[1] + ' ' + freq[4] + "|" + "%.3f" % freq25khz + "|" + freq[0] + freq[3])
+
+                        # cascade for ResponsibleSectors tag in Sectors.xml
+                        xmlSectorResponsible = xtree.SubElement(xmlSector, "ResponsibleSectors")
+                        if serviceType(row['callsign_type']) == "_D_APP":
+                            xmlSectorResponsible.text = row['icao_designator'] + "_APP," + row['icao_designator'] + "_TWR," + row['icao_designator'] + "_GND," + row['icao_designator']+ "_DEL"
+                        elif serviceType(row['callsign_type']) == "_APP":
+                            xmlSectorResponsible.text = row['icao_designator'] + "_TWR," + row['icao_designator'] + "_GND," + row['icao_designator'] + "_DEL"
+                        elif serviceType(row['callsign_type']) == "_TWR":
+                            xmlSectorResponsible.text = row['icao_designator'] + "_GND," + row['icao_designator'] + "_DEL"
+                        elif serviceType(row['callsign_type']) == "_GND":
+                            xmlSectorResponsible.text = row['icao_designator'] + "_DEL"
+
+                    lastType = row['callsign_type']
+                bar()
+
+            sectorTree = xtree.ElementTree(xmlSectors)
+            sectorTree.write('Build/Sectors.xml', encoding="utf-8", xml_declaration=True)
 
     @staticmethod
     def root(name):
@@ -564,6 +926,30 @@ class Builder:
 
 class Geo:
     '''Class to store various geo tools'''
+
+    @staticmethod
+    def geodesic_point_buffer(lat, lon, km):
+        proj_wgs84 = pyproj.Proj('+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
+        # Azimuthal equidistant projection
+        aeqd_proj = '+proj=aeqd +lat_0={lat} +lon_0={lon} +x_0=0 +y_0=0'
+        project = partial(
+            pyproj.transform,
+            pyproj.Proj(aeqd_proj.format(lat=lat, lon=lon)),
+            proj_wgs84)
+        buf = sPoint(0, 0).buffer(km * 1000)  # distance in metres
+        return transform(project, buf).exterior.coords[:]
+
+    @staticmethod
+    def northSouth(arg): # Turns a compass point into the correct + or - for lat and long
+        if arg in ('+'):
+            return "N"
+        return "S"
+
+    @staticmethod
+    def eastWest(arg): # Turns a compass point into the correct + or - for lat and long
+        if arg in ('+'):
+            return "E"
+        return "W"
 
     @staticmethod
     def plusMinus(arg): # Turns a compass point into the correct + or - for lat and long
@@ -651,6 +1037,65 @@ class Geo:
 
         allGround = xtree.ElementTree(xmlGround)
         allGround.write('Build/Maps/'+ aerodromeIcao + '_SMR.xml', encoding="utf-8", xml_declaration=True)
+
+class Navigraph:
+    def sidStar(file, icaoIn, rwyIn):
+        dfColumns=['ICAO','Runway','Name','Route']
+        df = pd.DataFrame(columns=dfColumns)
+        #print(df.to_string())
+        with open(file, 'r') as text:
+            content = text.read() # read everything
+            aerodromeData = re.split(r'\[', content) # split by [
+            for data in aerodromeData:
+                aerodromeIcao = re.search(r'([A-Z]{4})(\]\n)', data) # get the ICAO aerodrome designator
+                if aerodromeIcao:
+                    icao = aerodromeIcao.group(1)
+                    if icao == icaoIn:
+                        lineSearch = re.findall(r'(T[\s]+)([A-Z\d]{5,})([\s]+[A-Z\d]{5,}[\s]+)([\d]{2}[L|R|C]?)(\,.*)?\n', data)
+
+                        if lineSearch:
+                            for line in lineSearch:
+                                srdRunway = line[3]
+
+                                # for each SID, get the route
+                                routeSearch = re.findall(rf'^({line[1]})\s+([\dA-Z]{{3,5}})', data, re.M)
+
+                                if routeSearch:
+                                    concatRoute = ''
+                                    for route in routeSearch:
+                                        concatRoute += route[1] + "/"
+                                        routeName = route[0]
+
+                                    if line[4]:
+                                        starRunways = line[4].split(',')
+                                        for rwy in starRunways:
+                                            dfOut = {'ICAO': icao, 'Runway': rwy, 'Name': routeName, 'Route': concatRoute.rstrip('/')}
+                                            df = df.append(dfOut, ignore_index=True)
+
+                                    dfOut = {'ICAO': icao, 'Runway': srdRunway, 'Name': routeName, 'Route': concatRoute.rstrip('/')}
+                                    df = df.append(dfOut, ignore_index=True)
+
+            return df[(df.Runway == rwyIn)]
+
+class ValidateXml:
+    """docstring for ValidateXml."""
+
+    def __init__(self, schema):
+        with open(schema) as sFile:
+            self.schema = xmlschema.XMLSchema(sFile)
+
+    def validateDir(self, searchDir, matchFile):
+        with alive_bar() as bar:
+            for subdir, dirs, files in os.walk(searchDir):
+                for filename in files:
+                    filepath = subdir + os.sep + filename
+                    if fnmatch.fnmatch(filename, matchFile + '.xml'):
+                        bar()
+                        if self.schema.is_valid(filepath) is False:
+                            print(filepath)
+                            self.schema.validate(filepath)
+
+        print(Fore.GREEN + "    OK" + Style.RESET_ALL + " - All tests passed for " + searchDir + matchFile)
 
 # Defuse XML
 defuse_stdlib()
