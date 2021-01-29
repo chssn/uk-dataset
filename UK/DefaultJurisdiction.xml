@@ -6,7 +6,7 @@
         <Departure Values="EGKK">
           <Rules>
             <Default>
-              <AssignSector Order="EGKK_DEL,EGKK_GND,EGKK_TWR,LTC_CTR"/>
+              <AssignSector Order="EGKK_DEL,EGKK_GND,EGKK_TWR,LTC_CTR,LON_CTR"/>
             </Default>
           </Rules>
         </Departure>
