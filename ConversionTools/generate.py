@@ -647,7 +647,7 @@ class Builder:
 
         # Construct the XML element as per https://virtualairtrafficsystem.com/docs/dpk/#intersections
         # List all the verified points (fixes)
-        dfEnr044 = self.scrape[11]
+        dfEnr044 = self.scrape[12]
         barLength = len(dfEnr044.index)
 
         with alive_bar(barLength) as bar: # Define the progress bar
