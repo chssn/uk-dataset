@@ -480,6 +480,7 @@ class Builder:
         allTma = self.buildOtherTopLevelMaps('ALL_TMA', '2')
         self.buildSectors()
         self.buildRestrictedAreas()
+        self.buildPositions()
 
         dfAd01 = self.scrape[0]
         dfVerified = dfAd01.loc[dfAd01['verified'] == 1] # select all verified aerodromes (verified as in a page was found in the eAIP corresponding to the icao_designator)
@@ -863,6 +864,196 @@ class Builder:
         restrictedAreaTree = xtree.ElementTree(xmlRestrictedAreas)
         restrictedAreaTree.write('Build/RestrictedAreas.xml', encoding="utf-8", xml_declaration=True)
 
+    def buildPositions(self):
+        # Load the services data to build Positions.xml
+        aerodromeList = self.scrape[0]
+        #servicesCsv = self.scrape[2].sort_values(by=['icao_designator', 'callsign_type'])
+        barLength = len(aerodromeList.index)
+        xmlPositions = self.root("Positions")
+
+        with alive_bar(barLength) as bar: # Define the progress bar
+            print("Constructing XML for vatSys logon positions")
+            for index, row in aerodromeList.iterrows():
+                fullName = row['name']
+                defCentre = row['location']
+                magVar = row['magnetic_variation']
+
+                # Code to build Positions.xml (DIRECTOR)
+                xmlPosition = xtree.SubElement(xmlPositions, "Position")
+                xmlPosition.set("Name", row['icao_designator'] + "_D_APP")
+                xmlPosition.set("Type", "ASD")
+                xmlPosition.set("DefaultCenter", defCentre)
+                xmlPosition.set("DefaultRange", "100")
+                xmlPosition.set("MagneticVariation", str(magVar))
+
+                xmlPositionMaps = xtree.SubElement(xmlPosition, "Maps")
+                xmlPositionMap = xtree.SubElement(xmlPositionMaps, "Map")
+                xmlPositionMap.set("Name", row['icao_designator'] + '/' + row['icao_designator'] + '_SMR')
+                #loop for runways here
+
+                xmlPositionAtis = xtree.SubElement(xmlPosition, "ATIS")
+                xmlPositionAtisEditor = xtree.SubElement(xmlPositionAtis, "Editor")
+                xmlPositionAtisEditor.set("Airport", row['icao_designator'])
+                xmlPositionAtisEditor.set("Frequency", "122.800") # not coded
+                xmlPositionAtisWindow = xtree.SubElement(xmlPositionAtis, "Window")
+                xmlPositionAtisWindow.set("Airport", row['icao_designator'])
+
+                xmlPositionStrips = xtree.SubElement(xmlPosition, "Strips")
+                xmlPositionStrip = xtree.SubElement(xmlPositionStrips, "Window")
+                xmlPositionStrip.set("Type", "ADEP")
+                xmlPositionStrip.set("Beacon", row['icao_designator'])
+                xmlPositionStrip.set("Visible", "true")
+                xmlPositionStrip = xtree.SubElement(xmlPositionStrips, "Window")
+                xmlPositionStrip.set("Type", "ADES")
+                xmlPositionStrip.set("Beacon", row['icao_designator'])
+                xmlPositionStrip.set("Visible", "true")
+
+                xmlPositionController = xtree.SubElement(xmlPosition, "ControllerInfo")
+                xmlPositionControllerInfo = xtree.SubElement(xmlPositionController, "Line")
+                xmlPositionControllerInfo.text = fullName + " DIRECTOR"
+                xmlPositionControllerInfo = xtree.SubElement(xmlPositionController, "Line")
+                xmlPositionControllerInfo.text = "ATIS available on 000.000" # not coded
+
+                xmlPositionSectors = xtree.SubElement(xmlPosition, "Sectors")
+                xmlPositionSector = xtree.SubElement(xmlPositionSectors, "Sector")
+                xmlPositionSector.set("Name", row['icao_designator'] + '_D_APP')
+                xmlPositionSector = xtree.SubElement(xmlPositionSectors, "Sector")
+                xmlPositionSector.set("Name", row['icao_designator'] + '_APP')
+                xmlPositionSector = xtree.SubElement(xmlPositionSectors, "Sector")
+                xmlPositionSector.set("Name", row['icao_designator'] + '_TWR')
+                xmlPositionSector = xtree.SubElement(xmlPositionSectors, "Sector")
+                xmlPositionSector.set("Name", row['icao_designator'] + '_GND')
+
+                xmlPositionArrivals = xtree.SubElement(xmlPosition, "ArrivalLists")
+                xmlPositionArrivalAirport = xtree.SubElement(xmlPositionArrivals, "Airport")
+                xmlPositionArrivalAirport.set("Airport", row['icao_designator'])
+
+                # Code to build Positions.xml (APPROACH)
+                xmlPosition = xtree.SubElement(xmlPositions, "Position")
+                xmlPosition.set("Name", row['icao_designator'] + "_APP")
+                xmlPosition.set("Type", "ASD")
+                xmlPosition.set("DefaultCenter", defCentre)
+                xmlPosition.set("DefaultRange", "50")
+                xmlPosition.set("MagneticVariation", str(magVar))
+
+                xmlPositionMaps = xtree.SubElement(xmlPosition, "Maps")
+                xmlPositionMap = xtree.SubElement(xmlPositionMaps, "Map")
+                xmlPositionMap.set("Name", row['icao_designator'] + '/' + row['icao_designator'] + '_SMR')
+                #loop for runways here
+
+                xmlPositionAtis = xtree.SubElement(xmlPosition, "ATIS")
+                xmlPositionAtisEditor = xtree.SubElement(xmlPositionAtis, "Editor")
+                xmlPositionAtisEditor.set("Airport", row['icao_designator'])
+                xmlPositionAtisEditor.set("Frequency", "122.800") # not coded
+                xmlPositionAtisWindow = xtree.SubElement(xmlPositionAtis, "Window")
+                xmlPositionAtisWindow.set("Airport", row['icao_designator'])
+
+                xmlPositionStrips = xtree.SubElement(xmlPosition, "Strips")
+                xmlPositionStrip = xtree.SubElement(xmlPositionStrips, "Window")
+                xmlPositionStrip.set("Type", "ADEP")
+                xmlPositionStrip.set("Beacon", row['icao_designator'])
+                xmlPositionStrip.set("Visible", "true")
+                xmlPositionStrip = xtree.SubElement(xmlPositionStrips, "Window")
+                xmlPositionStrip.set("Type", "ADES")
+                xmlPositionStrip.set("Beacon", row['icao_designator'])
+                xmlPositionStrip.set("Visible", "true")
+
+                xmlPositionController = xtree.SubElement(xmlPosition, "ControllerInfo")
+                xmlPositionControllerInfo = xtree.SubElement(xmlPositionController, "Line")
+                xmlPositionControllerInfo.text = fullName + " APPROACH"
+                xmlPositionControllerInfo = xtree.SubElement(xmlPositionController, "Line")
+                xmlPositionControllerInfo.text = "ATIS available on 000.000" # not coded
+
+                xmlPositionSectors = xtree.SubElement(xmlPosition, "Sectors")
+                xmlPositionSector = xtree.SubElement(xmlPositionSectors, "Sector")
+                xmlPositionSector.set("Name", row['icao_designator'] + '_APP')
+                xmlPositionSector = xtree.SubElement(xmlPositionSectors, "Sector")
+                xmlPositionSector.set("Name", row['icao_designator'] + '_TWR')
+                xmlPositionSector = xtree.SubElement(xmlPositionSectors, "Sector")
+                xmlPositionSector.set("Name", row['icao_designator'] + '_GND')
+
+                xmlPositionArrivals = xtree.SubElement(xmlPosition, "ArrivalLists")
+                xmlPositionArrivalAirport = xtree.SubElement(xmlPositionArrivals, "Airport")
+                xmlPositionArrivalAirport.set("Airport", row['icao_designator'])
+
+                # Code to build Positions.xml (TOWER)
+                xmlPosition = xtree.SubElement(xmlPositions, "Position")
+                xmlPosition.set("Name", row['icao_designator'] + "_TWR")
+                xmlPosition.set("Type", "ASD")
+                xmlPosition.set("DefaultCenter", defCentre)
+                xmlPosition.set("DefaultRange", "30")
+                xmlPosition.set("MagneticVariation", str(magVar))
+
+                xmlPositionMaps = xtree.SubElement(xmlPosition, "Maps")
+                xmlPositionMap = xtree.SubElement(xmlPositionMaps, "Map")
+                xmlPositionMap.set("Name", row['icao_designator'] + '/' + row['icao_designator'] + '_SMR')
+                #loop for runways here
+
+                xmlPositionAtis = xtree.SubElement(xmlPosition, "ATIS")
+                xmlPositionAtisEditor = xtree.SubElement(xmlPositionAtis, "Editor")
+                xmlPositionAtisEditor.set("Airport", row['icao_designator'])
+                xmlPositionAtisEditor.set("Frequency", "122.800") # not coded
+                xmlPositionAtisWindow = xtree.SubElement(xmlPositionAtis, "Window")
+                xmlPositionAtisWindow.set("Airport", row['icao_designator'])
+
+                xmlPositionStrips = xtree.SubElement(xmlPosition, "Strips")
+                xmlPositionStrip = xtree.SubElement(xmlPositionStrips, "Window")
+                xmlPositionStrip.set("Type", "ADEP")
+                xmlPositionStrip.set("Beacon", row['icao_designator'])
+                xmlPositionStrip.set("Visible", "true")
+                xmlPositionStrip = xtree.SubElement(xmlPositionStrips, "Window")
+                xmlPositionStrip.set("Type", "ADES")
+                xmlPositionStrip.set("Beacon", row['icao_designator'])
+                xmlPositionStrip.set("Visible", "true")
+
+                xmlPositionController = xtree.SubElement(xmlPosition, "ControllerInfo")
+                xmlPositionControllerInfo = xtree.SubElement(xmlPositionController, "Line")
+                xmlPositionControllerInfo.text = fullName + " TOWER"
+                xmlPositionControllerInfo = xtree.SubElement(xmlPositionController, "Line")
+                xmlPositionControllerInfo.text = "ATIS available on 000.000" # not coded
+
+                xmlPositionSectors = xtree.SubElement(xmlPosition, "Sectors")
+                xmlPositionSector = xtree.SubElement(xmlPositionSectors, "Sector")
+                xmlPositionSector.set("Name", row['icao_designator'] + '_TWR')
+                xmlPositionSector = xtree.SubElement(xmlPositionSectors, "Sector")
+                xmlPositionSector.set("Name", row['icao_designator'] + '_GND')
+
+                xmlPositionArrivals = xtree.SubElement(xmlPosition, "ArrivalLists")
+                xmlPositionArrivalAirport = xtree.SubElement(xmlPositionArrivals, "Airport")
+                xmlPositionArrivalAirport.set("Airport", row['icao_designator'])
+
+                # Code to build Positions.xml (ASMGCS)
+                xmlPosition = xtree.SubElement(xmlPositions, "Position")
+                xmlPosition.set("Name", row['icao_designator'] + "_GND")
+                xmlPosition.set("Type", "ASMGCS")
+                xmlPosition.set("ASMGCSAirport", row['icao_designator'])
+                xmlPosition.set("DefaultCenter", defCentre)
+                xmlPosition.set("DefaultRange", "5")
+                xmlPosition.set("MagneticVariation", str(magVar))
+                xmlPosition.set("Rotation", "0")
+
+                xmlPositionMaps = xtree.SubElement(xmlPosition, "Maps")
+                xmlPositionMap = xtree.SubElement(xmlPositionMaps, "Map")
+                xmlPositionMap.set("Name", row['icao_designator'] + '/' + row['icao_designator'] + '_SMR')
+                xmlPositionMap = xtree.SubElement(xmlPositionMaps, "Map")
+                xmlPositionMap.set("Name", row['icao_designator'] + '/' + row['icao_designator'] + '_SMR_RWY')
+                xmlPositionMap = xtree.SubElement(xmlPositionMaps, "Map")
+                xmlPositionMap.set("Name", row['icao_designator'] + '/' + row['icao_designator'] + '_SMR_TWY')
+                xmlPositionMap = xtree.SubElement(xmlPositionMaps, "Map")
+                xmlPositionMap.set("Name", row['icao_designator'] + '/' + row['icao_designator'] + '_SMR_BLD')
+                xmlPositionMap = xtree.SubElement(xmlPositionMaps, "Map")
+                xmlPositionMap.set("Name", row['icao_designator'] + '/' + row['icao_designator'] + '_SMR_APR')
+                xmlPositionMap = xtree.SubElement(xmlPositionMaps, "Map")
+                xmlPositionMap.set("Name", row['icao_designator'] + '/' + row['icao_designator'] + '_SMR_BAK')
+                xmlPositionMap = xtree.SubElement(xmlPositionMaps, "Map")
+                xmlPositionMap.set("Name", row['icao_designator'] + '/' + row['icao_designator'] + '_SMR_INF')
+                xmlPositionMap = xtree.SubElement(xmlPositionMaps, "Map")
+                xmlPositionMap.set("Name", row['icao_designator'] + '/' + row['icao_designator'] + '_SMR_HLD')
+                bar()
+
+        positionTree = xtree.ElementTree(xmlPositions)
+        positionTree.write('Build/Positions.xml', encoding="utf-8", xml_declaration=True)
+
     def buildSectors(self): # creates the frequency secion of ATIS.xml, Sectors.xml
         def myround(x, base=0.025): # rounds to the nearest 25KHz - simulator limitations prevent 8.33KHz spacing currently
             flt = float(x)
@@ -882,7 +1073,6 @@ class Builder:
                 return "_DEL"
 
         xmlSectors = self.root("Sectors")
-        xmlPositions = self.root("Positions")
         lastType = ''
 
         # Load the services data to build Sectors.xml
@@ -912,189 +1102,14 @@ class Builder:
                         xmlSectorResponsible = xtree.SubElement(xmlSector, "ResponsibleSectors")
                         if serviceType(row['callsign_type']) == "_D_APP":
                             xmlSectorResponsible.text = row['icao_designator'] + "_APP," + row['icao_designator'] + "_TWR," + row['icao_designator'] + "_GND," + row['icao_designator']+ "_DEL"
-
-                            # Code to build Positions.xml (Tower)
-                            xmlPosition = xtree.SubElement(xmlPositions, "Position")
-                            xmlPosition.set("Name", row['icao_designator'] + "_D_APP")
-                            xmlPosition.set("Type", "ASD")
-                            xmlPosition.set("DefaultCenter", defCentre)
-                            xmlPosition.set("DefaultRange", "100")
-                            xmlPosition.set("MagneticVariation", str(magVar))
-
-                            xmlPositionMaps = xtree.SubElement(xmlPosition, "Maps")
-                            xmlPositionMap = xtree.SubElement(xmlPositionMaps, "Map")
-                            xmlPositionMap.set("Name", row['icao_designator'] + '/' + row['icao_designator'] + '_SMR')
-                            #loop for runways here
-
-                            xmlPositionAtis = xtree.SubElement(xmlPosition, "ATIS")
-                            xmlPositionAtisEditor = xtree.SubElement(xmlPositionAtis, "Editor")
-                            xmlPositionAtisEditor.set("Airport", row['icao_designator'])
-                            xmlPositionAtisEditor.set("Frequency", "122.800") # not coded
-                            xmlPositionAtisWindow = xtree.SubElement(xmlPositionAtis, "Window")
-                            xmlPositionAtisWindow.set("Airport", row['icao_designator'])
-
-                            xmlPositionStrips = xtree.SubElement(xmlPosition, "Strips")
-                            xmlPositionStrip = xtree.SubElement(xmlPositionStrips, "Window")
-                            xmlPositionStrip.set("Type", "ADEP")
-                            xmlPositionStrip.set("Beacon", row['icao_designator'])
-                            xmlPositionStrip.set("Visible", "true")
-                            xmlPositionStrip = xtree.SubElement(xmlPositionStrips, "Window")
-                            xmlPositionStrip.set("Type", "ADES")
-                            xmlPositionStrip.set("Beacon", row['icao_designator'])
-                            xmlPositionStrip.set("Visible", "true")
-
-                            xmlPositionController = xtree.SubElement(xmlPosition, "ControllerInfo")
-                            xmlPositionControllerInfo = xtree.SubElement(xmlPositionController, "Line")
-                            xmlPositionControllerInfo.text = fullName + " " + row['callsign_type']
-                            xmlPositionControllerInfo = xtree.SubElement(xmlPositionController, "Line")
-                            xmlPositionControllerInfo.text = "ATIS available on 000.000" # not coded
-
-                            xmlPositionSectors = xtree.SubElement(xmlPosition, "Sectors")
-                            xmlPositionSector = xtree.SubElement(xmlPositionSectors, "Sector")
-                            xmlPositionSector.set("Name", row['icao_designator'] + 'D_APP')
-                            xmlPositionSector = xtree.SubElement(xmlPositionSectors, "Sector")
-                            xmlPositionSector.set("Name", row['icao_designator'] + '_APP')
-                            xmlPositionSector = xtree.SubElement(xmlPositionSectors, "Sector")
-                            xmlPositionSector.set("Name", row['icao_designator'] + '_TWR')
-                            xmlPositionSector = xtree.SubElement(xmlPositionSectors, "Sector")
-                            xmlPositionSector.set("Name", row['icao_designator'] + '_GND')
-
-                            xmlPositionArrivals = xtree.SubElement(xmlPosition, "ArrivalLists")
-                            xmlPositionArrivalAirport = xtree.SubElement(xmlPositionArrivals, "Airport")
-                            xmlPositionArrivalAirport.set("Airport", row['icao_designator'])
                         elif serviceType(row['callsign_type']) == "_APP":
                             xmlSectorResponsible.text = row['icao_designator'] + "_TWR," + row['icao_designator'] + "_GND," + row['icao_designator'] + "_DEL"
-
-                            # Code to build Positions.xml (Approach)
-                            xmlPosition = xtree.SubElement(xmlPositions, "Position")
-                            xmlPosition.set("Name", row['icao_designator'] + "_APP")
-                            xmlPosition.set("Type", "ASD")
-                            xmlPosition.set("DefaultCenter", defCentre)
-                            xmlPosition.set("DefaultRange", "50")
-                            xmlPosition.set("MagneticVariation", str(magVar))
-
-                            xmlPositionMaps = xtree.SubElement(xmlPosition, "Maps")
-                            xmlPositionMap = xtree.SubElement(xmlPositionMaps, "Map")
-                            xmlPositionMap.set("Name", row['icao_designator'] + '/' + row['icao_designator'] + '_SMR')
-                            #loop for runways here
-
-                            xmlPositionAtis = xtree.SubElement(xmlPosition, "ATIS")
-                            xmlPositionAtisEditor = xtree.SubElement(xmlPositionAtis, "Editor")
-                            xmlPositionAtisEditor.set("Airport", row['icao_designator'])
-                            xmlPositionAtisEditor.set("Frequency", "122.800") # not coded
-                            xmlPositionAtisWindow = xtree.SubElement(xmlPositionAtis, "Window")
-                            xmlPositionAtisWindow.set("Airport", row['icao_designator'])
-
-                            xmlPositionStrips = xtree.SubElement(xmlPosition, "Strips")
-                            xmlPositionStrip = xtree.SubElement(xmlPositionStrips, "Window")
-                            xmlPositionStrip.set("Type", "ADEP")
-                            xmlPositionStrip.set("Beacon", row['icao_designator'])
-                            xmlPositionStrip.set("Visible", "true")
-                            xmlPositionStrip = xtree.SubElement(xmlPositionStrips, "Window")
-                            xmlPositionStrip.set("Type", "ADES")
-                            xmlPositionStrip.set("Beacon", row['icao_designator'])
-                            xmlPositionStrip.set("Visible", "true")
-
-                            xmlPositionController = xtree.SubElement(xmlPosition, "ControllerInfo")
-                            xmlPositionControllerInfo = xtree.SubElement(xmlPositionController, "Line")
-                            xmlPositionControllerInfo.text = fullName + " " + row['callsign_type']
-                            xmlPositionControllerInfo = xtree.SubElement(xmlPositionController, "Line")
-                            xmlPositionControllerInfo.text = "ATIS available on 000.000" # not coded
-
-                            xmlPositionSectors = xtree.SubElement(xmlPosition, "Sectors")
-                            xmlPositionSector = xtree.SubElement(xmlPositionSectors, "Sector")
-                            xmlPositionSector.set("Name", row['icao_designator'] + '_APP')
-                            xmlPositionSector = xtree.SubElement(xmlPositionSectors, "Sector")
-                            xmlPositionSector.set("Name", row['icao_designator'] + '_TWR')
-                            xmlPositionSector = xtree.SubElement(xmlPositionSectors, "Sector")
-                            xmlPositionSector.set("Name", row['icao_designator'] + '_GND')
-
-                            xmlPositionArrivals = xtree.SubElement(xmlPosition, "ArrivalLists")
-                            xmlPositionArrivalAirport = xtree.SubElement(xmlPositionArrivals, "Airport")
-                            xmlPositionArrivalAirport.set("Airport", row['icao_designator'])
                         elif serviceType(row['callsign_type']) == "_TWR":
                             xmlSectorResponsible.text = row['icao_designator'] + "_GND," + row['icao_designator'] + "_DEL"
-
-                            # Code to build Positions.xml (Tower)
-                            xmlPosition = xtree.SubElement(xmlPositions, "Position")
-                            xmlPosition.set("Name", row['icao_designator'] + "_TWR")
-                            xmlPosition.set("Type", "ASD")
-                            xmlPosition.set("DefaultCenter", defCentre)
-                            xmlPosition.set("DefaultRange", "30")
-                            xmlPosition.set("MagneticVariation", str(magVar))
-
-                            xmlPositionMaps = xtree.SubElement(xmlPosition, "Maps")
-                            xmlPositionMap = xtree.SubElement(xmlPositionMaps, "Map")
-                            xmlPositionMap.set("Name", row['icao_designator'] + '/' + row['icao_designator'] + '_SMR')
-                            #loop for runways here
-
-                            xmlPositionAtis = xtree.SubElement(xmlPosition, "ATIS")
-                            xmlPositionAtisEditor = xtree.SubElement(xmlPositionAtis, "Editor")
-                            xmlPositionAtisEditor.set("Airport", row['icao_designator'])
-                            xmlPositionAtisEditor.set("Frequency", "122.800") # not coded
-                            xmlPositionAtisWindow = xtree.SubElement(xmlPositionAtis, "Window")
-                            xmlPositionAtisWindow.set("Airport", row['icao_designator'])
-
-                            xmlPositionStrips = xtree.SubElement(xmlPosition, "Strips")
-                            xmlPositionStrip = xtree.SubElement(xmlPositionStrips, "Window")
-                            xmlPositionStrip.set("Type", "ADEP")
-                            xmlPositionStrip.set("Beacon", row['icao_designator'])
-                            xmlPositionStrip.set("Visible", "true")
-                            xmlPositionStrip = xtree.SubElement(xmlPositionStrips, "Window")
-                            xmlPositionStrip.set("Type", "ADES")
-                            xmlPositionStrip.set("Beacon", row['icao_designator'])
-                            xmlPositionStrip.set("Visible", "true")
-
-                            xmlPositionController = xtree.SubElement(xmlPosition, "ControllerInfo")
-                            xmlPositionControllerInfo = xtree.SubElement(xmlPositionController, "Line")
-                            xmlPositionControllerInfo.text = fullName + " " + row['callsign_type']
-                            xmlPositionControllerInfo = xtree.SubElement(xmlPositionController, "Line")
-                            xmlPositionControllerInfo.text = "ATIS available on 000.000" # not coded
-
-                            xmlPositionSectors = xtree.SubElement(xmlPosition, "Sectors")
-                            xmlPositionSector = xtree.SubElement(xmlPositionSectors, "Sector")
-                            xmlPositionSector.set("Name", row['icao_designator'] + '_TWR')
-                            xmlPositionSector = xtree.SubElement(xmlPositionSectors, "Sector")
-                            xmlPositionSector.set("Name", row['icao_designator'] + '_GND')
-
-                            xmlPositionArrivals = xtree.SubElement(xmlPosition, "ArrivalLists")
-                            xmlPositionArrivalAirport = xtree.SubElement(xmlPositionArrivals, "Airport")
-                            xmlPositionArrivalAirport.set("Airport", row['icao_designator'])
-
-                            # Code to build Positions.xml (ASMGCS)
-                            xmlPosition = xtree.SubElement(xmlPositions, "Position")
-                            xmlPosition.set("Name", row['icao_designator'] + "_GND")
-                            xmlPosition.set("Type", "ASMGCS")
-                            xmlPosition.set("ASMGCSAirport", row['icao_designator'])
-                            xmlPosition.set("DefaultCenter", defCentre)
-                            xmlPosition.set("DefaultRange", "5")
-                            xmlPosition.set("MagneticVariation", str(magVar))
-                            xmlPosition.set("Rotation", "0")
-
-                            xmlPositionMaps = xtree.SubElement(xmlPosition, "Maps")
-                            xmlPositionMap = xtree.SubElement(xmlPositionMaps, "Map")
-                            xmlPositionMap.set("Name", row['icao_designator'] + '/' + row['icao_designator'] + '_SMR')
-                            xmlPositionMap = xtree.SubElement(xmlPositionMaps, "Map")
-                            xmlPositionMap.set("Name", row['icao_designator'] + '/' + row['icao_designator'] + '_SMR_RWY')
-                            xmlPositionMap = xtree.SubElement(xmlPositionMaps, "Map")
-                            xmlPositionMap.set("Name", row['icao_designator'] + '/' + row['icao_designator'] + '_SMR_TWY')
-                            xmlPositionMap = xtree.SubElement(xmlPositionMaps, "Map")
-                            xmlPositionMap.set("Name", row['icao_designator'] + '/' + row['icao_designator'] + '_SMR_BLD')
-                            xmlPositionMap = xtree.SubElement(xmlPositionMaps, "Map")
-                            xmlPositionMap.set("Name", row['icao_designator'] + '/' + row['icao_designator'] + '_SMR_APR')
-                            xmlPositionMap = xtree.SubElement(xmlPositionMaps, "Map")
-                            xmlPositionMap.set("Name", row['icao_designator'] + '/' + row['icao_designator'] + '_SMR_BAK')
-                            xmlPositionMap = xtree.SubElement(xmlPositionMaps, "Map")
-                            xmlPositionMap.set("Name", row['icao_designator'] + '/' + row['icao_designator'] + '_SMR_INF')
-                            xmlPositionMap = xtree.SubElement(xmlPositionMaps, "Map")
-                            xmlPositionMap.set("Name", row['icao_designator'] + '/' + row['icao_designator'] + '_SMR_HLD')
                         elif serviceType(row['callsign_type']) == "_GND":
                             xmlSectorResponsible.text = row['icao_designator'] + "_DEL"
                 lastType = row['callsign_type']
                 bar()
-
-            positionTree = xtree.ElementTree(xmlPositions)
-            positionTree.write('Build/Test.xml', encoding="utf-8", xml_declaration=True)
 
             sectorTree = xtree.ElementTree(xmlSectors)
             sectorTree.write('Build/Sectors.xml', encoding="utf-8", xml_declaration=True)
