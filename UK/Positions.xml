@@ -29,35 +29,1455 @@
       <Airport Name="EGLL" />
     </ArrivalLists>
   </Position>
-  <Position Name="EGKK_TWR" Type="ASD" DefaultCenter="+510853.0-0001125.0" DefaultRange="50" MagneticVariation="0.53">
+  <Position Name="LTC_NE_CTR" Type="ASD" DefaultCenter="+52.8311111-001.3280556" DefaultRange="600">
+    <Sectors>
+      <Sector Name="LTC_NE_CTR" />
+    </Sectors>
     <Maps>
-      <Map Name="EGKK/EGKK_SMR" />
-      <Map Name="EGKK/EGKK_TWR_RWY26L" />
-      <Map Name="EGKK/EGKK_TWR_RWY08R" />
+      <Map Name="ALL_CTA" />
+      <Map Name="ALL_TMA" />
+      <Map Name="ALL_SECTORS" />
+      <Map Name="ALL_NAVAIDS" />
+      <Map Name="UK_COAST" />
+      <Map Name="ALL_ROUTES_HIGH" />
+      <Map Name="ALL_POINTS_HIGH" />
+      <Map Name="FIR_BDRY" />
+    </Maps>
+    <Strips Mode="State" Sort="Time">
+      <Window Type="State" State="Jurisdiction" Visible="true" />
+      <Window Type="State" State="Announced" Visible="true" />
+      <Window Type="State" State="Preactive" Visible="true" />
+    </Strips>
+    <CFL QuickLevel="25000" />
+    <ControllerInfo>
+      <Line>London Terminal Control North East</Line>
+      <Line>vatSys Demo</Line>
+    </ControllerInfo>
+    <ArrivalLists>
+      <Airport Name="EGSU" />
+      <Airport Name="EGSS" />
+      <Airport Name="EGMC" />
+      <Airport Name="EGSG" />
+      <Airport Name="EGLC" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="LTC_NW_CTR" Type="ASD" DefaultCenter="+52.8311111-001.3280556" DefaultRange="600">
+    <Sectors>
+      <Sector Name="LTC_NW_CTR" />
+    </Sectors>
+    <Maps>
+      <Map Name="ALL_CTA" />
+      <Map Name="ALL_TMA" />
+      <Map Name="ALL_SECTORS" />
+      <Map Name="ALL_NAVAIDS" />
+      <Map Name="UK_COAST" />
+      <Map Name="ALL_ROUTES_HIGH" />
+      <Map Name="ALL_POINTS_HIGH" />
+      <Map Name="FIR_BDRY" />
+    </Maps>
+    <Strips Mode="State" Sort="Time">
+      <Window Type="State" State="Jurisdiction" Visible="true" />
+      <Window Type="State" State="Announced" Visible="true" />
+      <Window Type="State" State="Preactive" Visible="true" />
+    </Strips>
+    <CFL QuickLevel="25000" />
+    <ControllerInfo>
+      <Line>London Centre</Line>
+      <Line>vatSys Demo</Line>
+    </ControllerInfo>
+    <ArrivalLists>
+      <Airport Name="EGKK" />
+      <Airport Name="EGLL" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGAA_APP" Type="ASD" DefaultCenter="+543927.00-0061257.00" DefaultRange="50" MagneticVariation="-2.15">
+    <Maps>
+      <Map Name="EGAA/EGAA_SMR" />
     </Maps>
     <ATIS>
-      <Editor Airport="EGKK" Frequency="121.950" />
+      <Editor Airport="EGAA" Frequency="122.800" />
+      <Window Airport="EGAA" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGAA" Visible="true" />
+      <Window Type="ADES" Beacon="EGAA" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>BELFAST ALDERGROVE APPROACH</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGAA_APP" />
+      <Sector Name="EGAA_TWR" />
+      <Sector Name="EGAA_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGAA" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGAA_D_APP" Type="ASD" DefaultCenter="+543927.00-0061257.00" DefaultRange="100" MagneticVariation="-2.15">
+    <Maps>
+      <Map Name="EGAA/EGAA_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGAA" Frequency="122.800" />
+      <Window Airport="EGAA" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGAA" Visible="true" />
+      <Window Type="ADES" Beacon="EGAA" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>BELFAST ALDERGROVE DIRECTOR</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGAAD_APP" />
+      <Sector Name="EGAA_APP" />
+      <Sector Name="EGAA_TWR" />
+      <Sector Name="EGAA_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGAA" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGAA_TWR" Type="ASD" DefaultCenter="+543927.00-0061257.00" DefaultRange="30" MagneticVariation="-2.15">
+    <Maps>
+      <Map Name="EGAA/EGAA_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGAA" Frequency="122.800" />
+      <Window Airport="EGAA" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGAA" Visible="true" />
+      <Window Type="ADES" Beacon="EGAA" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>BELFAST ALDERGROVE TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGAA_TWR" />
+      <Sector Name="EGAA_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGAA" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGAA_GND" Type="ASMGCS" ASMGCSAirport="EGAA" DefaultCenter="+543927.00-0061257.00" DefaultRange="5" MagneticVariation="-2.15" Rotation="0">
+    <Maps>
+      <Map Name="EGAA/EGAA_SMR" />
+      <Map Name="EGAA/EGAA_SMR_RWY" />
+      <Map Name="EGAA/EGAA_SMR_TWY" />
+      <Map Name="EGAA/EGAA_SMR_BLD" />
+      <Map Name="EGAA/EGAA_SMR_APR" />
+      <Map Name="EGAA/EGAA_SMR_BAK" />
+      <Map Name="EGAA/EGAA_SMR_INF" />
+      <Map Name="EGAA/EGAA_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGAC_APP" Type="ASD" DefaultCenter="+543705.00-0055221.00" DefaultRange="50" MagneticVariation="-2.0">
+    <Maps>
+      <Map Name="EGAC/EGAC_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGAC" Frequency="122.800" />
+      <Window Airport="EGAC" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGAC" Visible="true" />
+      <Window Type="ADES" Beacon="EGAC" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>BELFAST/CITY APPROACH</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGAC_APP" />
+      <Sector Name="EGAC_TWR" />
+      <Sector Name="EGAC_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGAC" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGAC_TWR" Type="ASD" DefaultCenter="+543705.00-0055221.00" DefaultRange="30" MagneticVariation="-2.0">
+    <Maps>
+      <Map Name="EGAC/EGAC_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGAC" Frequency="122.800" />
+      <Window Airport="EGAC" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGAC" Visible="true" />
+      <Window Type="ADES" Beacon="EGAC" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>BELFAST/CITY TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGAC_TWR" />
+      <Sector Name="EGAC_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGAC" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGAC_GND" Type="ASMGCS" ASMGCSAirport="EGAC" DefaultCenter="+543705.00-0055221.00" DefaultRange="5" MagneticVariation="-2.0" Rotation="0">
+    <Maps>
+      <Map Name="EGAC/EGAC_SMR" />
+      <Map Name="EGAC/EGAC_SMR_RWY" />
+      <Map Name="EGAC/EGAC_SMR_TWY" />
+      <Map Name="EGAC/EGAC_SMR_BLD" />
+      <Map Name="EGAC/EGAC_SMR_APR" />
+      <Map Name="EGAC/EGAC_SMR_BAK" />
+      <Map Name="EGAC/EGAC_SMR_INF" />
+      <Map Name="EGAC/EGAC_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGAE_APP" Type="ASD" DefaultCenter="+550234.00-0070943.00" DefaultRange="50" MagneticVariation="-2.6">
+    <Maps>
+      <Map Name="EGAE/EGAE_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGAE" Frequency="122.800" />
+      <Window Airport="EGAE" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGAE" Visible="true" />
+      <Window Type="ADES" Beacon="EGAE" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>LONDONDERRY/EGLINTON APPROACH</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGAE_APP" />
+      <Sector Name="EGAE_TWR" />
+      <Sector Name="EGAE_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGAE" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGAE_TWR" Type="ASD" DefaultCenter="+550234.00-0070943.00" DefaultRange="30" MagneticVariation="-2.6">
+    <Maps>
+      <Map Name="EGAE/EGAE_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGAE" Frequency="122.800" />
+      <Window Airport="EGAE" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGAE" Visible="true" />
+      <Window Type="ADES" Beacon="EGAE" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>LONDONDERRY/EGLINTON TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGAE_TWR" />
+      <Sector Name="EGAE_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGAE" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGAE_GND" Type="ASMGCS" ASMGCSAirport="EGAE" DefaultCenter="+550234.00-0070943.00" DefaultRange="5" MagneticVariation="-2.6" Rotation="0">
+    <Maps>
+      <Map Name="EGAE/EGAE_SMR" />
+      <Map Name="EGAE/EGAE_SMR_RWY" />
+      <Map Name="EGAE/EGAE_SMR_TWY" />
+      <Map Name="EGAE/EGAE_SMR_BLD" />
+      <Map Name="EGAE/EGAE_SMR_APR" />
+      <Map Name="EGAE/EGAE_SMR_BAK" />
+      <Map Name="EGAE/EGAE_SMR_INF" />
+      <Map Name="EGAE/EGAE_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGBB_APP" Type="ASD" DefaultCenter="+522714.00-0014453.00" DefaultRange="50" MagneticVariation="-0.13">
+    <Maps>
+      <Map Name="EGBB/EGBB_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGBB" Frequency="122.800" />
+      <Window Airport="EGBB" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGBB" Visible="true" />
+      <Window Type="ADES" Beacon="EGBB" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>BIRMINGHAM APPROACH</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGBB_APP" />
+      <Sector Name="EGBB_TWR" />
+      <Sector Name="EGBB_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGBB" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGBB_D_APP" Type="ASD" DefaultCenter="+522714.00-0014453.00" DefaultRange="100" MagneticVariation="-0.13">
+    <Maps>
+      <Map Name="EGBB/EGBB_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGBB" Frequency="122.800" />
+      <Window Airport="EGBB" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGBB" Visible="true" />
+      <Window Type="ADES" Beacon="EGBB" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>BIRMINGHAM DIRECTOR</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGBBD_APP" />
+      <Sector Name="EGBB_APP" />
+      <Sector Name="EGBB_TWR" />
+      <Sector Name="EGBB_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGBB" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGBB_TWR" Type="ASD" DefaultCenter="+522714.00-0014453.00" DefaultRange="30" MagneticVariation="-0.13">
+    <Maps>
+      <Map Name="EGBB/EGBB_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGBB" Frequency="122.800" />
+      <Window Airport="EGBB" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGBB" Visible="true" />
+      <Window Type="ADES" Beacon="EGBB" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>BIRMINGHAM TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGBB_TWR" />
+      <Sector Name="EGBB_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGBB" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGBB_GND" Type="ASMGCS" ASMGCSAirport="EGBB" DefaultCenter="+522714.00-0014453.00" DefaultRange="5" MagneticVariation="-0.13" Rotation="0">
+    <Maps>
+      <Map Name="EGBB/EGBB_SMR" />
+      <Map Name="EGBB/EGBB_SMR_RWY" />
+      <Map Name="EGBB/EGBB_SMR_TWY" />
+      <Map Name="EGBB/EGBB_SMR_BLD" />
+      <Map Name="EGBB/EGBB_SMR_APR" />
+      <Map Name="EGBB/EGBB_SMR_BAK" />
+      <Map Name="EGBB/EGBB_SMR_INF" />
+      <Map Name="EGBB/EGBB_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGBJ_APP" Type="ASD" DefaultCenter="+515339.00-0021002.00" DefaultRange="50" MagneticVariation="-0.22">
+    <Maps>
+      <Map Name="EGBJ/EGBJ_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGBJ" Frequency="122.800" />
+      <Window Airport="EGBJ" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGBJ" Visible="true" />
+      <Window Type="ADES" Beacon="EGBJ" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>GLOUCESTERSHIRE APPROACH</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGBJ_APP" />
+      <Sector Name="EGBJ_TWR" />
+      <Sector Name="EGBJ_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGBJ" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGBJ_TWR" Type="ASD" DefaultCenter="+515339.00-0021002.00" DefaultRange="30" MagneticVariation="-0.22">
+    <Maps>
+      <Map Name="EGBJ/EGBJ_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGBJ" Frequency="122.800" />
+      <Window Airport="EGBJ" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGBJ" Visible="true" />
+      <Window Type="ADES" Beacon="EGBJ" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>GLOUCESTERSHIRE TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGBJ_TWR" />
+      <Sector Name="EGBJ_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGBJ" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGBJ_GND" Type="ASMGCS" ASMGCSAirport="EGBJ" DefaultCenter="+515339.00-0021002.00" DefaultRange="5" MagneticVariation="-0.22" Rotation="0">
+    <Maps>
+      <Map Name="EGBJ/EGBJ_SMR" />
+      <Map Name="EGBJ/EGBJ_SMR_RWY" />
+      <Map Name="EGBJ/EGBJ_SMR_TWY" />
+      <Map Name="EGBJ/EGBJ_SMR_BLD" />
+      <Map Name="EGBJ/EGBJ_SMR_APR" />
+      <Map Name="EGBJ/EGBJ_SMR_BAK" />
+      <Map Name="EGBJ/EGBJ_SMR_INF" />
+      <Map Name="EGBJ/EGBJ_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGCC_D_APP" Type="ASD" DefaultCenter="+532114.00-0021630.00" DefaultRange="100" MagneticVariation="-0.43">
+    <Maps>
+      <Map Name="EGCC/EGCC_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGCC" Frequency="122.800" />
+      <Window Airport="EGCC" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGCC" Visible="true" />
+      <Window Type="ADES" Beacon="EGCC" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>MANCHESTER DIRECTOR</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGCCD_APP" />
+      <Sector Name="EGCC_APP" />
+      <Sector Name="EGCC_TWR" />
+      <Sector Name="EGCC_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGCC" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGCC_TWR" Type="ASD" DefaultCenter="+532114.00-0021630.00" DefaultRange="30" MagneticVariation="-0.43">
+    <Maps>
+      <Map Name="EGCC/EGCC_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGCC" Frequency="122.800" />
+      <Window Airport="EGCC" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGCC" Visible="true" />
+      <Window Type="ADES" Beacon="EGCC" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>MANCHESTER TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGCC_TWR" />
+      <Sector Name="EGCC_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGCC" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGCC_GND" Type="ASMGCS" ASMGCSAirport="EGCC" DefaultCenter="+532114.00-0021630.00" DefaultRange="5" MagneticVariation="-0.43" Rotation="0">
+    <Maps>
+      <Map Name="EGCC/EGCC_SMR" />
+      <Map Name="EGCC/EGCC_SMR_RWY" />
+      <Map Name="EGCC/EGCC_SMR_TWY" />
+      <Map Name="EGCC/EGCC_SMR_BLD" />
+      <Map Name="EGCC/EGCC_SMR_APR" />
+      <Map Name="EGCC/EGCC_SMR_BAK" />
+      <Map Name="EGCC/EGCC_SMR_INF" />
+      <Map Name="EGCC/EGCC_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGCN_APP" Type="ASD" DefaultCenter="+532831.00-0010015.00" DefaultRange="50" MagneticVariation="0.02">
+    <Maps>
+      <Map Name="EGCN/EGCN_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGCN" Frequency="122.800" />
+      <Window Airport="EGCN" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGCN" Visible="true" />
+      <Window Type="ADES" Beacon="EGCN" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>DONCASTER SHEFFIELD APPROACH</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGCN_APP" />
+      <Sector Name="EGCN_TWR" />
+      <Sector Name="EGCN_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGCN" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGCN_TWR" Type="ASD" DefaultCenter="+532831.00-0010015.00" DefaultRange="30" MagneticVariation="0.02">
+    <Maps>
+      <Map Name="EGCN/EGCN_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGCN" Frequency="122.800" />
+      <Window Airport="EGCN" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGCN" Visible="true" />
+      <Window Type="ADES" Beacon="EGCN" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>DONCASTER SHEFFIELD TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGCN_TWR" />
+      <Sector Name="EGCN_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGCN" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGCN_GND" Type="ASMGCS" ASMGCSAirport="EGCN" DefaultCenter="+532831.00-0010015.00" DefaultRange="5" MagneticVariation="0.02" Rotation="0">
+    <Maps>
+      <Map Name="EGCN/EGCN_SMR" />
+      <Map Name="EGCN/EGCN_SMR_RWY" />
+      <Map Name="EGCN/EGCN_SMR_TWY" />
+      <Map Name="EGCN/EGCN_SMR_BLD" />
+      <Map Name="EGCN/EGCN_SMR_APR" />
+      <Map Name="EGCN/EGCN_SMR_BAK" />
+      <Map Name="EGCN/EGCN_SMR_INF" />
+      <Map Name="EGCN/EGCN_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGFF_APP" Type="ASD" DefaultCenter="+512348.00-0032036.00" DefaultRange="50" MagneticVariation="-0.58">
+    <Maps>
+      <Map Name="EGFF/EGFF_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGFF" Frequency="122.800" />
+      <Window Airport="EGFF" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGFF" Visible="true" />
+      <Window Type="ADES" Beacon="EGFF" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>CARDIFF APPROACH</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGFF_APP" />
+      <Sector Name="EGFF_TWR" />
+      <Sector Name="EGFF_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGFF" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGFF_TWR" Type="ASD" DefaultCenter="+512348.00-0032036.00" DefaultRange="30" MagneticVariation="-0.58">
+    <Maps>
+      <Map Name="EGFF/EGFF_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGFF" Frequency="122.800" />
+      <Window Airport="EGFF" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGFF" Visible="true" />
+      <Window Type="ADES" Beacon="EGFF" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>CARDIFF TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGFF_TWR" />
+      <Sector Name="EGFF_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGFF" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGFF_GND" Type="ASMGCS" ASMGCSAirport="EGFF" DefaultCenter="+512348.00-0032036.00" DefaultRange="5" MagneticVariation="-0.58" Rotation="0">
+    <Maps>
+      <Map Name="EGFF/EGFF_SMR" />
+      <Map Name="EGFF/EGFF_SMR_RWY" />
+      <Map Name="EGFF/EGFF_SMR_TWY" />
+      <Map Name="EGFF/EGFF_SMR_BLD" />
+      <Map Name="EGFF/EGFF_SMR_APR" />
+      <Map Name="EGFF/EGFF_SMR_BAK" />
+      <Map Name="EGFF/EGFF_SMR_INF" />
+      <Map Name="EGFF/EGFF_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGGD_D_APP" Type="ASD" DefaultCenter="+512258.00-0024309.00" DefaultRange="100" MagneticVariation="-0.36">
+    <Maps>
+      <Map Name="EGGD/EGGD_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGGD" Frequency="122.800" />
+      <Window Airport="EGGD" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGGD" Visible="true" />
+      <Window Type="ADES" Beacon="EGGD" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>BRISTOL DIRECTOR</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGGDD_APP" />
+      <Sector Name="EGGD_APP" />
+      <Sector Name="EGGD_TWR" />
+      <Sector Name="EGGD_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGGD" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGGD_TWR" Type="ASD" DefaultCenter="+512258.00-0024309.00" DefaultRange="30" MagneticVariation="-0.36">
+    <Maps>
+      <Map Name="EGGD/EGGD_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGGD" Frequency="122.800" />
+      <Window Airport="EGGD" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGGD" Visible="true" />
+      <Window Type="ADES" Beacon="EGGD" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>BRISTOL TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGGD_TWR" />
+      <Sector Name="EGGD_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGGD" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGGD_GND" Type="ASMGCS" ASMGCSAirport="EGGD" DefaultCenter="+512258.00-0024309.00" DefaultRange="5" MagneticVariation="-0.36" Rotation="0">
+    <Maps>
+      <Map Name="EGGD/EGGD_SMR" />
+      <Map Name="EGGD/EGGD_SMR_RWY" />
+      <Map Name="EGGD/EGGD_SMR_TWY" />
+      <Map Name="EGGD/EGGD_SMR_BLD" />
+      <Map Name="EGGD/EGGD_SMR_APR" />
+      <Map Name="EGGD/EGGD_SMR_BAK" />
+      <Map Name="EGGD/EGGD_SMR_INF" />
+      <Map Name="EGGD/EGGD_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGGP_APP" Type="ASD" DefaultCenter="+532001.00-0025059.00" DefaultRange="50" MagneticVariation="-0.64">
+    <Maps>
+      <Map Name="EGGP/EGGP_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGGP" Frequency="122.800" />
+      <Window Airport="EGGP" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGGP" Visible="true" />
+      <Window Type="ADES" Beacon="EGGP" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>LIVERPOOL APPROACH</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGGP_APP" />
+      <Sector Name="EGGP_TWR" />
+      <Sector Name="EGGP_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGGP" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGGP_TWR" Type="ASD" DefaultCenter="+532001.00-0025059.00" DefaultRange="30" MagneticVariation="-0.64">
+    <Maps>
+      <Map Name="EGGP/EGGP_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGGP" Frequency="122.800" />
+      <Window Airport="EGGP" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGGP" Visible="true" />
+      <Window Type="ADES" Beacon="EGGP" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>LIVERPOOL TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGGP_TWR" />
+      <Sector Name="EGGP_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGGP" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGGP_GND" Type="ASMGCS" ASMGCSAirport="EGGP" DefaultCenter="+532001.00-0025059.00" DefaultRange="5" MagneticVariation="-0.64" Rotation="0">
+    <Maps>
+      <Map Name="EGGP/EGGP_SMR" />
+      <Map Name="EGGP/EGGP_SMR_RWY" />
+      <Map Name="EGGP/EGGP_SMR_TWY" />
+      <Map Name="EGGP/EGGP_SMR_BLD" />
+      <Map Name="EGGP/EGGP_SMR_APR" />
+      <Map Name="EGGP/EGGP_SMR_BAK" />
+      <Map Name="EGGP/EGGP_SMR_INF" />
+      <Map Name="EGGP/EGGP_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGGW_D_APP" Type="ASD" DefaultCenter="+515229.00-0002206.00" DefaultRange="100" MagneticVariation="0.41">
+    <Maps>
+      <Map Name="EGGW/EGGW_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGGW" Frequency="122.800" />
+      <Window Airport="EGGW" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGGW" Visible="true" />
+      <Window Type="ADES" Beacon="EGGW" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>LONDON LUTON DIRECTOR</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGGWD_APP" />
+      <Sector Name="EGGW_APP" />
+      <Sector Name="EGGW_TWR" />
+      <Sector Name="EGGW_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGGW" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGGW_TWR" Type="ASD" DefaultCenter="+515229.00-0002206.00" DefaultRange="30" MagneticVariation="0.41">
+    <Maps>
+      <Map Name="EGGW/EGGW_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGGW" Frequency="122.800" />
+      <Window Airport="EGGW" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGGW" Visible="true" />
+      <Window Type="ADES" Beacon="EGGW" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>LONDON LUTON TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGGW_TWR" />
+      <Sector Name="EGGW_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGGW" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGGW_GND" Type="ASMGCS" ASMGCSAirport="EGGW" DefaultCenter="+515229.00-0002206.00" DefaultRange="5" MagneticVariation="0.41" Rotation="0">
+    <Maps>
+      <Map Name="EGGW/EGGW_SMR" />
+      <Map Name="EGGW/EGGW_SMR_RWY" />
+      <Map Name="EGGW/EGGW_SMR_TWY" />
+      <Map Name="EGGW/EGGW_SMR_BLD" />
+      <Map Name="EGGW/EGGW_SMR_APR" />
+      <Map Name="EGGW/EGGW_SMR_BAK" />
+      <Map Name="EGGW/EGGW_SMR_INF" />
+      <Map Name="EGGW/EGGW_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGHE_APP" Type="ASD" DefaultCenter="+495448.00-0061730.00" DefaultRange="50" MagneticVariation="-1.45">
+    <Maps>
+      <Map Name="EGHE/EGHE_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGHE" Frequency="122.800" />
+      <Window Airport="EGHE" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGHE" Visible="true" />
+      <Window Type="ADES" Beacon="EGHE" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>SCILLY ISLES/ST MARY'S APPROACH</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGHE_APP" />
+      <Sector Name="EGHE_TWR" />
+      <Sector Name="EGHE_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGHE" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGHE_TWR" Type="ASD" DefaultCenter="+495448.00-0061730.00" DefaultRange="30" MagneticVariation="-1.45">
+    <Maps>
+      <Map Name="EGHE/EGHE_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGHE" Frequency="122.800" />
+      <Window Airport="EGHE" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGHE" Visible="true" />
+      <Window Type="ADES" Beacon="EGHE" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>SCILLY ISLES/ST MARY'S TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGHE_TWR" />
+      <Sector Name="EGHE_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGHE" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGHE_GND" Type="ASMGCS" ASMGCSAirport="EGHE" DefaultCenter="+495448.00-0061730.00" DefaultRange="5" MagneticVariation="-1.45" Rotation="0">
+    <Maps>
+      <Map Name="EGHE/EGHE_SMR" />
+      <Map Name="EGHE/EGHE_SMR_RWY" />
+      <Map Name="EGHE/EGHE_SMR_TWY" />
+      <Map Name="EGHE/EGHE_SMR_BLD" />
+      <Map Name="EGHE/EGHE_SMR_APR" />
+      <Map Name="EGHE/EGHE_SMR_BAK" />
+      <Map Name="EGHE/EGHE_SMR_INF" />
+      <Map Name="EGHE/EGHE_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGHG_APP" Type="ASD" DefaultCenter="+505624.00-0023932.00" DefaultRange="50" MagneticVariation="-0.29">
+    <Maps>
+      <Map Name="EGHG/EGHG_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGHG" Frequency="122.800" />
+      <Window Airport="EGHG" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGHG" Visible="true" />
+      <Window Type="ADES" Beacon="EGHG" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>YEOVIL/WESTLAND APPROACH</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGHG_APP" />
+      <Sector Name="EGHG_TWR" />
+      <Sector Name="EGHG_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGHG" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGHG_TWR" Type="ASD" DefaultCenter="+505624.00-0023932.00" DefaultRange="30" MagneticVariation="-0.29">
+    <Maps>
+      <Map Name="EGHG/EGHG_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGHG" Frequency="122.800" />
+      <Window Airport="EGHG" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGHG" Visible="true" />
+      <Window Type="ADES" Beacon="EGHG" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>YEOVIL/WESTLAND TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGHG_TWR" />
+      <Sector Name="EGHG_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGHG" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGHG_GND" Type="ASMGCS" ASMGCSAirport="EGHG" DefaultCenter="+505624.00-0023932.00" DefaultRange="5" MagneticVariation="-0.29" Rotation="0">
+    <Maps>
+      <Map Name="EGHG/EGHG_SMR" />
+      <Map Name="EGHG/EGHG_SMR_RWY" />
+      <Map Name="EGHG/EGHG_SMR_TWY" />
+      <Map Name="EGHG/EGHG_SMR_BLD" />
+      <Map Name="EGHG/EGHG_SMR_APR" />
+      <Map Name="EGHG/EGHG_SMR_BAK" />
+      <Map Name="EGHG/EGHG_SMR_INF" />
+      <Map Name="EGHG/EGHG_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGHH_APP" Type="ASD" DefaultCenter="+504648.00-0015033.00" DefaultRange="50" MagneticVariation="0.01">
+    <Maps>
+      <Map Name="EGHH/EGHH_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGHH" Frequency="122.800" />
+      <Window Airport="EGHH" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGHH" Visible="true" />
+      <Window Type="ADES" Beacon="EGHH" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>BOURNEMOUTH APPROACH</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGHH_APP" />
+      <Sector Name="EGHH_TWR" />
+      <Sector Name="EGHH_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGHH" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGHH_D_APP" Type="ASD" DefaultCenter="+504648.00-0015033.00" DefaultRange="100" MagneticVariation="0.01">
+    <Maps>
+      <Map Name="EGHH/EGHH_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGHH" Frequency="122.800" />
+      <Window Airport="EGHH" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGHH" Visible="true" />
+      <Window Type="ADES" Beacon="EGHH" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>BOURNEMOUTH DIRECTOR</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGHHD_APP" />
+      <Sector Name="EGHH_APP" />
+      <Sector Name="EGHH_TWR" />
+      <Sector Name="EGHH_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGHH" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGHH_TWR" Type="ASD" DefaultCenter="+504648.00-0015033.00" DefaultRange="30" MagneticVariation="0.01">
+    <Maps>
+      <Map Name="EGHH/EGHH_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGHH" Frequency="122.800" />
+      <Window Airport="EGHH" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGHH" Visible="true" />
+      <Window Type="ADES" Beacon="EGHH" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>BOURNEMOUTH TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGHH_TWR" />
+      <Sector Name="EGHH_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGHH" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGHH_GND" Type="ASMGCS" ASMGCSAirport="EGHH" DefaultCenter="+504648.00-0015033.00" DefaultRange="5" MagneticVariation="0.01" Rotation="0">
+    <Maps>
+      <Map Name="EGHH/EGHH_SMR" />
+      <Map Name="EGHH/EGHH_SMR_RWY" />
+      <Map Name="EGHH/EGHH_SMR_TWY" />
+      <Map Name="EGHH/EGHH_SMR_BLD" />
+      <Map Name="EGHH/EGHH_SMR_APR" />
+      <Map Name="EGHH/EGHH_SMR_BAK" />
+      <Map Name="EGHH/EGHH_SMR_INF" />
+      <Map Name="EGHH/EGHH_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGHI_TWR" Type="ASD" DefaultCenter="+505701.00-0012124.00" DefaultRange="30" MagneticVariation="0.16">
+    <Maps>
+      <Map Name="EGHI/EGHI_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGHI" Frequency="122.800" />
+      <Window Airport="EGHI" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGHI" Visible="true" />
+      <Window Type="ADES" Beacon="EGHI" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>SOUTHAMPTON TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGHI_TWR" />
+      <Sector Name="EGHI_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGHI" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGHI_GND" Type="ASMGCS" ASMGCSAirport="EGHI" DefaultCenter="+505701.00-0012124.00" DefaultRange="5" MagneticVariation="0.16" Rotation="0">
+    <Maps>
+      <Map Name="EGHI/EGHI_SMR" />
+      <Map Name="EGHI/EGHI_SMR_RWY" />
+      <Map Name="EGHI/EGHI_SMR_TWY" />
+      <Map Name="EGHI/EGHI_SMR_BLD" />
+      <Map Name="EGHI/EGHI_SMR_APR" />
+      <Map Name="EGHI/EGHI_SMR_BAK" />
+      <Map Name="EGHI/EGHI_SMR_INF" />
+      <Map Name="EGHI/EGHI_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGHQ_APP" Type="ASD" DefaultCenter="+502627.00-0045943.00" DefaultRange="50" MagneticVariation="-1.05">
+    <Maps>
+      <Map Name="EGHQ/EGHQ_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGHQ" Frequency="122.800" />
+      <Window Airport="EGHQ" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGHQ" Visible="true" />
+      <Window Type="ADES" Beacon="EGHQ" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>NEWQUAY APPROACH</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGHQ_APP" />
+      <Sector Name="EGHQ_TWR" />
+      <Sector Name="EGHQ_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGHQ" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGHQ_TWR" Type="ASD" DefaultCenter="+502627.00-0045943.00" DefaultRange="30" MagneticVariation="-1.05">
+    <Maps>
+      <Map Name="EGHQ/EGHQ_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGHQ" Frequency="122.800" />
+      <Window Airport="EGHQ" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGHQ" Visible="true" />
+      <Window Type="ADES" Beacon="EGHQ" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>NEWQUAY TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGHQ_TWR" />
+      <Sector Name="EGHQ_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGHQ" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGHQ_GND" Type="ASMGCS" ASMGCSAirport="EGHQ" DefaultCenter="+502627.00-0045943.00" DefaultRange="5" MagneticVariation="-1.05" Rotation="0">
+    <Maps>
+      <Map Name="EGHQ/EGHQ_SMR" />
+      <Map Name="EGHQ/EGHQ_SMR_RWY" />
+      <Map Name="EGHQ/EGHQ_SMR_TWY" />
+      <Map Name="EGHQ/EGHQ_SMR_BLD" />
+      <Map Name="EGHQ/EGHQ_SMR_APR" />
+      <Map Name="EGHQ/EGHQ_SMR_BAK" />
+      <Map Name="EGHQ/EGHQ_SMR_INF" />
+      <Map Name="EGHQ/EGHQ_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGJA_APP" Type="ASD" DefaultCenter="+494224.00-0021252.00" DefaultRange="50" MagneticVariation="-0.01">
+    <Maps>
+      <Map Name="EGJA/EGJA_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGJA" Frequency="122.800" />
+      <Window Airport="EGJA" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGJA" Visible="true" />
+      <Window Type="ADES" Beacon="EGJA" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>ALDERNEY APPROACH</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGJA_APP" />
+      <Sector Name="EGJA_TWR" />
+      <Sector Name="EGJA_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGJA" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGJA_TWR" Type="ASD" DefaultCenter="+494224.00-0021252.00" DefaultRange="30" MagneticVariation="-0.01">
+    <Maps>
+      <Map Name="EGJA/EGJA_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGJA" Frequency="122.800" />
+      <Window Airport="EGJA" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGJA" Visible="true" />
+      <Window Type="ADES" Beacon="EGJA" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>ALDERNEY TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGJA_TWR" />
+      <Sector Name="EGJA_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGJA" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGJA_GND" Type="ASMGCS" ASMGCSAirport="EGJA" DefaultCenter="+494224.00-0021252.00" DefaultRange="5" MagneticVariation="-0.01" Rotation="0">
+    <Maps>
+      <Map Name="EGJA/EGJA_SMR" />
+      <Map Name="EGJA/EGJA_SMR_RWY" />
+      <Map Name="EGJA/EGJA_SMR_TWY" />
+      <Map Name="EGJA/EGJA_SMR_BLD" />
+      <Map Name="EGJA/EGJA_SMR_APR" />
+      <Map Name="EGJA/EGJA_SMR_BAK" />
+      <Map Name="EGJA/EGJA_SMR_INF" />
+      <Map Name="EGJA/EGJA_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGJB_APP" Type="ASD" DefaultCenter="+492606.00-0023610.00" DefaultRange="50" MagneticVariation="-0.11">
+    <Maps>
+      <Map Name="EGJB/EGJB_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGJB" Frequency="122.800" />
+      <Window Airport="EGJB" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGJB" Visible="true" />
+      <Window Type="ADES" Beacon="EGJB" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>GUERNSEY APPROACH</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGJB_APP" />
+      <Sector Name="EGJB_TWR" />
+      <Sector Name="EGJB_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGJB" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGJB_TWR" Type="ASD" DefaultCenter="+492606.00-0023610.00" DefaultRange="30" MagneticVariation="-0.11">
+    <Maps>
+      <Map Name="EGJB/EGJB_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGJB" Frequency="122.800" />
+      <Window Airport="EGJB" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGJB" Visible="true" />
+      <Window Type="ADES" Beacon="EGJB" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>GUERNSEY TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGJB_TWR" />
+      <Sector Name="EGJB_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGJB" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGJB_GND" Type="ASMGCS" ASMGCSAirport="EGJB" DefaultCenter="+492606.00-0023610.00" DefaultRange="5" MagneticVariation="-0.11" Rotation="0">
+    <Maps>
+      <Map Name="EGJB/EGJB_SMR" />
+      <Map Name="EGJB/EGJB_SMR_RWY" />
+      <Map Name="EGJB/EGJB_SMR_TWY" />
+      <Map Name="EGJB/EGJB_SMR_BLD" />
+      <Map Name="EGJB/EGJB_SMR_APR" />
+      <Map Name="EGJB/EGJB_SMR_BAK" />
+      <Map Name="EGJB/EGJB_SMR_INF" />
+      <Map Name="EGJB/EGJB_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGJJ_APP" Type="ASD" DefaultCenter="+491229.00-0021144.00" DefaultRange="50" MagneticVariation="0.04">
+    <Maps>
+      <Map Name="EGJJ/EGJJ_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGJJ" Frequency="122.800" />
+      <Window Airport="EGJJ" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGJJ" Visible="true" />
+      <Window Type="ADES" Beacon="EGJJ" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>JERSEY APPROACH</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGJJ_APP" />
+      <Sector Name="EGJJ_TWR" />
+      <Sector Name="EGJJ_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGJJ" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGJJ_TWR" Type="ASD" DefaultCenter="+491229.00-0021144.00" DefaultRange="30" MagneticVariation="0.04">
+    <Maps>
+      <Map Name="EGJJ/EGJJ_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGJJ" Frequency="122.800" />
+      <Window Airport="EGJJ" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGJJ" Visible="true" />
+      <Window Type="ADES" Beacon="EGJJ" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>JERSEY TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGJJ_TWR" />
+      <Sector Name="EGJJ_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGJJ" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGJJ_GND" Type="ASMGCS" ASMGCSAirport="EGJJ" DefaultCenter="+491229.00-0021144.00" DefaultRange="5" MagneticVariation="0.04" Rotation="0">
+    <Maps>
+      <Map Name="EGJJ/EGJJ_SMR" />
+      <Map Name="EGJJ/EGJJ_SMR_RWY" />
+      <Map Name="EGJJ/EGJJ_SMR_TWY" />
+      <Map Name="EGJJ/EGJJ_SMR_BLD" />
+      <Map Name="EGJJ/EGJJ_SMR_APR" />
+      <Map Name="EGJJ/EGJJ_SMR_BAK" />
+      <Map Name="EGJJ/EGJJ_SMR_INF" />
+      <Map Name="EGJJ/EGJJ_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGKA_APP" Type="ASD" DefaultCenter="+505008.00-0001750.00" DefaultRange="50" MagneticVariation="0.53">
+    <Maps>
+      <Map Name="EGKA/EGKA_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGKA" Frequency="122.800" />
+      <Window Airport="EGKA" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGKA" Visible="true" />
+      <Window Type="ADES" Beacon="EGKA" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>SHOREHAM APPROACH</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGKA_APP" />
+      <Sector Name="EGKA_TWR" />
+      <Sector Name="EGKA_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGKA" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGKA_TWR" Type="ASD" DefaultCenter="+505008.00-0001750.00" DefaultRange="30" MagneticVariation="0.53">
+    <Maps>
+      <Map Name="EGKA/EGKA_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGKA" Frequency="122.800" />
+      <Window Airport="EGKA" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGKA" Visible="true" />
+      <Window Type="ADES" Beacon="EGKA" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>SHOREHAM TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGKA_TWR" />
+      <Sector Name="EGKA_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGKA" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGKA_GND" Type="ASMGCS" ASMGCSAirport="EGKA" DefaultCenter="+505008.00-0001750.00" DefaultRange="5" MagneticVariation="0.53" Rotation="0">
+    <Maps>
+      <Map Name="EGKA/EGKA_SMR" />
+      <Map Name="EGKA/EGKA_SMR_RWY" />
+      <Map Name="EGKA/EGKA_SMR_TWY" />
+      <Map Name="EGKA/EGKA_SMR_BLD" />
+      <Map Name="EGKA/EGKA_SMR_APR" />
+      <Map Name="EGKA/EGKA_SMR_BAK" />
+      <Map Name="EGKA/EGKA_SMR_INF" />
+      <Map Name="EGKA/EGKA_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGKB_APP" Type="ASD" DefaultCenter="+511951.00+0000157.00" DefaultRange="50" MagneticVariation="0.59">
+    <Maps>
+      <Map Name="EGKB/EGKB_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGKB" Frequency="122.800" />
+      <Window Airport="EGKB" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGKB" Visible="true" />
+      <Window Type="ADES" Beacon="EGKB" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>BIGGIN HILL APPROACH</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGKB_APP" />
+      <Sector Name="EGKB_TWR" />
+      <Sector Name="EGKB_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGKB" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGKB_TWR" Type="ASD" DefaultCenter="+511951.00+0000157.00" DefaultRange="30" MagneticVariation="0.59">
+    <Maps>
+      <Map Name="EGKB/EGKB_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGKB" Frequency="122.800" />
+      <Window Airport="EGKB" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGKB" Visible="true" />
+      <Window Type="ADES" Beacon="EGKB" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>BIGGIN HILL TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGKB_TWR" />
+      <Sector Name="EGKB_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGKB" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGKB_GND" Type="ASMGCS" ASMGCSAirport="EGKB" DefaultCenter="+511951.00+0000157.00" DefaultRange="5" MagneticVariation="0.59" Rotation="0">
+    <Maps>
+      <Map Name="EGKB/EGKB_SMR" />
+      <Map Name="EGKB/EGKB_SMR_RWY" />
+      <Map Name="EGKB/EGKB_SMR_TWY" />
+      <Map Name="EGKB/EGKB_SMR_BLD" />
+      <Map Name="EGKB/EGKB_SMR_APR" />
+      <Map Name="EGKB/EGKB_SMR_BAK" />
+      <Map Name="EGKB/EGKB_SMR_INF" />
+      <Map Name="EGKB/EGKB_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGKK_D_APP" Type="ASD" DefaultCenter="+510853.00-0001125.00" DefaultRange="100" MagneticVariation="0.53">
+    <Maps>
+      <Map Name="EGKK/EGKK_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGKK" Frequency="122.800" />
       <Window Airport="EGKK" />
     </ATIS>
-    <Strips Mode="Beacon" Sort="Time">
+    <Strips>
       <Window Type="ADEP" Beacon="EGKK" Visible="true" />
       <Window Type="ADES" Beacon="EGKK" Visible="true" />
     </Strips>
     <ControllerInfo>
-      <Line>London Gatwick Tower</Line>
-      <Line>ATIS available on 121.950</Line>
-      <Line>vatSys Demo</Line>
+      <Line>LONDON GATWICK DIRECTOR</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGKKD_APP" />
+      <Sector Name="EGKK_APP" />
+      <Sector Name="EGKK_TWR" />
+      <Sector Name="EGKK_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGKK" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGKK_TWR" Type="ASD" DefaultCenter="+510853.00-0001125.00" DefaultRange="30" MagneticVariation="0.53">
+    <Maps>
+      <Map Name="EGKK/EGKK_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGKK" Frequency="122.800" />
+      <Window Airport="EGKK" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGKK" Visible="true" />
+      <Window Type="ADES" Beacon="EGKK" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>LONDON GATWICK TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
     </ControllerInfo>
     <Sectors>
       <Sector Name="EGKK_TWR" />
       <Sector Name="EGKK_GND" />
-      <Sector Name="EGKK_DEL" />
     </Sectors>
     <ArrivalLists>
-      <Airport Name="EGKK" />
+      <Airport Airport="EGKK" />
     </ArrivalLists>
   </Position>
-  <Position Name="EGKK_GND" Type="ASMGCS" ASMGCSAirport="EGKK" DefaultCenter="+510853.0-0001125.0" DefaultRange="2" MagneticVariation="0.53" Rotation="10">
+  <Position Name="EGKK_GND" Type="ASMGCS" ASMGCSAirport="EGKK" DefaultCenter="+510853.00-0001125.00" DefaultRange="5" MagneticVariation="0.53" Rotation="0">
     <Maps>
       <Map Name="EGKK/EGKK_SMR" />
       <Map Name="EGKK/EGKK_SMR_RWY" />
@@ -68,46 +1488,1373 @@
       <Map Name="EGKK/EGKK_SMR_INF" />
       <Map Name="EGKK/EGKK_SMR_HLD" />
     </Maps>
-    <Strips Mode="Beacon" Sort="Alpha">
-      <Window Type="ADEP" Beacon="EGKK" Visible="true" />
-    </Strips>
-    <Sectors>
-      <Sector Name="EGKK_GND" />
-      <Sector Name="EGKK_DEL" />
-    </Sectors>
-    <ArrivalLists>
-      <Airport Name="EGKK" />
-    </ArrivalLists>
   </Position>
-  <Position Name="EGPH_TWR" Type="ASD" DefaultCenter="+555700.0-0032221.0" DefaultRange="50" MagneticVariation="0.53">
+  <Position Name="EGKR_TWR" Type="ASD" DefaultCenter="+511249.00-0000819.00" DefaultRange="30" MagneticVariation="0.55">
     <Maps>
-      <Map Name="EGPH/EGPH_SMR" />
-      <Map Name="EGPH/EGPH_TWR_RWY06" />
-      <Map Name="EGPH/EGPH_TWR_RWY24" />
+      <Map Name="EGKR/EGKR_SMR" />
     </Maps>
     <ATIS>
-      <Editor Airport="EGPH" Frequency="0" />
+      <Editor Airport="EGKR" Frequency="122.800" />
+      <Window Airport="EGKR" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGKR" Visible="true" />
+      <Window Type="ADES" Beacon="EGKR" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>REDHILL TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGKR_TWR" />
+      <Sector Name="EGKR_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGKR" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGKR_GND" Type="ASMGCS" ASMGCSAirport="EGKR" DefaultCenter="+511249.00-0000819.00" DefaultRange="5" MagneticVariation="0.55" Rotation="0">
+    <Maps>
+      <Map Name="EGKR/EGKR_SMR" />
+      <Map Name="EGKR/EGKR_SMR_RWY" />
+      <Map Name="EGKR/EGKR_SMR_TWY" />
+      <Map Name="EGKR/EGKR_SMR_BLD" />
+      <Map Name="EGKR/EGKR_SMR_APR" />
+      <Map Name="EGKR/EGKR_SMR_BAK" />
+      <Map Name="EGKR/EGKR_SMR_INF" />
+      <Map Name="EGKR/EGKR_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGLC_D_APP" Type="ASD" DefaultCenter="+513019.00+0000319.00" DefaultRange="100" MagneticVariation="0.59">
+    <Maps>
+      <Map Name="EGLC/EGLC_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGLC" Frequency="122.800" />
+      <Window Airport="EGLC" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGLC" Visible="true" />
+      <Window Type="ADES" Beacon="EGLC" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>LONDON CITY DIRECTOR</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGLCD_APP" />
+      <Sector Name="EGLC_APP" />
+      <Sector Name="EGLC_TWR" />
+      <Sector Name="EGLC_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGLC" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGLC_TWR" Type="ASD" DefaultCenter="+513019.00+0000319.00" DefaultRange="30" MagneticVariation="0.59">
+    <Maps>
+      <Map Name="EGLC/EGLC_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGLC" Frequency="122.800" />
+      <Window Airport="EGLC" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGLC" Visible="true" />
+      <Window Type="ADES" Beacon="EGLC" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>LONDON CITY TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGLC_TWR" />
+      <Sector Name="EGLC_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGLC" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGLC_GND" Type="ASMGCS" ASMGCSAirport="EGLC" DefaultCenter="+513019.00+0000319.00" DefaultRange="5" MagneticVariation="0.59" Rotation="0">
+    <Maps>
+      <Map Name="EGLC/EGLC_SMR" />
+      <Map Name="EGLC/EGLC_SMR_RWY" />
+      <Map Name="EGLC/EGLC_SMR_TWY" />
+      <Map Name="EGLC/EGLC_SMR_BLD" />
+      <Map Name="EGLC/EGLC_SMR_APR" />
+      <Map Name="EGLC/EGLC_SMR_BAK" />
+      <Map Name="EGLC/EGLC_SMR_INF" />
+      <Map Name="EGLC/EGLC_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGLF_D_APP" Type="ASD" DefaultCenter="+511631.00-0004639.00" DefaultRange="100" MagneticVariation="0.33">
+    <Maps>
+      <Map Name="EGLF/EGLF_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGLF" Frequency="122.800" />
+      <Window Airport="EGLF" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGLF" Visible="true" />
+      <Window Type="ADES" Beacon="EGLF" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>FARNBOROUGH DIRECTOR</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGLFD_APP" />
+      <Sector Name="EGLF_APP" />
+      <Sector Name="EGLF_TWR" />
+      <Sector Name="EGLF_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGLF" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGLF_TWR" Type="ASD" DefaultCenter="+511631.00-0004639.00" DefaultRange="30" MagneticVariation="0.33">
+    <Maps>
+      <Map Name="EGLF/EGLF_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGLF" Frequency="122.800" />
+      <Window Airport="EGLF" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGLF" Visible="true" />
+      <Window Type="ADES" Beacon="EGLF" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>FARNBOROUGH TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGLF_TWR" />
+      <Sector Name="EGLF_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGLF" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGLF_GND" Type="ASMGCS" ASMGCSAirport="EGLF" DefaultCenter="+511631.00-0004639.00" DefaultRange="5" MagneticVariation="0.33" Rotation="0">
+    <Maps>
+      <Map Name="EGLF/EGLF_SMR" />
+      <Map Name="EGLF/EGLF_SMR_RWY" />
+      <Map Name="EGLF/EGLF_SMR_TWY" />
+      <Map Name="EGLF/EGLF_SMR_BLD" />
+      <Map Name="EGLF/EGLF_SMR_APR" />
+      <Map Name="EGLF/EGLF_SMR_BAK" />
+      <Map Name="EGLF/EGLF_SMR_INF" />
+      <Map Name="EGLF/EGLF_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGLL_D_APP" Type="ASD" DefaultCenter="+512839.00-0002741.00" DefaultRange="100" MagneticVariation="0.41">
+    <Maps>
+      <Map Name="EGLL/EGLL_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGLL" Frequency="122.800" />
+      <Window Airport="EGLL" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGLL" Visible="true" />
+      <Window Type="ADES" Beacon="EGLL" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>LONDON HEATHROW DIRECTOR</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGLLD_APP" />
+      <Sector Name="EGLL_APP" />
+      <Sector Name="EGLL_TWR" />
+      <Sector Name="EGLL_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGLL" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGLL_TWR" Type="ASD" DefaultCenter="+512839.00-0002741.00" DefaultRange="30" MagneticVariation="0.41">
+    <Maps>
+      <Map Name="EGLL/EGLL_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGLL" Frequency="122.800" />
+      <Window Airport="EGLL" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGLL" Visible="true" />
+      <Window Type="ADES" Beacon="EGLL" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>LONDON HEATHROW TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGLL_TWR" />
+      <Sector Name="EGLL_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGLL" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGLL_GND" Type="ASMGCS" ASMGCSAirport="EGLL" DefaultCenter="+512839.00-0002741.00" DefaultRange="5" MagneticVariation="0.41" Rotation="0">
+    <Maps>
+      <Map Name="EGLL/EGLL_SMR" />
+      <Map Name="EGLL/EGLL_SMR_RWY" />
+      <Map Name="EGLL/EGLL_SMR_TWY" />
+      <Map Name="EGLL/EGLL_SMR_BLD" />
+      <Map Name="EGLL/EGLL_SMR_APR" />
+      <Map Name="EGLL/EGLL_SMR_BAK" />
+      <Map Name="EGLL/EGLL_SMR_INF" />
+      <Map Name="EGLL/EGLL_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGMC_APP" Type="ASD" DefaultCenter="+513413.00+0004136.00" DefaultRange="50" MagneticVariation="0.79">
+    <Maps>
+      <Map Name="EGMC/EGMC_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGMC" Frequency="122.800" />
+      <Window Airport="EGMC" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGMC" Visible="true" />
+      <Window Type="ADES" Beacon="EGMC" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>SOUTHEND APPROACH</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGMC_APP" />
+      <Sector Name="EGMC_TWR" />
+      <Sector Name="EGMC_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGMC" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGMC_D_APP" Type="ASD" DefaultCenter="+513413.00+0004136.00" DefaultRange="100" MagneticVariation="0.79">
+    <Maps>
+      <Map Name="EGMC/EGMC_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGMC" Frequency="122.800" />
+      <Window Airport="EGMC" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGMC" Visible="true" />
+      <Window Type="ADES" Beacon="EGMC" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>SOUTHEND DIRECTOR</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGMCD_APP" />
+      <Sector Name="EGMC_APP" />
+      <Sector Name="EGMC_TWR" />
+      <Sector Name="EGMC_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGMC" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGMC_TWR" Type="ASD" DefaultCenter="+513413.00+0004136.00" DefaultRange="30" MagneticVariation="0.79">
+    <Maps>
+      <Map Name="EGMC/EGMC_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGMC" Frequency="122.800" />
+      <Window Airport="EGMC" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGMC" Visible="true" />
+      <Window Type="ADES" Beacon="EGMC" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>SOUTHEND TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGMC_TWR" />
+      <Sector Name="EGMC_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGMC" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGMC_GND" Type="ASMGCS" ASMGCSAirport="EGMC" DefaultCenter="+513413.00+0004136.00" DefaultRange="5" MagneticVariation="0.79" Rotation="0">
+    <Maps>
+      <Map Name="EGMC/EGMC_SMR" />
+      <Map Name="EGMC/EGMC_SMR_RWY" />
+      <Map Name="EGMC/EGMC_SMR_TWY" />
+      <Map Name="EGMC/EGMC_SMR_BLD" />
+      <Map Name="EGMC/EGMC_SMR_APR" />
+      <Map Name="EGMC/EGMC_SMR_BAK" />
+      <Map Name="EGMC/EGMC_SMR_INF" />
+      <Map Name="EGMC/EGMC_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGMD_APP" Type="ASD" DefaultCenter="+505722.00+0005620.00" DefaultRange="50" MagneticVariation="0.92">
+    <Maps>
+      <Map Name="EGMD/EGMD_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGMD" Frequency="122.800" />
+      <Window Airport="EGMD" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGMD" Visible="true" />
+      <Window Type="ADES" Beacon="EGMD" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>LYDD APPROACH</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGMD_APP" />
+      <Sector Name="EGMD_TWR" />
+      <Sector Name="EGMD_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGMD" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGMD_TWR" Type="ASD" DefaultCenter="+505722.00+0005620.00" DefaultRange="30" MagneticVariation="0.92">
+    <Maps>
+      <Map Name="EGMD/EGMD_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGMD" Frequency="122.800" />
+      <Window Airport="EGMD" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGMD" Visible="true" />
+      <Window Type="ADES" Beacon="EGMD" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>LYDD TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGMD_TWR" />
+      <Sector Name="EGMD_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGMD" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGMD_GND" Type="ASMGCS" ASMGCSAirport="EGMD" DefaultCenter="+505722.00+0005620.00" DefaultRange="5" MagneticVariation="0.92" Rotation="0">
+    <Maps>
+      <Map Name="EGMD/EGMD_SMR" />
+      <Map Name="EGMD/EGMD_SMR_RWY" />
+      <Map Name="EGMD/EGMD_SMR_TWY" />
+      <Map Name="EGMD/EGMD_SMR_BLD" />
+      <Map Name="EGMD/EGMD_SMR_APR" />
+      <Map Name="EGMD/EGMD_SMR_BAK" />
+      <Map Name="EGMD/EGMD_SMR_INF" />
+      <Map Name="EGMD/EGMD_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGNC_APP" Type="ASD" DefaultCenter="+545615.00-0024832.00" DefaultRange="50" MagneticVariation="-0.84">
+    <Maps>
+      <Map Name="EGNC/EGNC_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGNC" Frequency="122.800" />
+      <Window Airport="EGNC" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGNC" Visible="true" />
+      <Window Type="ADES" Beacon="EGNC" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>CARLISLE APPROACH</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGNC_APP" />
+      <Sector Name="EGNC_TWR" />
+      <Sector Name="EGNC_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGNC" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGNC_TWR" Type="ASD" DefaultCenter="+545615.00-0024832.00" DefaultRange="30" MagneticVariation="-0.84">
+    <Maps>
+      <Map Name="EGNC/EGNC_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGNC" Frequency="122.800" />
+      <Window Airport="EGNC" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGNC" Visible="true" />
+      <Window Type="ADES" Beacon="EGNC" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>CARLISLE TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGNC_TWR" />
+      <Sector Name="EGNC_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGNC" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGNC_GND" Type="ASMGCS" ASMGCSAirport="EGNC" DefaultCenter="+545615.00-0024832.00" DefaultRange="5" MagneticVariation="-0.84" Rotation="0">
+    <Maps>
+      <Map Name="EGNC/EGNC_SMR" />
+      <Map Name="EGNC/EGNC_SMR_RWY" />
+      <Map Name="EGNC/EGNC_SMR_TWY" />
+      <Map Name="EGNC/EGNC_SMR_BLD" />
+      <Map Name="EGNC/EGNC_SMR_APR" />
+      <Map Name="EGNC/EGNC_SMR_BAK" />
+      <Map Name="EGNC/EGNC_SMR_INF" />
+      <Map Name="EGNC/EGNC_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGNH_TWR" Type="ASD" DefaultCenter="+534618.00-0030143.00" DefaultRange="30" MagneticVariation="-0.76">
+    <Maps>
+      <Map Name="EGNH/EGNH_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGNH" Frequency="122.800" />
+      <Window Airport="EGNH" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGNH" Visible="true" />
+      <Window Type="ADES" Beacon="EGNH" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>BLACKPOOL TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGNH_TWR" />
+      <Sector Name="EGNH_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGNH" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGNH_GND" Type="ASMGCS" ASMGCSAirport="EGNH" DefaultCenter="+534618.00-0030143.00" DefaultRange="5" MagneticVariation="-0.76" Rotation="0">
+    <Maps>
+      <Map Name="EGNH/EGNH_SMR" />
+      <Map Name="EGNH/EGNH_SMR_RWY" />
+      <Map Name="EGNH/EGNH_SMR_TWY" />
+      <Map Name="EGNH/EGNH_SMR_BLD" />
+      <Map Name="EGNH/EGNH_SMR_APR" />
+      <Map Name="EGNH/EGNH_SMR_BAK" />
+      <Map Name="EGNH/EGNH_SMR_INF" />
+      <Map Name="EGNH/EGNH_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGNJ_APP" Type="ASD" DefaultCenter="+533424.00-0002105.00" DefaultRange="50" MagneticVariation="0.25">
+    <Maps>
+      <Map Name="EGNJ/EGNJ_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGNJ" Frequency="122.800" />
+      <Window Airport="EGNJ" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGNJ" Visible="true" />
+      <Window Type="ADES" Beacon="EGNJ" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>HUMBERSIDE APPROACH</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGNJ_APP" />
+      <Sector Name="EGNJ_TWR" />
+      <Sector Name="EGNJ_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGNJ" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGNJ_TWR" Type="ASD" DefaultCenter="+533424.00-0002105.00" DefaultRange="30" MagneticVariation="0.25">
+    <Maps>
+      <Map Name="EGNJ/EGNJ_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGNJ" Frequency="122.800" />
+      <Window Airport="EGNJ" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGNJ" Visible="true" />
+      <Window Type="ADES" Beacon="EGNJ" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>HUMBERSIDE TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGNJ_TWR" />
+      <Sector Name="EGNJ_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGNJ" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGNJ_GND" Type="ASMGCS" ASMGCSAirport="EGNJ" DefaultCenter="+533424.00-0002105.00" DefaultRange="5" MagneticVariation="0.25" Rotation="0">
+    <Maps>
+      <Map Name="EGNJ/EGNJ_SMR" />
+      <Map Name="EGNJ/EGNJ_SMR_RWY" />
+      <Map Name="EGNJ/EGNJ_SMR_TWY" />
+      <Map Name="EGNJ/EGNJ_SMR_BLD" />
+      <Map Name="EGNJ/EGNJ_SMR_APR" />
+      <Map Name="EGNJ/EGNJ_SMR_BAK" />
+      <Map Name="EGNJ/EGNJ_SMR_INF" />
+      <Map Name="EGNJ/EGNJ_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGNM_APP" Type="ASD" DefaultCenter="+535158.00-0013939.00" DefaultRange="50" MagneticVariation="-0.26">
+    <Maps>
+      <Map Name="EGNM/EGNM_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGNM" Frequency="122.800" />
+      <Window Airport="EGNM" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGNM" Visible="true" />
+      <Window Type="ADES" Beacon="EGNM" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>LEEDS BRADFORD APPROACH</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGNM_APP" />
+      <Sector Name="EGNM_TWR" />
+      <Sector Name="EGNM_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGNM" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGNM_D_APP" Type="ASD" DefaultCenter="+535158.00-0013939.00" DefaultRange="100" MagneticVariation="-0.26">
+    <Maps>
+      <Map Name="EGNM/EGNM_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGNM" Frequency="122.800" />
+      <Window Airport="EGNM" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGNM" Visible="true" />
+      <Window Type="ADES" Beacon="EGNM" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>LEEDS BRADFORD DIRECTOR</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGNMD_APP" />
+      <Sector Name="EGNM_APP" />
+      <Sector Name="EGNM_TWR" />
+      <Sector Name="EGNM_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGNM" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGNM_TWR" Type="ASD" DefaultCenter="+535158.00-0013939.00" DefaultRange="30" MagneticVariation="-0.26">
+    <Maps>
+      <Map Name="EGNM/EGNM_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGNM" Frequency="122.800" />
+      <Window Airport="EGNM" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGNM" Visible="true" />
+      <Window Type="ADES" Beacon="EGNM" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>LEEDS BRADFORD TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGNM_TWR" />
+      <Sector Name="EGNM_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGNM" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGNM_GND" Type="ASMGCS" ASMGCSAirport="EGNM" DefaultCenter="+535158.00-0013939.00" DefaultRange="5" MagneticVariation="-0.26" Rotation="0">
+    <Maps>
+      <Map Name="EGNM/EGNM_SMR" />
+      <Map Name="EGNM/EGNM_SMR_RWY" />
+      <Map Name="EGNM/EGNM_SMR_TWY" />
+      <Map Name="EGNM/EGNM_SMR_BLD" />
+      <Map Name="EGNM/EGNM_SMR_APR" />
+      <Map Name="EGNM/EGNM_SMR_BAK" />
+      <Map Name="EGNM/EGNM_SMR_INF" />
+      <Map Name="EGNM/EGNM_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGNO_TWR" Type="ASD" DefaultCenter="+534442.00-0025300.00" DefaultRange="30" MagneticVariation="-0.71">
+    <Maps>
+      <Map Name="EGNO/EGNO_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGNO" Frequency="122.800" />
+      <Window Airport="EGNO" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGNO" Visible="true" />
+      <Window Type="ADES" Beacon="EGNO" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>WARTON TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGNO_TWR" />
+      <Sector Name="EGNO_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGNO" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGNO_GND" Type="ASMGCS" ASMGCSAirport="EGNO" DefaultCenter="+534442.00-0025300.00" DefaultRange="5" MagneticVariation="-0.71" Rotation="0">
+    <Maps>
+      <Map Name="EGNO/EGNO_SMR" />
+      <Map Name="EGNO/EGNO_SMR_RWY" />
+      <Map Name="EGNO/EGNO_SMR_TWY" />
+      <Map Name="EGNO/EGNO_SMR_BLD" />
+      <Map Name="EGNO/EGNO_SMR_APR" />
+      <Map Name="EGNO/EGNO_SMR_BAK" />
+      <Map Name="EGNO/EGNO_SMR_INF" />
+      <Map Name="EGNO/EGNO_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGNR_D_APP" Type="ASD" DefaultCenter="+531041.00-0025840.00" DefaultRange="100" MagneticVariation="-0.67">
+    <Maps>
+      <Map Name="EGNR/EGNR_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGNR" Frequency="122.800" />
+      <Window Airport="EGNR" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGNR" Visible="true" />
+      <Window Type="ADES" Beacon="EGNR" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>HAWARDEN DIRECTOR</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGNRD_APP" />
+      <Sector Name="EGNR_APP" />
+      <Sector Name="EGNR_TWR" />
+      <Sector Name="EGNR_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGNR" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGNR_TWR" Type="ASD" DefaultCenter="+531041.00-0025840.00" DefaultRange="30" MagneticVariation="-0.67">
+    <Maps>
+      <Map Name="EGNR/EGNR_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGNR" Frequency="122.800" />
+      <Window Airport="EGNR" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGNR" Visible="true" />
+      <Window Type="ADES" Beacon="EGNR" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>HAWARDEN TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGNR_TWR" />
+      <Sector Name="EGNR_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGNR" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGNR_GND" Type="ASMGCS" ASMGCSAirport="EGNR" DefaultCenter="+531041.00-0025840.00" DefaultRange="5" MagneticVariation="-0.67" Rotation="0">
+    <Maps>
+      <Map Name="EGNR/EGNR_SMR" />
+      <Map Name="EGNR/EGNR_SMR_RWY" />
+      <Map Name="EGNR/EGNR_SMR_TWY" />
+      <Map Name="EGNR/EGNR_SMR_BLD" />
+      <Map Name="EGNR/EGNR_SMR_APR" />
+      <Map Name="EGNR/EGNR_SMR_BAK" />
+      <Map Name="EGNR/EGNR_SMR_INF" />
+      <Map Name="EGNR/EGNR_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGNS_APP" Type="ASD" DefaultCenter="+540500.00-0043724.00" DefaultRange="50" MagneticVariation="-1.42">
+    <Maps>
+      <Map Name="EGNS/EGNS_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGNS" Frequency="122.800" />
+      <Window Airport="EGNS" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGNS" Visible="true" />
+      <Window Type="ADES" Beacon="EGNS" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>ISLE OF MAN APPROACH</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGNS_APP" />
+      <Sector Name="EGNS_TWR" />
+      <Sector Name="EGNS_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGNS" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGNS_TWR" Type="ASD" DefaultCenter="+540500.00-0043724.00" DefaultRange="30" MagneticVariation="-1.42">
+    <Maps>
+      <Map Name="EGNS/EGNS_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGNS" Frequency="122.800" />
+      <Window Airport="EGNS" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGNS" Visible="true" />
+      <Window Type="ADES" Beacon="EGNS" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>ISLE OF MAN TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGNS_TWR" />
+      <Sector Name="EGNS_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGNS" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGNS_GND" Type="ASMGCS" ASMGCSAirport="EGNS" DefaultCenter="+540500.00-0043724.00" DefaultRange="5" MagneticVariation="-1.42" Rotation="0">
+    <Maps>
+      <Map Name="EGNS/EGNS_SMR" />
+      <Map Name="EGNS/EGNS_SMR_RWY" />
+      <Map Name="EGNS/EGNS_SMR_TWY" />
+      <Map Name="EGNS/EGNS_SMR_BLD" />
+      <Map Name="EGNS/EGNS_SMR_APR" />
+      <Map Name="EGNS/EGNS_SMR_BAK" />
+      <Map Name="EGNS/EGNS_SMR_INF" />
+      <Map Name="EGNS/EGNS_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGNT_APP" Type="ASD" DefaultCenter="+550217.00-0014123.00" DefaultRange="50" MagneticVariation="-0.42">
+    <Maps>
+      <Map Name="EGNT/EGNT_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGNT" Frequency="122.800" />
+      <Window Airport="EGNT" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGNT" Visible="true" />
+      <Window Type="ADES" Beacon="EGNT" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>NEWCASTLE APPROACH</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGNT_APP" />
+      <Sector Name="EGNT_TWR" />
+      <Sector Name="EGNT_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGNT" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGNT_D_APP" Type="ASD" DefaultCenter="+550217.00-0014123.00" DefaultRange="100" MagneticVariation="-0.42">
+    <Maps>
+      <Map Name="EGNT/EGNT_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGNT" Frequency="122.800" />
+      <Window Airport="EGNT" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGNT" Visible="true" />
+      <Window Type="ADES" Beacon="EGNT" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>NEWCASTLE DIRECTOR</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGNTD_APP" />
+      <Sector Name="EGNT_APP" />
+      <Sector Name="EGNT_TWR" />
+      <Sector Name="EGNT_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGNT" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGNT_TWR" Type="ASD" DefaultCenter="+550217.00-0014123.00" DefaultRange="30" MagneticVariation="-0.42">
+    <Maps>
+      <Map Name="EGNT/EGNT_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGNT" Frequency="122.800" />
+      <Window Airport="EGNT" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGNT" Visible="true" />
+      <Window Type="ADES" Beacon="EGNT" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>NEWCASTLE TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGNT_TWR" />
+      <Sector Name="EGNT_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGNT" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGNT_GND" Type="ASMGCS" ASMGCSAirport="EGNT" DefaultCenter="+550217.00-0014123.00" DefaultRange="5" MagneticVariation="-0.42" Rotation="0">
+    <Maps>
+      <Map Name="EGNT/EGNT_SMR" />
+      <Map Name="EGNT/EGNT_SMR_RWY" />
+      <Map Name="EGNT/EGNT_SMR_TWY" />
+      <Map Name="EGNT/EGNT_SMR_BLD" />
+      <Map Name="EGNT/EGNT_SMR_APR" />
+      <Map Name="EGNT/EGNT_SMR_BAK" />
+      <Map Name="EGNT/EGNT_SMR_INF" />
+      <Map Name="EGNT/EGNT_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGNV_APP" Type="ASD" DefaultCenter="+543033.00-0012546.00" DefaultRange="50" MagneticVariation="-0.25">
+    <Maps>
+      <Map Name="EGNV/EGNV_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGNV" Frequency="122.800" />
+      <Window Airport="EGNV" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGNV" Visible="true" />
+      <Window Type="ADES" Beacon="EGNV" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>TEESSIDE INTERNATIONAL APPROACH</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGNV_APP" />
+      <Sector Name="EGNV_TWR" />
+      <Sector Name="EGNV_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGNV" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGNV_D_APP" Type="ASD" DefaultCenter="+543033.00-0012546.00" DefaultRange="100" MagneticVariation="-0.25">
+    <Maps>
+      <Map Name="EGNV/EGNV_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGNV" Frequency="122.800" />
+      <Window Airport="EGNV" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGNV" Visible="true" />
+      <Window Type="ADES" Beacon="EGNV" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>TEESSIDE INTERNATIONAL DIRECTOR</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGNVD_APP" />
+      <Sector Name="EGNV_APP" />
+      <Sector Name="EGNV_TWR" />
+      <Sector Name="EGNV_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGNV" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGNV_TWR" Type="ASD" DefaultCenter="+543033.00-0012546.00" DefaultRange="30" MagneticVariation="-0.25">
+    <Maps>
+      <Map Name="EGNV/EGNV_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGNV" Frequency="122.800" />
+      <Window Airport="EGNV" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGNV" Visible="true" />
+      <Window Type="ADES" Beacon="EGNV" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>TEESSIDE INTERNATIONAL TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGNV_TWR" />
+      <Sector Name="EGNV_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGNV" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGNV_GND" Type="ASMGCS" ASMGCSAirport="EGNV" DefaultCenter="+543033.00-0012546.00" DefaultRange="5" MagneticVariation="-0.25" Rotation="0">
+    <Maps>
+      <Map Name="EGNV/EGNV_SMR" />
+      <Map Name="EGNV/EGNV_SMR_RWY" />
+      <Map Name="EGNV/EGNV_SMR_TWY" />
+      <Map Name="EGNV/EGNV_SMR_BLD" />
+      <Map Name="EGNV/EGNV_SMR_APR" />
+      <Map Name="EGNV/EGNV_SMR_BAK" />
+      <Map Name="EGNV/EGNV_SMR_INF" />
+      <Map Name="EGNV/EGNV_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGNX_D_APP" Type="ASD" DefaultCenter="+524952.00-0011940.00" DefaultRange="100" MagneticVariation="-0.02">
+    <Maps>
+      <Map Name="EGNX/EGNX_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGNX" Frequency="122.800" />
+      <Window Airport="EGNX" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGNX" Visible="true" />
+      <Window Type="ADES" Beacon="EGNX" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>EAST MIDLANDS DIRECTOR</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGNXD_APP" />
+      <Sector Name="EGNX_APP" />
+      <Sector Name="EGNX_TWR" />
+      <Sector Name="EGNX_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGNX" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGNX_TWR" Type="ASD" DefaultCenter="+524952.00-0011940.00" DefaultRange="30" MagneticVariation="-0.02">
+    <Maps>
+      <Map Name="EGNX/EGNX_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGNX" Frequency="122.800" />
+      <Window Airport="EGNX" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGNX" Visible="true" />
+      <Window Type="ADES" Beacon="EGNX" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>EAST MIDLANDS TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGNX_TWR" />
+      <Sector Name="EGNX_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGNX" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGNX_GND" Type="ASMGCS" ASMGCSAirport="EGNX" DefaultCenter="+524952.00-0011940.00" DefaultRange="5" MagneticVariation="-0.02" Rotation="0">
+    <Maps>
+      <Map Name="EGNX/EGNX_SMR" />
+      <Map Name="EGNX/EGNX_SMR_RWY" />
+      <Map Name="EGNX/EGNX_SMR_TWY" />
+      <Map Name="EGNX/EGNX_SMR_BLD" />
+      <Map Name="EGNX/EGNX_SMR_APR" />
+      <Map Name="EGNX/EGNX_SMR_BAK" />
+      <Map Name="EGNX/EGNX_SMR_INF" />
+      <Map Name="EGNX/EGNX_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGPA_APP" Type="ASD" DefaultCenter="+585729.00-0025402.00" DefaultRange="50" MagneticVariation="-1.46">
+    <Maps>
+      <Map Name="EGPA/EGPA_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGPA" Frequency="122.800" />
+      <Window Airport="EGPA" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGPA" Visible="true" />
+      <Window Type="ADES" Beacon="EGPA" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>KIRKWALL APPROACH</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGPA_APP" />
+      <Sector Name="EGPA_TWR" />
+      <Sector Name="EGPA_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGPA" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGPA_TWR" Type="ASD" DefaultCenter="+585729.00-0025402.00" DefaultRange="30" MagneticVariation="-1.46">
+    <Maps>
+      <Map Name="EGPA/EGPA_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGPA" Frequency="122.800" />
+      <Window Airport="EGPA" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGPA" Visible="true" />
+      <Window Type="ADES" Beacon="EGPA" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>KIRKWALL TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGPA_TWR" />
+      <Sector Name="EGPA_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGPA" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGPA_GND" Type="ASMGCS" ASMGCSAirport="EGPA" DefaultCenter="+585729.00-0025402.00" DefaultRange="5" MagneticVariation="-1.46" Rotation="0">
+    <Maps>
+      <Map Name="EGPA/EGPA_SMR" />
+      <Map Name="EGPA/EGPA_SMR_RWY" />
+      <Map Name="EGPA/EGPA_SMR_TWY" />
+      <Map Name="EGPA/EGPA_SMR_BLD" />
+      <Map Name="EGPA/EGPA_SMR_APR" />
+      <Map Name="EGPA/EGPA_SMR_BAK" />
+      <Map Name="EGPA/EGPA_SMR_INF" />
+      <Map Name="EGPA/EGPA_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGPB_TWR" Type="ASD" DefaultCenter="+595253.00-0011738.00" DefaultRange="30" MagneticVariation="-0.87">
+    <Maps>
+      <Map Name="EGPB/EGPB_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGPB" Frequency="122.800" />
+      <Window Airport="EGPB" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGPB" Visible="true" />
+      <Window Type="ADES" Beacon="EGPB" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>SUMBURGH TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGPB_TWR" />
+      <Sector Name="EGPB_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGPB" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGPB_GND" Type="ASMGCS" ASMGCSAirport="EGPB" DefaultCenter="+595253.00-0011738.00" DefaultRange="5" MagneticVariation="-0.87" Rotation="0">
+    <Maps>
+      <Map Name="EGPB/EGPB_SMR" />
+      <Map Name="EGPB/EGPB_SMR_RWY" />
+      <Map Name="EGPB/EGPB_SMR_TWY" />
+      <Map Name="EGPB/EGPB_SMR_BLD" />
+      <Map Name="EGPB/EGPB_SMR_APR" />
+      <Map Name="EGPB/EGPB_SMR_BAK" />
+      <Map Name="EGPB/EGPB_SMR_INF" />
+      <Map Name="EGPB/EGPB_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGPC_APP" Type="ASD" DefaultCenter="+582732.00-0030535.00" DefaultRange="50" MagneticVariation="-1.47">
+    <Maps>
+      <Map Name="EGPC/EGPC_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGPC" Frequency="122.800" />
+      <Window Airport="EGPC" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGPC" Visible="true" />
+      <Window Type="ADES" Beacon="EGPC" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>WICK APPROACH</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGPC_APP" />
+      <Sector Name="EGPC_TWR" />
+      <Sector Name="EGPC_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGPC" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGPC_TWR" Type="ASD" DefaultCenter="+582732.00-0030535.00" DefaultRange="30" MagneticVariation="-1.47">
+    <Maps>
+      <Map Name="EGPC/EGPC_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGPC" Frequency="122.800" />
+      <Window Airport="EGPC" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGPC" Visible="true" />
+      <Window Type="ADES" Beacon="EGPC" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>WICK TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGPC_TWR" />
+      <Sector Name="EGPC_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGPC" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGPC_GND" Type="ASMGCS" ASMGCSAirport="EGPC" DefaultCenter="+582732.00-0030535.00" DefaultRange="5" MagneticVariation="-1.47" Rotation="0">
+    <Maps>
+      <Map Name="EGPC/EGPC_SMR" />
+      <Map Name="EGPC/EGPC_SMR_RWY" />
+      <Map Name="EGPC/EGPC_SMR_TWY" />
+      <Map Name="EGPC/EGPC_SMR_BLD" />
+      <Map Name="EGPC/EGPC_SMR_APR" />
+      <Map Name="EGPC/EGPC_SMR_BAK" />
+      <Map Name="EGPC/EGPC_SMR_INF" />
+      <Map Name="EGPC/EGPC_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGPD_APP" Type="ASD" DefaultCenter="+571209.00-0021153.00" DefaultRange="50" MagneticVariation="-0.91">
+    <Maps>
+      <Map Name="EGPD/EGPD_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGPD" Frequency="122.800" />
+      <Window Airport="EGPD" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGPD" Visible="true" />
+      <Window Type="ADES" Beacon="EGPD" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>ABERDEEN/DYCE APPROACH</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGPD_APP" />
+      <Sector Name="EGPD_TWR" />
+      <Sector Name="EGPD_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGPD" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGPD_D_APP" Type="ASD" DefaultCenter="+571209.00-0021153.00" DefaultRange="100" MagneticVariation="-0.91">
+    <Maps>
+      <Map Name="EGPD/EGPD_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGPD" Frequency="122.800" />
+      <Window Airport="EGPD" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGPD" Visible="true" />
+      <Window Type="ADES" Beacon="EGPD" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>ABERDEEN/DYCE DIRECTOR</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGPDD_APP" />
+      <Sector Name="EGPD_APP" />
+      <Sector Name="EGPD_TWR" />
+      <Sector Name="EGPD_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGPD" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGPD_TWR" Type="ASD" DefaultCenter="+571209.00-0021153.00" DefaultRange="30" MagneticVariation="-0.91">
+    <Maps>
+      <Map Name="EGPD/EGPD_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGPD" Frequency="122.800" />
+      <Window Airport="EGPD" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGPD" Visible="true" />
+      <Window Type="ADES" Beacon="EGPD" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>ABERDEEN/DYCE TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGPD_TWR" />
+      <Sector Name="EGPD_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGPD" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGPD_GND" Type="ASMGCS" ASMGCSAirport="EGPD" DefaultCenter="+571209.00-0021153.00" DefaultRange="5" MagneticVariation="-0.91" Rotation="0">
+    <Maps>
+      <Map Name="EGPD/EGPD_SMR" />
+      <Map Name="EGPD/EGPD_SMR_RWY" />
+      <Map Name="EGPD/EGPD_SMR_TWY" />
+      <Map Name="EGPD/EGPD_SMR_BLD" />
+      <Map Name="EGPD/EGPD_SMR_APR" />
+      <Map Name="EGPD/EGPD_SMR_BAK" />
+      <Map Name="EGPD/EGPD_SMR_INF" />
+      <Map Name="EGPD/EGPD_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGPE_APP" Type="ASD" DefaultCenter="+573233.00-0040251.00" DefaultRange="50" MagneticVariation="-1.74">
+    <Maps>
+      <Map Name="EGPE/EGPE_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGPE" Frequency="122.800" />
+      <Window Airport="EGPE" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGPE" Visible="true" />
+      <Window Type="ADES" Beacon="EGPE" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>INVERNESS APPROACH</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGPE_APP" />
+      <Sector Name="EGPE_TWR" />
+      <Sector Name="EGPE_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGPE" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGPE_TWR" Type="ASD" DefaultCenter="+573233.00-0040251.00" DefaultRange="30" MagneticVariation="-1.74">
+    <Maps>
+      <Map Name="EGPE/EGPE_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGPE" Frequency="122.800" />
+      <Window Airport="EGPE" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGPE" Visible="true" />
+      <Window Type="ADES" Beacon="EGPE" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>INVERNESS TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGPE_TWR" />
+      <Sector Name="EGPE_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGPE" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGPE_GND" Type="ASMGCS" ASMGCSAirport="EGPE" DefaultCenter="+573233.00-0040251.00" DefaultRange="5" MagneticVariation="-1.74" Rotation="0">
+    <Maps>
+      <Map Name="EGPE/EGPE_SMR" />
+      <Map Name="EGPE/EGPE_SMR_RWY" />
+      <Map Name="EGPE/EGPE_SMR_TWY" />
+      <Map Name="EGPE/EGPE_SMR_BLD" />
+      <Map Name="EGPE/EGPE_SMR_APR" />
+      <Map Name="EGPE/EGPE_SMR_BAK" />
+      <Map Name="EGPE/EGPE_SMR_INF" />
+      <Map Name="EGPE/EGPE_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGPH_APP" Type="ASD" DefaultCenter="+555700.00-0032221.00" DefaultRange="50" MagneticVariation="-1.21">
+    <Maps>
+      <Map Name="EGPH/EGPH_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGPH" Frequency="122.800" />
       <Window Airport="EGPH" />
     </ATIS>
-    <Strips Mode="Beacon" Sort="Time">
+    <Strips>
       <Window Type="ADEP" Beacon="EGPH" Visible="true" />
       <Window Type="ADES" Beacon="EGPH" Visible="true" />
     </Strips>
     <ControllerInfo>
-      <Line>London Gatwick Tower</Line>
-      <Line>ATIS available on 121.950</Line>
-      <Line>vatSys Demo</Line>
+      <Line>EDINBURGH APPROACH</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGPH_APP" />
+      <Sector Name="EGPH_TWR" />
+      <Sector Name="EGPH_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGPH" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGPH_TWR" Type="ASD" DefaultCenter="+555700.00-0032221.00" DefaultRange="30" MagneticVariation="-1.21">
+    <Maps>
+      <Map Name="EGPH/EGPH_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGPH" Frequency="122.800" />
+      <Window Airport="EGPH" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGPH" Visible="true" />
+      <Window Type="ADES" Beacon="EGPH" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>EDINBURGH TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
     </ControllerInfo>
     <Sectors>
       <Sector Name="EGPH_TWR" />
       <Sector Name="EGPH_GND" />
-      <Sector Name="EGPH_DEL" />
     </Sectors>
     <ArrivalLists>
-      <Airport Name="EGPH" />
+      <Airport Airport="EGPH" />
     </ArrivalLists>
   </Position>
-  <Position Name="EGPH_GND" Type="ASMGCS" ASMGCSAirport="EGPH" DefaultCenter="+555700.0-0032221.0" DefaultRange="2" MagneticVariation="0.53" Rotation="10">
+  <Position Name="EGPH_GND" Type="ASMGCS" ASMGCSAirport="EGPH" DefaultCenter="+555700.00-0032221.00" DefaultRange="5" MagneticVariation="-1.21" Rotation="0">
     <Maps>
       <Map Name="EGPH/EGPH_SMR" />
       <Map Name="EGPH/EGPH_SMR_RWY" />
@@ -118,15 +2865,694 @@
       <Map Name="EGPH/EGPH_SMR_INF" />
       <Map Name="EGPH/EGPH_SMR_HLD" />
     </Maps>
-    <Strips Mode="Beacon" Sort="Alpha">
-      <Window Type="ADEP" Beacon="EGPH" Visible="true" />
+  </Position>
+  <Position Name="EGPK_APP" Type="ASD" DefaultCenter="+553034.00-0043540.00" DefaultRange="50" MagneticVariation="-1.64">
+    <Maps>
+      <Map Name="EGPK/EGPK_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGPK" Frequency="122.800" />
+      <Window Airport="EGPK" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGPK" Visible="true" />
+      <Window Type="ADES" Beacon="EGPK" Visible="true" />
     </Strips>
+    <ControllerInfo>
+      <Line>PRESTWICK APPROACH</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
     <Sectors>
-      <Sector Name="EGPH_GND" />
-      <Sector Name="EGPH_DEL" />
+      <Sector Name="EGPK_APP" />
+      <Sector Name="EGPK_TWR" />
+      <Sector Name="EGPK_GND" />
     </Sectors>
     <ArrivalLists>
-      <Airport Name="EGPH" />
+      <Airport Airport="EGPK" />
     </ArrivalLists>
+  </Position>
+  <Position Name="EGPK_TWR" Type="ASD" DefaultCenter="+553034.00-0043540.00" DefaultRange="30" MagneticVariation="-1.64">
+    <Maps>
+      <Map Name="EGPK/EGPK_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGPK" Frequency="122.800" />
+      <Window Airport="EGPK" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGPK" Visible="true" />
+      <Window Type="ADES" Beacon="EGPK" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>PRESTWICK TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGPK_TWR" />
+      <Sector Name="EGPK_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGPK" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGPK_GND" Type="ASMGCS" ASMGCSAirport="EGPK" DefaultCenter="+553034.00-0043540.00" DefaultRange="5" MagneticVariation="-1.64" Rotation="0">
+    <Maps>
+      <Map Name="EGPK/EGPK_SMR" />
+      <Map Name="EGPK/EGPK_SMR_RWY" />
+      <Map Name="EGPK/EGPK_SMR_TWY" />
+      <Map Name="EGPK/EGPK_SMR_BLD" />
+      <Map Name="EGPK/EGPK_SMR_APR" />
+      <Map Name="EGPK/EGPK_SMR_BAK" />
+      <Map Name="EGPK/EGPK_SMR_INF" />
+      <Map Name="EGPK/EGPK_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGPL_APP" Type="ASD" DefaultCenter="+572850.00-0072150.00" DefaultRange="50" MagneticVariation="-3.17">
+    <Maps>
+      <Map Name="EGPL/EGPL_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGPL" Frequency="122.800" />
+      <Window Airport="EGPL" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGPL" Visible="true" />
+      <Window Type="ADES" Beacon="EGPL" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>BENBECULA APPROACH</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGPL_APP" />
+      <Sector Name="EGPL_TWR" />
+      <Sector Name="EGPL_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGPL" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGPL_TWR" Type="ASD" DefaultCenter="+572850.00-0072150.00" DefaultRange="30" MagneticVariation="-3.17">
+    <Maps>
+      <Map Name="EGPL/EGPL_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGPL" Frequency="122.800" />
+      <Window Airport="EGPL" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGPL" Visible="true" />
+      <Window Type="ADES" Beacon="EGPL" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>BENBECULA TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGPL_TWR" />
+      <Sector Name="EGPL_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGPL" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGPL_GND" Type="ASMGCS" ASMGCSAirport="EGPL" DefaultCenter="+572850.00-0072150.00" DefaultRange="5" MagneticVariation="-3.17" Rotation="0">
+    <Maps>
+      <Map Name="EGPL/EGPL_SMR" />
+      <Map Name="EGPL/EGPL_SMR_RWY" />
+      <Map Name="EGPL/EGPL_SMR_TWY" />
+      <Map Name="EGPL/EGPL_SMR_BLD" />
+      <Map Name="EGPL/EGPL_SMR_APR" />
+      <Map Name="EGPL/EGPL_SMR_BAK" />
+      <Map Name="EGPL/EGPL_SMR_INF" />
+      <Map Name="EGPL/EGPL_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGPN_APP" Type="ASD" DefaultCenter="+562709.00-0030133.00" DefaultRange="50" MagneticVariation="-1.14">
+    <Maps>
+      <Map Name="EGPN/EGPN_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGPN" Frequency="122.800" />
+      <Window Airport="EGPN" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGPN" Visible="true" />
+      <Window Type="ADES" Beacon="EGPN" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>DUNDEE APPROACH</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGPN_APP" />
+      <Sector Name="EGPN_TWR" />
+      <Sector Name="EGPN_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGPN" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGPN_TWR" Type="ASD" DefaultCenter="+562709.00-0030133.00" DefaultRange="30" MagneticVariation="-1.14">
+    <Maps>
+      <Map Name="EGPN/EGPN_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGPN" Frequency="122.800" />
+      <Window Airport="EGPN" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGPN" Visible="true" />
+      <Window Type="ADES" Beacon="EGPN" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>DUNDEE TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGPN_TWR" />
+      <Sector Name="EGPN_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGPN" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGPN_GND" Type="ASMGCS" ASMGCSAirport="EGPN" DefaultCenter="+562709.00-0030133.00" DefaultRange="5" MagneticVariation="-1.14" Rotation="0">
+    <Maps>
+      <Map Name="EGPN/EGPN_SMR" />
+      <Map Name="EGPN/EGPN_SMR_RWY" />
+      <Map Name="EGPN/EGPN_SMR_TWY" />
+      <Map Name="EGPN/EGPN_SMR_BLD" />
+      <Map Name="EGPN/EGPN_SMR_APR" />
+      <Map Name="EGPN/EGPN_SMR_BAK" />
+      <Map Name="EGPN/EGPN_SMR_INF" />
+      <Map Name="EGPN/EGPN_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGPO_APP" Type="ASD" DefaultCenter="+581256.00-0061952.00" DefaultRange="50" MagneticVariation="-2.86">
+    <Maps>
+      <Map Name="EGPO/EGPO_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGPO" Frequency="122.800" />
+      <Window Airport="EGPO" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGPO" Visible="true" />
+      <Window Type="ADES" Beacon="EGPO" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>STORNOWAY APPROACH</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGPO_APP" />
+      <Sector Name="EGPO_TWR" />
+      <Sector Name="EGPO_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGPO" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGPO_TWR" Type="ASD" DefaultCenter="+581256.00-0061952.00" DefaultRange="30" MagneticVariation="-2.86">
+    <Maps>
+      <Map Name="EGPO/EGPO_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGPO" Frequency="122.800" />
+      <Window Airport="EGPO" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGPO" Visible="true" />
+      <Window Type="ADES" Beacon="EGPO" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>STORNOWAY TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGPO_TWR" />
+      <Sector Name="EGPO_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGPO" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGPO_GND" Type="ASMGCS" ASMGCSAirport="EGPO" DefaultCenter="+581256.00-0061952.00" DefaultRange="5" MagneticVariation="-2.86" Rotation="0">
+    <Maps>
+      <Map Name="EGPO/EGPO_SMR" />
+      <Map Name="EGPO/EGPO_SMR_RWY" />
+      <Map Name="EGPO/EGPO_SMR_TWY" />
+      <Map Name="EGPO/EGPO_SMR_BLD" />
+      <Map Name="EGPO/EGPO_SMR_APR" />
+      <Map Name="EGPO/EGPO_SMR_BAK" />
+      <Map Name="EGPO/EGPO_SMR_INF" />
+      <Map Name="EGPO/EGPO_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGSC_APP" Type="ASD" DefaultCenter="+521218.00+0001030.00" DefaultRange="50" MagneticVariation="0.57">
+    <Maps>
+      <Map Name="EGSC/EGSC_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGSC" Frequency="122.800" />
+      <Window Airport="EGSC" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGSC" Visible="true" />
+      <Window Type="ADES" Beacon="EGSC" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>CAMBRIDGE APPROACH</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGSC_APP" />
+      <Sector Name="EGSC_TWR" />
+      <Sector Name="EGSC_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGSC" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGSC_D_APP" Type="ASD" DefaultCenter="+521218.00+0001030.00" DefaultRange="100" MagneticVariation="0.57">
+    <Maps>
+      <Map Name="EGSC/EGSC_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGSC" Frequency="122.800" />
+      <Window Airport="EGSC" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGSC" Visible="true" />
+      <Window Type="ADES" Beacon="EGSC" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>CAMBRIDGE DIRECTOR</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGSCD_APP" />
+      <Sector Name="EGSC_APP" />
+      <Sector Name="EGSC_TWR" />
+      <Sector Name="EGSC_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGSC" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGSC_TWR" Type="ASD" DefaultCenter="+521218.00+0001030.00" DefaultRange="30" MagneticVariation="0.57">
+    <Maps>
+      <Map Name="EGSC/EGSC_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGSC" Frequency="122.800" />
+      <Window Airport="EGSC" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGSC" Visible="true" />
+      <Window Type="ADES" Beacon="EGSC" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>CAMBRIDGE TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGSC_TWR" />
+      <Sector Name="EGSC_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGSC" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGSC_GND" Type="ASMGCS" ASMGCSAirport="EGSC" DefaultCenter="+521218.00+0001030.00" DefaultRange="5" MagneticVariation="0.57" Rotation="0">
+    <Maps>
+      <Map Name="EGSC/EGSC_SMR" />
+      <Map Name="EGSC/EGSC_SMR_RWY" />
+      <Map Name="EGSC/EGSC_SMR_TWY" />
+      <Map Name="EGSC/EGSC_SMR_BLD" />
+      <Map Name="EGSC/EGSC_SMR_APR" />
+      <Map Name="EGSC/EGSC_SMR_BAK" />
+      <Map Name="EGSC/EGSC_SMR_INF" />
+      <Map Name="EGSC/EGSC_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGSH_APP" Type="ASD" DefaultCenter="+524033.00+0011658.00" DefaultRange="50" MagneticVariation="0.91">
+    <Maps>
+      <Map Name="EGSH/EGSH_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGSH" Frequency="122.800" />
+      <Window Airport="EGSH" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGSH" Visible="true" />
+      <Window Type="ADES" Beacon="EGSH" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>NORWICH APPROACH</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGSH_APP" />
+      <Sector Name="EGSH_TWR" />
+      <Sector Name="EGSH_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGSH" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGSH_D_APP" Type="ASD" DefaultCenter="+524033.00+0011658.00" DefaultRange="100" MagneticVariation="0.91">
+    <Maps>
+      <Map Name="EGSH/EGSH_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGSH" Frequency="122.800" />
+      <Window Airport="EGSH" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGSH" Visible="true" />
+      <Window Type="ADES" Beacon="EGSH" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>NORWICH DIRECTOR</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGSHD_APP" />
+      <Sector Name="EGSH_APP" />
+      <Sector Name="EGSH_TWR" />
+      <Sector Name="EGSH_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGSH" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGSH_TWR" Type="ASD" DefaultCenter="+524033.00+0011658.00" DefaultRange="30" MagneticVariation="0.91">
+    <Maps>
+      <Map Name="EGSH/EGSH_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGSH" Frequency="122.800" />
+      <Window Airport="EGSH" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGSH" Visible="true" />
+      <Window Type="ADES" Beacon="EGSH" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>NORWICH TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGSH_TWR" />
+      <Sector Name="EGSH_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGSH" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGSH_GND" Type="ASMGCS" ASMGCSAirport="EGSH" DefaultCenter="+524033.00+0011658.00" DefaultRange="5" MagneticVariation="0.91" Rotation="0">
+    <Maps>
+      <Map Name="EGSH/EGSH_SMR" />
+      <Map Name="EGSH/EGSH_SMR_RWY" />
+      <Map Name="EGSH/EGSH_SMR_TWY" />
+      <Map Name="EGSH/EGSH_SMR_BLD" />
+      <Map Name="EGSH/EGSH_SMR_APR" />
+      <Map Name="EGSH/EGSH_SMR_BAK" />
+      <Map Name="EGSH/EGSH_SMR_INF" />
+      <Map Name="EGSH/EGSH_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGSS_D_APP" Type="ASD" DefaultCenter="+515306.00+0001406.00" DefaultRange="100" MagneticVariation="0.61">
+    <Maps>
+      <Map Name="EGSS/EGSS_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGSS" Frequency="122.800" />
+      <Window Airport="EGSS" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGSS" Visible="true" />
+      <Window Type="ADES" Beacon="EGSS" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>LONDON STANSTED DIRECTOR</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGSSD_APP" />
+      <Sector Name="EGSS_APP" />
+      <Sector Name="EGSS_TWR" />
+      <Sector Name="EGSS_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGSS" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGSS_TWR" Type="ASD" DefaultCenter="+515306.00+0001406.00" DefaultRange="30" MagneticVariation="0.61">
+    <Maps>
+      <Map Name="EGSS/EGSS_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGSS" Frequency="122.800" />
+      <Window Airport="EGSS" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGSS" Visible="true" />
+      <Window Type="ADES" Beacon="EGSS" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>LONDON STANSTED TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGSS_TWR" />
+      <Sector Name="EGSS_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGSS" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGSS_GND" Type="ASMGCS" ASMGCSAirport="EGSS" DefaultCenter="+515306.00+0001406.00" DefaultRange="5" MagneticVariation="0.61" Rotation="0">
+    <Maps>
+      <Map Name="EGSS/EGSS_SMR" />
+      <Map Name="EGSS/EGSS_SMR_RWY" />
+      <Map Name="EGSS/EGSS_SMR_TWY" />
+      <Map Name="EGSS/EGSS_SMR_BLD" />
+      <Map Name="EGSS/EGSS_SMR_APR" />
+      <Map Name="EGSS/EGSS_SMR_BAK" />
+      <Map Name="EGSS/EGSS_SMR_INF" />
+      <Map Name="EGSS/EGSS_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGTC_APP" Type="ASD" DefaultCenter="+520420.00-0003700.00" DefaultRange="50" MagneticVariation="0.31">
+    <Maps>
+      <Map Name="EGTC/EGTC_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGTC" Frequency="122.800" />
+      <Window Airport="EGTC" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGTC" Visible="true" />
+      <Window Type="ADES" Beacon="EGTC" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>CRANFIELD APPROACH</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGTC_APP" />
+      <Sector Name="EGTC_TWR" />
+      <Sector Name="EGTC_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGTC" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGTC_TWR" Type="ASD" DefaultCenter="+520420.00-0003700.00" DefaultRange="30" MagneticVariation="0.31">
+    <Maps>
+      <Map Name="EGTC/EGTC_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGTC" Frequency="122.800" />
+      <Window Airport="EGTC" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGTC" Visible="true" />
+      <Window Type="ADES" Beacon="EGTC" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>CRANFIELD TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGTC_TWR" />
+      <Sector Name="EGTC_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGTC" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGTC_GND" Type="ASMGCS" ASMGCSAirport="EGTC" DefaultCenter="+520420.00-0003700.00" DefaultRange="5" MagneticVariation="0.31" Rotation="0">
+    <Maps>
+      <Map Name="EGTC/EGTC_SMR" />
+      <Map Name="EGTC/EGTC_SMR_RWY" />
+      <Map Name="EGTC/EGTC_SMR_TWY" />
+      <Map Name="EGTC/EGTC_SMR_BLD" />
+      <Map Name="EGTC/EGTC_SMR_APR" />
+      <Map Name="EGTC/EGTC_SMR_BAK" />
+      <Map Name="EGTC/EGTC_SMR_INF" />
+      <Map Name="EGTC/EGTC_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGTE_APP" Type="ASD" DefaultCenter="+504403.00-0032450.00" DefaultRange="50" MagneticVariation="-0.53">
+    <Maps>
+      <Map Name="EGTE/EGTE_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGTE" Frequency="122.800" />
+      <Window Airport="EGTE" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGTE" Visible="true" />
+      <Window Type="ADES" Beacon="EGTE" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>EXETER APPROACH</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGTE_APP" />
+      <Sector Name="EGTE_TWR" />
+      <Sector Name="EGTE_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGTE" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGTE_TWR" Type="ASD" DefaultCenter="+504403.00-0032450.00" DefaultRange="30" MagneticVariation="-0.53">
+    <Maps>
+      <Map Name="EGTE/EGTE_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGTE" Frequency="122.800" />
+      <Window Airport="EGTE" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGTE" Visible="true" />
+      <Window Type="ADES" Beacon="EGTE" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>EXETER TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGTE_TWR" />
+      <Sector Name="EGTE_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGTE" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGTE_GND" Type="ASMGCS" ASMGCSAirport="EGTE" DefaultCenter="+504403.00-0032450.00" DefaultRange="5" MagneticVariation="-0.53" Rotation="0">
+    <Maps>
+      <Map Name="EGTE/EGTE_SMR" />
+      <Map Name="EGTE/EGTE_SMR_RWY" />
+      <Map Name="EGTE/EGTE_SMR_TWY" />
+      <Map Name="EGTE/EGTE_SMR_BLD" />
+      <Map Name="EGTE/EGTE_SMR_APR" />
+      <Map Name="EGTE/EGTE_SMR_BAK" />
+      <Map Name="EGTE/EGTE_SMR_INF" />
+      <Map Name="EGTE/EGTE_SMR_HLD" />
+    </Maps>
+  </Position>
+  <Position Name="EGTK_APP" Type="ASD" DefaultCenter="+515013.00-0011912.00" DefaultRange="50" MagneticVariation="0.08">
+    <Maps>
+      <Map Name="EGTK/EGTK_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGTK" Frequency="122.800" />
+      <Window Airport="EGTK" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGTK" Visible="true" />
+      <Window Type="ADES" Beacon="EGTK" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>OXFORD APPROACH</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGTK_APP" />
+      <Sector Name="EGTK_TWR" />
+      <Sector Name="EGTK_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGTK" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGTK_D_APP" Type="ASD" DefaultCenter="+515013.00-0011912.00" DefaultRange="100" MagneticVariation="0.08">
+    <Maps>
+      <Map Name="EGTK/EGTK_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGTK" Frequency="122.800" />
+      <Window Airport="EGTK" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGTK" Visible="true" />
+      <Window Type="ADES" Beacon="EGTK" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>OXFORD DIRECTOR</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGTKD_APP" />
+      <Sector Name="EGTK_APP" />
+      <Sector Name="EGTK_TWR" />
+      <Sector Name="EGTK_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGTK" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGTK_TWR" Type="ASD" DefaultCenter="+515013.00-0011912.00" DefaultRange="30" MagneticVariation="0.08">
+    <Maps>
+      <Map Name="EGTK/EGTK_SMR" />
+    </Maps>
+    <ATIS>
+      <Editor Airport="EGTK" Frequency="122.800" />
+      <Window Airport="EGTK" />
+    </ATIS>
+    <Strips>
+      <Window Type="ADEP" Beacon="EGTK" Visible="true" />
+      <Window Type="ADES" Beacon="EGTK" Visible="true" />
+    </Strips>
+    <ControllerInfo>
+      <Line>OXFORD TOWER</Line>
+      <Line>ATIS available on 000.000</Line>
+    </ControllerInfo>
+    <Sectors>
+      <Sector Name="EGTK_TWR" />
+      <Sector Name="EGTK_GND" />
+    </Sectors>
+    <ArrivalLists>
+      <Airport Airport="EGTK" />
+    </ArrivalLists>
+  </Position>
+  <Position Name="EGTK_GND" Type="ASMGCS" ASMGCSAirport="EGTK" DefaultCenter="+515013.00-0011912.00" DefaultRange="5" MagneticVariation="0.08" Rotation="0">
+    <Maps>
+      <Map Name="EGTK/EGTK_SMR" />
+      <Map Name="EGTK/EGTK_SMR_RWY" />
+      <Map Name="EGTK/EGTK_SMR_TWY" />
+      <Map Name="EGTK/EGTK_SMR_BLD" />
+      <Map Name="EGTK/EGTK_SMR_APR" />
+      <Map Name="EGTK/EGTK_SMR_BAK" />
+      <Map Name="EGTK/EGTK_SMR_INF" />
+      <Map Name="EGTK/EGTK_SMR_HLD" />
+    </Maps>
   </Position>
 </Positions>

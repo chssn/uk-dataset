@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 import math
 import datetime
+import argparse
+import zipfile
+import shutil
 import urllib3
 import argparse
 import requests
@@ -879,6 +882,7 @@ class Builder:
                 return "_DEL"
 
         xmlSectors = self.root("Sectors")
+        xmlPositions = self.root("Positions")
         lastType = ''
 
         # Load the services data to build Sectors.xml
@@ -891,8 +895,14 @@ class Builder:
                 if row['callsign_type'] != lastType:
                     freq25khz = myround(row['frequency'])
                     if row['callsign_type'] != "INFORMATION": # don't include any ATIS frequencies in this XML file
+                        fullNameDb = self.scrape[0]
+                        dfLookup = fullNameDb.loc[fullNameDb['icao_designator'] == row['icao_designator']]
+                        fullName = dfLookup.iat[0,4]
+                        defCentre = dfLookup.iat[0,2]
+                        magVar = dfLookup.iat[0,5]
+
                         xmlSector = xtree.SubElement(xmlSectors, "Sector")
-                        xmlSector.set('FullName', row['icao_designator'] + " " + row['callsign_type']) # eg EGKK GROUND
+                        xmlSector.set('FullName', fullName + " " + row['callsign_type']) # eg EGKK GROUND
                         xmlSector.set('Frequency', "%.3f" % freq25khz) # format to full frequency eg 122.800
                         xmlSector.set('Callsign', row['icao_designator'] + str(serviceType(row['callsign_type']))) # eg EGKK_GND
                         xmlSector.set('Name', row['icao_designator'] + str(serviceType(row['callsign_type'])))
@@ -902,15 +912,189 @@ class Builder:
                         xmlSectorResponsible = xtree.SubElement(xmlSector, "ResponsibleSectors")
                         if serviceType(row['callsign_type']) == "_D_APP":
                             xmlSectorResponsible.text = row['icao_designator'] + "_APP," + row['icao_designator'] + "_TWR," + row['icao_designator'] + "_GND," + row['icao_designator']+ "_DEL"
+
+                            # Code to build Positions.xml (Tower)
+                            xmlPosition = xtree.SubElement(xmlPositions, "Position")
+                            xmlPosition.set("Name", row['icao_designator'] + "_D_APP")
+                            xmlPosition.set("Type", "ASD")
+                            xmlPosition.set("DefaultCenter", defCentre)
+                            xmlPosition.set("DefaultRange", "100")
+                            xmlPosition.set("MagneticVariation", str(magVar))
+
+                            xmlPositionMaps = xtree.SubElement(xmlPosition, "Maps")
+                            xmlPositionMap = xtree.SubElement(xmlPositionMaps, "Map")
+                            xmlPositionMap.set("Name", row['icao_designator'] + '/' + row['icao_designator'] + '_SMR')
+                            #loop for runways here
+
+                            xmlPositionAtis = xtree.SubElement(xmlPosition, "ATIS")
+                            xmlPositionAtisEditor = xtree.SubElement(xmlPositionAtis, "Editor")
+                            xmlPositionAtisEditor.set("Airport", row['icao_designator'])
+                            xmlPositionAtisEditor.set("Frequency", "122.800") # not coded
+                            xmlPositionAtisWindow = xtree.SubElement(xmlPositionAtis, "Window")
+                            xmlPositionAtisWindow.set("Airport", row['icao_designator'])
+
+                            xmlPositionStrips = xtree.SubElement(xmlPosition, "Strips")
+                            xmlPositionStrip = xtree.SubElement(xmlPositionStrips, "Window")
+                            xmlPositionStrip.set("Type", "ADEP")
+                            xmlPositionStrip.set("Beacon", row['icao_designator'])
+                            xmlPositionStrip.set("Visible", "true")
+                            xmlPositionStrip = xtree.SubElement(xmlPositionStrips, "Window")
+                            xmlPositionStrip.set("Type", "ADES")
+                            xmlPositionStrip.set("Beacon", row['icao_designator'])
+                            xmlPositionStrip.set("Visible", "true")
+
+                            xmlPositionController = xtree.SubElement(xmlPosition, "ControllerInfo")
+                            xmlPositionControllerInfo = xtree.SubElement(xmlPositionController, "Line")
+                            xmlPositionControllerInfo.text = fullName + " " + row['callsign_type']
+                            xmlPositionControllerInfo = xtree.SubElement(xmlPositionController, "Line")
+                            xmlPositionControllerInfo.text = "ATIS available on 000.000" # not coded
+
+                            xmlPositionSectors = xtree.SubElement(xmlPosition, "Sectors")
+                            xmlPositionSector = xtree.SubElement(xmlPositionSectors, "Sector")
+                            xmlPositionSector.set("Name", row['icao_designator'] + 'D_APP')
+                            xmlPositionSector = xtree.SubElement(xmlPositionSectors, "Sector")
+                            xmlPositionSector.set("Name", row['icao_designator'] + '_APP')
+                            xmlPositionSector = xtree.SubElement(xmlPositionSectors, "Sector")
+                            xmlPositionSector.set("Name", row['icao_designator'] + '_TWR')
+                            xmlPositionSector = xtree.SubElement(xmlPositionSectors, "Sector")
+                            xmlPositionSector.set("Name", row['icao_designator'] + '_GND')
+
+                            xmlPositionArrivals = xtree.SubElement(xmlPosition, "ArrivalLists")
+                            xmlPositionArrivalAirport = xtree.SubElement(xmlPositionArrivals, "Airport")
+                            xmlPositionArrivalAirport.set("Airport", row['icao_designator'])
                         elif serviceType(row['callsign_type']) == "_APP":
                             xmlSectorResponsible.text = row['icao_designator'] + "_TWR," + row['icao_designator'] + "_GND," + row['icao_designator'] + "_DEL"
+
+                            # Code to build Positions.xml (Approach)
+                            xmlPosition = xtree.SubElement(xmlPositions, "Position")
+                            xmlPosition.set("Name", row['icao_designator'] + "_APP")
+                            xmlPosition.set("Type", "ASD")
+                            xmlPosition.set("DefaultCenter", defCentre)
+                            xmlPosition.set("DefaultRange", "50")
+                            xmlPosition.set("MagneticVariation", str(magVar))
+
+                            xmlPositionMaps = xtree.SubElement(xmlPosition, "Maps")
+                            xmlPositionMap = xtree.SubElement(xmlPositionMaps, "Map")
+                            xmlPositionMap.set("Name", row['icao_designator'] + '/' + row['icao_designator'] + '_SMR')
+                            #loop for runways here
+
+                            xmlPositionAtis = xtree.SubElement(xmlPosition, "ATIS")
+                            xmlPositionAtisEditor = xtree.SubElement(xmlPositionAtis, "Editor")
+                            xmlPositionAtisEditor.set("Airport", row['icao_designator'])
+                            xmlPositionAtisEditor.set("Frequency", "122.800") # not coded
+                            xmlPositionAtisWindow = xtree.SubElement(xmlPositionAtis, "Window")
+                            xmlPositionAtisWindow.set("Airport", row['icao_designator'])
+
+                            xmlPositionStrips = xtree.SubElement(xmlPosition, "Strips")
+                            xmlPositionStrip = xtree.SubElement(xmlPositionStrips, "Window")
+                            xmlPositionStrip.set("Type", "ADEP")
+                            xmlPositionStrip.set("Beacon", row['icao_designator'])
+                            xmlPositionStrip.set("Visible", "true")
+                            xmlPositionStrip = xtree.SubElement(xmlPositionStrips, "Window")
+                            xmlPositionStrip.set("Type", "ADES")
+                            xmlPositionStrip.set("Beacon", row['icao_designator'])
+                            xmlPositionStrip.set("Visible", "true")
+
+                            xmlPositionController = xtree.SubElement(xmlPosition, "ControllerInfo")
+                            xmlPositionControllerInfo = xtree.SubElement(xmlPositionController, "Line")
+                            xmlPositionControllerInfo.text = fullName + " " + row['callsign_type']
+                            xmlPositionControllerInfo = xtree.SubElement(xmlPositionController, "Line")
+                            xmlPositionControllerInfo.text = "ATIS available on 000.000" # not coded
+
+                            xmlPositionSectors = xtree.SubElement(xmlPosition, "Sectors")
+                            xmlPositionSector = xtree.SubElement(xmlPositionSectors, "Sector")
+                            xmlPositionSector.set("Name", row['icao_designator'] + '_APP')
+                            xmlPositionSector = xtree.SubElement(xmlPositionSectors, "Sector")
+                            xmlPositionSector.set("Name", row['icao_designator'] + '_TWR')
+                            xmlPositionSector = xtree.SubElement(xmlPositionSectors, "Sector")
+                            xmlPositionSector.set("Name", row['icao_designator'] + '_GND')
+
+                            xmlPositionArrivals = xtree.SubElement(xmlPosition, "ArrivalLists")
+                            xmlPositionArrivalAirport = xtree.SubElement(xmlPositionArrivals, "Airport")
+                            xmlPositionArrivalAirport.set("Airport", row['icao_designator'])
                         elif serviceType(row['callsign_type']) == "_TWR":
                             xmlSectorResponsible.text = row['icao_designator'] + "_GND," + row['icao_designator'] + "_DEL"
+
+                            # Code to build Positions.xml (Tower)
+                            xmlPosition = xtree.SubElement(xmlPositions, "Position")
+                            xmlPosition.set("Name", row['icao_designator'] + "_TWR")
+                            xmlPosition.set("Type", "ASD")
+                            xmlPosition.set("DefaultCenter", defCentre)
+                            xmlPosition.set("DefaultRange", "30")
+                            xmlPosition.set("MagneticVariation", str(magVar))
+
+                            xmlPositionMaps = xtree.SubElement(xmlPosition, "Maps")
+                            xmlPositionMap = xtree.SubElement(xmlPositionMaps, "Map")
+                            xmlPositionMap.set("Name", row['icao_designator'] + '/' + row['icao_designator'] + '_SMR')
+                            #loop for runways here
+
+                            xmlPositionAtis = xtree.SubElement(xmlPosition, "ATIS")
+                            xmlPositionAtisEditor = xtree.SubElement(xmlPositionAtis, "Editor")
+                            xmlPositionAtisEditor.set("Airport", row['icao_designator'])
+                            xmlPositionAtisEditor.set("Frequency", "122.800") # not coded
+                            xmlPositionAtisWindow = xtree.SubElement(xmlPositionAtis, "Window")
+                            xmlPositionAtisWindow.set("Airport", row['icao_designator'])
+
+                            xmlPositionStrips = xtree.SubElement(xmlPosition, "Strips")
+                            xmlPositionStrip = xtree.SubElement(xmlPositionStrips, "Window")
+                            xmlPositionStrip.set("Type", "ADEP")
+                            xmlPositionStrip.set("Beacon", row['icao_designator'])
+                            xmlPositionStrip.set("Visible", "true")
+                            xmlPositionStrip = xtree.SubElement(xmlPositionStrips, "Window")
+                            xmlPositionStrip.set("Type", "ADES")
+                            xmlPositionStrip.set("Beacon", row['icao_designator'])
+                            xmlPositionStrip.set("Visible", "true")
+
+                            xmlPositionController = xtree.SubElement(xmlPosition, "ControllerInfo")
+                            xmlPositionControllerInfo = xtree.SubElement(xmlPositionController, "Line")
+                            xmlPositionControllerInfo.text = fullName + " " + row['callsign_type']
+                            xmlPositionControllerInfo = xtree.SubElement(xmlPositionController, "Line")
+                            xmlPositionControllerInfo.text = "ATIS available on 000.000" # not coded
+
+                            xmlPositionSectors = xtree.SubElement(xmlPosition, "Sectors")
+                            xmlPositionSector = xtree.SubElement(xmlPositionSectors, "Sector")
+                            xmlPositionSector.set("Name", row['icao_designator'] + '_TWR')
+                            xmlPositionSector = xtree.SubElement(xmlPositionSectors, "Sector")
+                            xmlPositionSector.set("Name", row['icao_designator'] + '_GND')
+
+                            xmlPositionArrivals = xtree.SubElement(xmlPosition, "ArrivalLists")
+                            xmlPositionArrivalAirport = xtree.SubElement(xmlPositionArrivals, "Airport")
+                            xmlPositionArrivalAirport.set("Airport", row['icao_designator'])
+
+                            # Code to build Positions.xml (ASMGCS)
+                            xmlPosition = xtree.SubElement(xmlPositions, "Position")
+                            xmlPosition.set("Name", row['icao_designator'] + "_GND")
+                            xmlPosition.set("Type", "ASMGCS")
+                            xmlPosition.set("ASMGCSAirport", row['icao_designator'])
+                            xmlPosition.set("DefaultCenter", defCentre)
+                            xmlPosition.set("DefaultRange", "5")
+                            xmlPosition.set("MagneticVariation", str(magVar))
+                            xmlPosition.set("Rotation", "0")
+
+                            xmlPositionMaps = xtree.SubElement(xmlPosition, "Maps")
+                            xmlPositionMap = xtree.SubElement(xmlPositionMaps, "Map")
+                            xmlPositionMap.set("Name", row['icao_designator'] + '/' + row['icao_designator'] + '_SMR')
+                            xmlPositionMap = xtree.SubElement(xmlPositionMaps, "Map")
+                            xmlPositionMap.set("Name", row['icao_designator'] + '/' + row['icao_designator'] + '_SMR_RWY')
+                            xmlPositionMap = xtree.SubElement(xmlPositionMaps, "Map")
+                            xmlPositionMap.set("Name", row['icao_designator'] + '/' + row['icao_designator'] + '_SMR_TWY')
+                            xmlPositionMap = xtree.SubElement(xmlPositionMaps, "Map")
+                            xmlPositionMap.set("Name", row['icao_designator'] + '/' + row['icao_designator'] + '_SMR_BLD')
+                            xmlPositionMap = xtree.SubElement(xmlPositionMaps, "Map")
+                            xmlPositionMap.set("Name", row['icao_designator'] + '/' + row['icao_designator'] + '_SMR_APR')
+                            xmlPositionMap = xtree.SubElement(xmlPositionMaps, "Map")
+                            xmlPositionMap.set("Name", row['icao_designator'] + '/' + row['icao_designator'] + '_SMR_BAK')
+                            xmlPositionMap = xtree.SubElement(xmlPositionMaps, "Map")
+                            xmlPositionMap.set("Name", row['icao_designator'] + '/' + row['icao_designator'] + '_SMR_INF')
+                            xmlPositionMap = xtree.SubElement(xmlPositionMaps, "Map")
+                            xmlPositionMap.set("Name", row['icao_designator'] + '/' + row['icao_designator'] + '_SMR_HLD')
                         elif serviceType(row['callsign_type']) == "_GND":
                             xmlSectorResponsible.text = row['icao_designator'] + "_DEL"
-
                 lastType = row['callsign_type']
                 bar()
+
+            positionTree = xtree.ElementTree(xmlPositions)
+            positionTree.write('Build/Test.xml', encoding="utf-8", xml_declaration=True)
 
             sectorTree = xtree.ElementTree(xmlSectors)
             sectorTree.write('Build/Sectors.xml', encoding="utf-8", xml_declaration=True)
@@ -1000,7 +1184,7 @@ class Geo:
             xmlGroundMapInfLabelPoint.set('Name', splitName[1])
             xmlGroundMapInfLabelPoint.text = "+" + str(labelSplit[0]) + re.sub(r'-0\.', '-000.', labelSplit[1])
 
-        aerodromeIcao = icao
+        self.icao = icao
 
         xmlGround = Xml.root('Ground')
         xmlGroundMap = xtree.SubElement(xmlGround, 'Maps')
@@ -1008,13 +1192,13 @@ class Geo:
         with open(fileIn) as fobj:
             folder = parser.parse(fobj).getroot().Document
 
-        xmlGroundMapRwy = Xml.constructMapHeader(xmlGroundMap, 'Ground_RWY', aerodromeIcao + '_SMR_RWY', '1', '+510853.0-0001125.0')
-        xmlGroundMapTwy = Xml.constructMapHeader(xmlGroundMap, 'Ground_TWY', aerodromeIcao + '_SMR_TWY', '2', '+510853.0-0001125.0')
-        xmlGroundMapBld = Xml.constructMapHeader(xmlGroundMap, 'Ground_BLD', aerodromeIcao + '_SMR_BLD', '1', '+510853.0-0001125.0')
-        xmlGroundMapApr = Xml.constructMapHeader(xmlGroundMap, 'Ground_APR', aerodromeIcao + '_SMR_APR', '3', '+510853.0-0001125.0')
-        xmlGroundMapBak = Xml.constructMapHeader(xmlGroundMap, 'Ground_BAK', aerodromeIcao + '_SMR_BAK', '4', '+510853.0-0001125.0')
-        xmlGroundMapInf = Xml.constructMapHeader(xmlGroundMap, 'Ground_INF', aerodromeIcao + '_SMR_INF', '0', '+510853.0-0001125.0')
-        xmlGroundMapHld = Xml.constructMapHeader(xmlGroundMap, 'Ground_INF', aerodromeIcao + '_SMR_HLD', '0', '+510853.0-0001125.0')
+        xmlGroundMapRwy = Xml.constructMapHeader(xmlGroundMap, 'Ground_RWY', self.icao + '_SMR_RWY', '1', '+510853.0-0001125.0')
+        xmlGroundMapTwy = Xml.constructMapHeader(xmlGroundMap, 'Ground_TWY', self.icao + '_SMR_TWY', '2', '+510853.0-0001125.0')
+        xmlGroundMapBld = Xml.constructMapHeader(xmlGroundMap, 'Ground_BLD', self.icao + '_SMR_BLD', '1', '+510853.0-0001125.0')
+        xmlGroundMapApr = Xml.constructMapHeader(xmlGroundMap, 'Ground_APR', self.icao + '_SMR_APR', '3', '+510853.0-0001125.0')
+        xmlGroundMapBak = Xml.constructMapHeader(xmlGroundMap, 'Ground_BAK', self.icao + '_SMR_BAK', '4', '+510853.0-0001125.0')
+        xmlGroundMapInf = Xml.constructMapHeader(xmlGroundMap, 'Ground_INF', self.icao + '_SMR_INF', '0', '+510853.0-0001125.0')
+        xmlGroundMapHld = Xml.constructMapHeader(xmlGroundMap, 'Ground_INF', self.icao + '_SMR_HLD', '0', '+510853.0-0001125.0')
 
         xmlGroundMapInfLabel = xtree.SubElement(xmlGroundMapInf, 'Label')
         xmlGroundMapInfLabel.set('HasLeader', 'False')
@@ -1058,7 +1242,7 @@ class Geo:
             xmlGroundInfill.text = output.rstrip('/')
 
         allGround = xtree.ElementTree(xmlGround)
-        allGround.write('Build/Maps/'+ aerodromeIcao + '_SMR.xml', encoding="utf-8", xml_declaration=True)
+        allGround.write('Build/Maps/'+ self.icao + '_SMR.xml', encoding="utf-8", xml_declaration=True)
 
 class Navigraph:
     def sidStar(file, icaoIn, rwyIn):
@@ -1137,8 +1321,221 @@ class ValidateXml:
         allMaps = ValidateXml("Validation/allmaps.xsd")
         allMaps.validateDir("Build/Maps", "ALL_*")
 
+class EuroScope:
+    """tools to convert EuroScope bits to vatSys"""
+
+    def __init__(self, icao):
+        self.icao = icao
+        # get the location of this aerodrome
+        df = pd.read_csv('Dataframes/Ad01.csv', index_col=0)
+        dfLookup = df.loc[df['icao_designator'] == icao]
+        self.location = dfLookup.iat[0,2]
+
+    def kmlMappingConvert(self, fileIn, fileNumber):
+        def mapLabels():
+            # code to generate the map labels.
+            points = MultiPoint(latLonString) # function to calculate polygon centroid
+            labelPoint = points.centroid
+            labelPrint = re.sub(r'[A-Z()]', '', str(labelPoint))
+            labelSplit = labelPrint.split()
+
+            if labelSplit:
+                xmlGroundMapInfLabelPoint = xtree.SubElement(xmlGroundMapInfLabel, 'Point')
+                xmlGroundMapInfLabelPoint.set('Name', child)
+                if float(labelSplit[0]) > 0:
+                    dotSplit = str(labelSplit[0]).split(".")
+                    latPrint = "+" + str(dotSplit[0]).zfill(2) + "." + str(dotSplit[1])
+                else:
+                    dotSplit = str(labelSplit[0]).split(".")
+                    dotStart = str(dotSplit[0]).lstrip("-")
+                    latPrint = "-" + str(dotStart).zfill(2) + "." + str(dotSplit[1])
+
+                if float(labelSplit[1]) > 0:
+                    dotSplit = str(labelSplit[1]).split(".")
+                    lonPrint = "+" + str(dotSplit[0]).zfill(3) + "." + str(dotSplit[1])
+                else:
+                    dotSplit = str(labelSplit[1]).split(".")
+                    dotStart = str(dotSplit[0]).lstrip("-")
+                    lonPrint = "-" + str(dotStart).zfill(3) + "." + str(dotSplit[1])
+
+                xmlGroundMapInfLabelPoint.text = str(latPrint) + str(lonPrint)
+
+        xmlGround = Builder.root('Ground')
+        xmlGroundMap = xtree.SubElement(xmlGround, 'Maps')
+
+        with open(fileIn) as fobj:
+            folder = parser.parse(fobj).getroot().Document
+
+        xmlGroundMapRwy = Builder.constructMapHeader(xmlGroundMap, 'Ground_RWY', self.icao + '_SMR_RWY', '1', self.location)
+        xmlGroundMapTwy = Builder.constructMapHeader(xmlGroundMap, 'Ground_TWY', self.icao + '_SMR_TWY', '2', self.location)
+        xmlGroundMapBld = Builder.constructMapHeader(xmlGroundMap, 'Ground_BLD', self.icao + '_SMR_BLD', '1', self.location)
+        xmlGroundMapApr = Builder.constructMapHeader(xmlGroundMap, 'Ground_APR', self.icao + '_SMR_APR', '3', self.location)
+        xmlGroundMapBak = Builder.constructMapHeader(xmlGroundMap, 'Ground_BAK', self.icao + '_SMR_BAK', '4', self.location)
+        xmlGroundMapInf = Builder.constructMapHeader(xmlGroundMap, 'Ground_INF', self.icao + '_SMR_INF', '0', self.location)
+        xmlGroundMapHld = Builder.constructMapHeader(xmlGroundMap, 'Ground_INF', self.icao + '_SMR_HLD', '0', self.location)
+
+        xmlGroundMapInfLabel = xtree.SubElement(xmlGroundMapInf, 'Label')
+        xmlGroundMapInfLabel.set('HasLeader', 'False')
+        xmlGroundMapInfLabel.set('Alignment', 'Center')
+        xmlGroundMapInfLabel.set('VerticalAlignment', 'Middle')
+
+        try:
+            rootFolder = folder.Folder.Folder
+        except:
+            rootFolder = folder.Folder
+
+        for pm in rootFolder:
+            name = pm.name
+            print(" " + name)
+            titles = ["apron","aprons","asphalt","backround","backrounds","buildings","concrete","grass","ground","holding","holds","island","land","markings","new","parking","runway","runways","stand","stands","surface","taxi","taxilines","taxiway","taxiways","other"]
+            splitName = str(name).split()
+            if splitName[0].lower() in titles:
+                try:
+                    pmP = pm.Folder.Placemark
+                except:
+                    try:
+                        pmP = pm.Placemark
+                    except:
+                        pass
+
+                for place in pmP:
+                    try:
+                        coords = place.LineString.coordinates
+                    except:
+                        coords = place.Polygon.outerBoundaryIs.LinearRing.coordinates
+
+                    child = place.name
+                    print("  " + str(child))
+                    search = re.finditer(r'([+|-]?)([\d]{1,3})\.([\d]{10,20}),([+|-]?)([\d]{1,2})\.([\d]{10,20})', str(coords))
+                    output = ''
+                    latLonString = []
+
+                    for line in search:
+                        if line.group(1) == "-":
+                            lonSign = "-"
+                        else:
+                            lonSign = "+"
+
+                        if line.group(4) == "-":
+                            latSign = "-"
+                        else:
+                            latSign = "+"
+
+                        output += latSign + str(line.group(5)).zfill(2) + "." + str(line.group(6)) + lonSign + str(line.group(2)).zfill(3) + "." + str(line.group(3)) + "/"
+                        lineSplit = line.group().split(",")
+                        latLonString.append((float(lineSplit[1]),float(lineSplit[0])))
+
+                    if str(name).lower() == "runways" or str(name).lower() == "runway" or splitName[-1].lower() == "runways":
+                        xmlGroundInfill = xtree.SubElement(xmlGroundMapRwy, 'Infill')
+                        mapLabels()
+                        xmlGroundInfill.set('Name', child)
+                        xmlGroundInfill.text = output.rstrip('/')
+                    elif splitName[0].lower() == "taxiways" or splitName[0].lower() == "taxi" or splitName[0].lower() == "taxilines" or splitName[0].lower() == "taxiway" or splitName[-1].lower() == "taxiways":
+                        xmlGroundInfill = xtree.SubElement(xmlGroundMapTwy, 'Infill')
+                        mapLabels()
+                        xmlGroundInfill.set('Name', child)
+                        xmlGroundInfill.text = output.rstrip('/')
+                    elif splitName[0].lower() == "buildings":
+                        xmlGroundInfill = xtree.SubElement(xmlGroundMapBld, 'Infill')
+                        xmlGroundInfill.set('Name', child)
+                        xmlGroundInfill.text = output.rstrip('/')
+                    elif splitName[0].lower() == "aprons" or splitName[-1] == "aprons":
+                        xmlGroundInfill = xtree.SubElement(xmlGroundMapApr, 'Infill')
+                        xmlGroundInfill.set('Name', child)
+                        xmlGroundInfill.text = output.rstrip('/')
+                    elif splitName[0].lower() == "background" or splitName[0].lower() == "backgrounds":
+                        xmlGroundInfill = xtree.SubElement(xmlGroundMapBak, 'Infill')
+                        xmlGroundInfill.set('Name', child)
+                        xmlGroundInfill.text = output.rstrip('/')
+                    elif splitName[0].lower() == "surface" or splitName[0].lower() == "markings" or splitName[-1].lower() == "markings" or splitName[-1].lower() == "lines" or splitName[0].lower() == "hold" or splitName[0].lower() == "holding" or splitName[0].lower() == "holds" or splitName[0].lower() == "stand" or splitName[0].lower() == "stands":
+                        xmlGroundInfill = xtree.SubElement(xmlGroundMapHld, 'Line')
+                        mapLabels()
+                        xmlGroundInfill.set('Name', child)
+                        xmlGroundInfill.text = output.rstrip('/')
+
+        allGround = xtree.ElementTree(xmlGround)
+        if str(fileNumber) == "1":
+            allGround.write('Build/Maps/'+ self.icao + '/' + self.icao + '_SMR.xml', encoding="utf-8", xml_declaration=True)
+            #allGround.write('KML/SMR/' + self.icao + '_SMR.xml', encoding="utf-8", xml_declaration=True)
+        else:
+            allGround.write('KML/SMR/' + self.icao + '_' + str(fileNumber) + '_SMR.xml', encoding="utf-8", xml_declaration=True)
+
+    @staticmethod
+    def parse(fileIn):
+        dfColumns = ['point']
+        df = pd.DataFrame(columns=dfColumns)
+        file = open(fileIn, "r")
+        c = 0
+        for f in file:
+            coord = re.search(r"(N|S)([\d]{3})\.([\d]{2})\.([\d]{2})(\.[\d]{3})\s(E|W)([\d]{3})\.([\d]{2})\.([\d]{2})(\.[\d]{3})", f)
+            latSign = Geo.plusMinus(coord.group(1))
+            lonSign = Geo.plusMinus(coord.group(6))
+
+            output = latSign + coord.group(2).lstrip("0") + coord.group(3) + coord.group(4)  + coord.group(5) + lonSign + coord.group(7) + coord.group(8) + coord.group(9)  + coord.group(10)
+            pOut = "<Point Name='" + str(c) + "'>" + output + "</Point>"
+
+            dfOut = {'point': pOut}
+            df = df.append(dfOut, ignore_index=True)
+            c += 1
+
+        #print(output.rstrip("/"))
+        finOut = ''
+        uniquePoints = df.point.unique()
+        for point in uniquePoints:
+            #finOut += point + "/"
+            finOut += point
+
+        print(finOut)
+
+    @staticmethod
+    def iterFolders(src, dst):
+        for subdir, dirs, files in os.walk(rf'{src}'):
+            c = 0
+            for filename in files:
+                filepath = subdir + os.sep + filename
+                if filepath.endswith(".kmz"):
+                    splitPath = subdir.split('/')
+                    splitName = filename.split('.')
+                    if re.match(r'(EG)[A-Z]{2}', splitPath[-1]) is not None:
+                        c += 1
+                        copyDst = dst + splitPath[-1] + "_" + str(c) + '.zip'
+                        shutil.copyfile(filepath, copyDst)
+                        with zipfile.ZipFile(copyDst, 'r') as zip:
+                            print(splitPath[-1])
+                            zip.extractall(dst)
+                            shutil.copyfile(dst + 'doc.kml', dst + splitPath[-1] + "_" + str(c) + '.kml')
+                            try:
+                                convert = EuroScope(splitPath[-1])
+                                kmlFileIn = dst + splitPath[-1] + "_" + str(c) + '.kml'
+                                convert.kmlMappingConvert(kmlFileIn, c)
+                            except:
+                                print("ERROR: " + splitPath[-1])
+
 # Defuse XML
 defuse_stdlib()
-new = Builder(1)
-new.run()
-ValidateXml.run()
+
+# Build command line argument parser
+cmdParse = argparse.ArgumentParser(description="Application to collect data from an AIRAC source and build that into xml files for use with vatSys.")
+cmdParse.add_argument('-s', '--scrape', help='web scrape and build xml files', action='store_true')
+cmdParse.add_argument('-b', '--build', help='build xml file from database', action='store_true')
+cmdParse.add_argument('-g', '--geo', help='tool to assist with converting airport mapping from ES', action='store_true')
+cmdParse.add_argument('-d', '--debug', help='runs the code defined in the debug section [DEV ONLY]', action='store_true')
+cmdParse.add_argument('-v', '--verbose', action='store_true')
+args = cmdParse.parse_args()
+
+if args.geo:
+    EuroScope.kmlMappingConvert("KML/EGAA.kml", "EGAA")
+elif args.debug:
+    EuroScope.iterFolders('/mnt/c/Users/chris/OneDrive/Git Repo/UK-Sector-File/_data/SMR Files/', '/mnt/c/Users/chris/OneDrive/Git Repo/uk-dataset/ConversionTools/KML/ZIP/')
+elif args.scrape:
+    shutil.rmtree('/mnt/c/Users/chris/OneDrive/Git Repo/uk-dataset/ConversionTools/Build')
+    os.mkdir('/mnt/c/Users/chris/OneDrive/Git Repo/uk-dataset/ConversionTools/Build')
+    new = Builder()
+    new.run()
+    ValidateXml.run()
+elif args.build:
+    shutil.rmtree('/mnt/c/Users/chris/OneDrive/Git Repo/uk-dataset/ConversionTools/Build')
+    os.mkdir('/mnt/c/Users/chris/OneDrive/Git Repo/uk-dataset/ConversionTools/Build')
+    new = Builder(1)
+    new.run()
+    ValidateXml.run()
