@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Maps>
-  <Map Type="System" Name="C_LL_LABELS" Priority="2" Center="-07.0+166.0">
+  <Map Type="System" Name="C_LL_LABELS" Priority="2" Center="-007.0+166.0">
     <Label HasLeader="False" Alignment="Center" VerticalAlignment="Middle">
       <Point Name="C020">-0652.5267+14658.6697</Point>
       <Point Name="C050">-0635.2351+14704.8182</Point>

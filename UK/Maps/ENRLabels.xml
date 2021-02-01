@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Maps>
-  <Map Type="System" Name="ENR_LL_LABELS" Priority="2" Center="-07.0+166.0">
+  <Map Type="System" Name="ENR_LL_LABELS" Priority="2" Center="-007.0+166.0">
     <Label HasLeader="False" Alignment="Center" VerticalAlignment="Middle">
       <Point Name="A195">-2315.0+16535.0</Point>
       <Point Name="A195">-2235.0+16930.0</Point>
