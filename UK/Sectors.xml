@@ -2,7 +2,6 @@
   <Sector FullName="London Control" Frequency="127.825" Callsign="LON_CTR" Name="LON_CTR">
     <Volumes>London_FIR</Volumes>
   </Sector>
-<Sectors xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" generated="Mon Feb  1 13:09:17 2021">
   <Sector FullName="BELFAST ALDERGROVE APPROACH" Frequency="128.500" Callsign="EGAA_APP" Name="EGAA_APP">
     <ResponsibleSectors>EGAA_TWR,EGAA_GND,EGAA_DEL</ResponsibleSectors>
   </Sector>
