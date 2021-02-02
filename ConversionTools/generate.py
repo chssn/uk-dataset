@@ -1028,7 +1028,7 @@ class Builder:
                 xmlPosition.set("Type", "ASMGCS")
                 xmlPosition.set("ASMGCSAirport", row['icao_designator'])
                 xmlPosition.set("DefaultCenter", defCentre)
-                xmlPosition.set("DefaultRange", "5")
+                xmlPosition.set("DefaultRange", "2")
                 xmlPosition.set("MagneticVariation", str(magVar))
                 xmlPosition.set("Rotation", "0")
 
@@ -1477,30 +1477,44 @@ class EuroScope:
 
     @staticmethod
     def parse(fileIn):
-        dfColumns = ['point']
+        dfColumns = ['sectorline','coords']
         df = pd.DataFrame(columns=dfColumns)
         file = open(fileIn, "r")
-        c = 0
+        #fileWrite = open('Testing/out.txt', "w")
+        c = ''
         for f in file:
-            coord = re.search(r"(N|S)([\d]{3})\.([\d]{2})\.([\d]{2})(\.[\d]{3})\s(E|W)([\d]{3})\.([\d]{2})\.([\d]{2})(\.[\d]{3})", f)
-            latSign = Geo.plusMinus(coord.group(1))
-            lonSign = Geo.plusMinus(coord.group(6))
+            coord = re.search(r"(N|S)([\d]{3})\.([\d]{2})\.([\d]{2})(\.[\d]{3})[\s|:](E|W)([\d]{3})\.([\d]{2})\.([\d]{2})(\.[\d]{3})", f)
+            line = re.search(r"(SECTORLINE):(.*)", f)
+            if coord:
+                latSign = Geo.plusMinus(coord.group(1))
+                lonSign = Geo.plusMinus(coord.group(6))
 
-            output = latSign + coord.group(2).lstrip("0") + coord.group(3) + coord.group(4)  + coord.group(5) + lonSign + coord.group(7) + coord.group(8) + coord.group(9)  + coord.group(10)
-            pOut = "<Point Name='" + str(c) + "'>" + output + "</Point>"
+                output = latSign + coord.group(2).lstrip("0") + coord.group(3) + coord.group(4)  + coord.group(5) + lonSign + coord.group(7) + coord.group(8) + coord.group(9)  + coord.group(10)
+                #pOut = "<Point Name='" + str(c) + "'>" + output + "</Point>"
 
-            dfOut = {'point': pOut}
-            df = df.append(dfOut, ignore_index=True)
-            c += 1
+                #dfOut = {'point': pOut}
+                #df = df.append(dfOut, ignore_index=True)
+                #c += 1
+                #fileWrite.write(output + '/')
+                #print(output + '/')
+                c += output + '/'
+            elif line:
+                lineOut = line.group(2)
+            elif f == "\n":
+                dfOut = {'sectorline': lineOut, 'coords': c.rstrip('/')}
+                df = df.append(dfOut, ignore_index=True)
+                c = ''
+                #fileWrite.write("</Line><Line Name='"+ line.group(2) +"'>")
 
         #print(output.rstrip("/"))
-        finOut = ''
-        uniquePoints = df.point.unique()
-        for point in uniquePoints:
-            #finOut += point + "/"
-            finOut += point
+        #finOut = ''
+        #uniquePoints = df.point.unique()
+        #for point in uniquePoints:
+        #    #finOut += point + "/"
+        #    finOut += point
 
-        print(finOut)
+        print(df)
+        df.to_csv('Dataframes/ES-SectorLines.csv')
 
     @staticmethod
     def iterFolders(src, dst):
@@ -1539,9 +1553,9 @@ cmdParse.add_argument('-v', '--verbose', action='store_true')
 args = cmdParse.parse_args()
 
 if args.geo:
-    EuroScope.kmlMappingConvert("KML/EGAA.kml", "EGAA")
-elif args.debug:
     EuroScope.iterFolders('/mnt/c/Users/chris/OneDrive/Git Repo/UK-Sector-File/_data/SMR Files/', '/mnt/c/Users/chris/OneDrive/Git Repo/uk-dataset/ConversionTools/KML/ZIP/')
+elif args.debug:
+    EuroScope.parse('/mnt/c/Users/chris/OneDrive/Git Repo/UK-Sector-File/Sectors/Combined.txt')
 elif args.scrape:
     shutil.rmtree('/mnt/c/Users/chris/OneDrive/Git Repo/uk-dataset/ConversionTools/Build')
     os.mkdir('/mnt/c/Users/chris/OneDrive/Git Repo/uk-dataset/ConversionTools/Build')
