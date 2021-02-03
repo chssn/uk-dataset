@@ -28,6 +28,7 @@ from shapely.ops import transform
 from functools import partial
 from geopy.point import Point
 from geopy.distance import geodesic
+from xml.dom import minidom
 
 class Airac:
     '''Class for general functions relating to AIRAC'''
@@ -639,8 +640,8 @@ class Builder:
                     # create folder structure if not exists
                     filename = 'Build/Maps/' + row['icao_designator'] + '/' + row['icao_designator'] + '_TWR_RWY_' + rwy['runway'] + '.xml'
                     os.makedirs(os.path.dirname(filename), exist_ok=True)
-                    xmlMapsRunwayTree = xtree.ElementTree(xmlMapsRunway)
-                    xmlMapsRunwayTree.write(filename, encoding="utf-8", xml_declaration=True)
+                    self.buildPrettyXml(xmlMapsRunway, filename)
+
 
                     # add runway into the airspace.xml file
                     xmlAirportRunway = xtree.SubElement(xmlAirport, 'Runway')
@@ -745,20 +746,11 @@ class Builder:
         addAirway(10)
 
         # Write all XML files
-        allAirportsTree = xtree.ElementTree(allAirports[2])
-        allAirportsTree.write('Build/Maps/ALL_AIRPORTS.xml', encoding="utf-8", xml_declaration=True)
-
-        allCtaTree = xtree.ElementTree(allCta)
-        allCtaTree.write('Build/Maps/ALL_CTA.xml', encoding="utf-8", xml_declaration=True)
-
-        allTmaTree = xtree.ElementTree(allTma)
-        allTmaTree.write('Build/Maps/ALL_TMA.xml', encoding="utf-8", xml_declaration=True)
-
-        allNavaidsTree = xtree.ElementTree(allNavaids[3])
-        allNavaidsTree.write('Build/Maps/ALL_NAVAIDS.xml', encoding="utf-8", xml_declaration=True)
-
-        airspaceTree = xtree.ElementTree(airspace[5])
-        airspaceTree.write('Build/Airspace.xml', encoding="utf-8", xml_declaration=True)
+        self.buildPrettyXml(allAirports[2], "Build/Maps/ALL_AIRPORTS.xml")
+        self.buildPrettyXml(allCta, "Build/Maps/ALL_CTA.xml")
+        self.buildPrettyXml(allTma, "Build/Maps/ALL_TMA.xml")
+        self.buildPrettyXml(allNavaids[3], "Build/Maps/ALL_NAVAIDS.xml")
+        self.buildPrettyXml(airspace[5], "Build/Airspace.xml")
 
     def buildAirspaceXml(self):
         xmlAirspace = self.root('Airspace') # create XML document Airspace.xml
@@ -861,8 +853,7 @@ class Builder:
 
                 bar()
 
-        restrictedAreaTree = xtree.ElementTree(xmlRestrictedAreas)
-        restrictedAreaTree.write('Build/RestrictedAreas.xml', encoding="utf-8", xml_declaration=True)
+        self.buildPrettyXml(xmlRestrictedAreas, 'Build/RestrictedAreas.xml')
 
     def buildPositions(self):
         # Load the services data to build Positions.xml
@@ -1051,8 +1042,7 @@ class Builder:
                 xmlPositionMap.set("Name", row['icao_designator'] + '/' + row['icao_designator'] + '_SMR_HLD')
                 bar()
 
-        positionTree = xtree.ElementTree(xmlPositions)
-        positionTree.write('Build/Positions.xml', encoding="utf-8", xml_declaration=True)
+        self.buildPrettyXml(xmlPositions, 'Build/Positions.xml')
 
     def buildSectors(self): # creates the frequency secion of ATIS.xml, Sectors.xml
         def myround(x, base=0.025): # rounds to the nearest 25KHz - simulator limitations prevent 8.33KHz spacing currently
@@ -1111,8 +1101,7 @@ class Builder:
                 lastType = row['callsign_type']
                 bar()
 
-            sectorTree = xtree.ElementTree(xmlSectors)
-            sectorTree.write('Build/Sectors.xml', encoding="utf-8", xml_declaration=True)
+            self.buildPrettyXml(xmlSectors, 'Build/Sectors.xml')
 
     @staticmethod
     def root(name):
@@ -1125,6 +1114,12 @@ class Builder:
         xml.set('generated', ctime(time()))
 
         return xml
+
+    @staticmethod
+    def buildPrettyXml(rootIn, fileOut):
+        xmlstr = minidom.parseString(xtree.tostring(rootIn)).toprettyxml(indent="   ")
+        with open(fileOut, "w") as f:
+            f.write(xmlstr)
 
     @staticmethod
     def constructMapHeader(rootName, mapType, name, priority, center): # ref https://virtualairtrafficsystem.com/docs/dpk/#map-element
@@ -1256,8 +1251,8 @@ class Geo:
             xmlGroundInfill.set('Name', name)
             xmlGroundInfill.text = output.rstrip('/')
 
-        allGround = xtree.ElementTree(xmlGround)
-        allGround.write('Build/Maps/'+ self.icao + '_SMR.xml', encoding="utf-8", xml_declaration=True)
+        Builder.buildPrettyXml(xmlGround, 'Build/Maps/'+ self.icao + '_SMR.xml')
+
 
 class Navigraph:
     def sidStar(file, icaoIn, rwyIn):
@@ -1468,12 +1463,10 @@ class EuroScope:
                         xmlGroundInfill.set('Name', child)
                         xmlGroundInfill.text = output.rstrip('/')
 
-        allGround = xtree.ElementTree(xmlGround)
         if str(fileNumber) == "1":
-            allGround.write('Build/Maps/'+ self.icao + '/' + self.icao + '_SMR.xml', encoding="utf-8", xml_declaration=True)
-            #allGround.write('KML/SMR/' + self.icao + '_SMR.xml', encoding="utf-8", xml_declaration=True)
+            Builder.buildPrettyXml(xmlGround, 'Build/Maps/'+ self.icao + '/' + self.icao + '_SMR.xml')
         else:
-            allGround.write('KML/SMR/' + self.icao + '_' + str(fileNumber) + '_SMR.xml', encoding="utf-8", xml_declaration=True)
+            Builder.buildPrettyXml(xmlGround, 'KML/SMR/' + self.icao + '_' + str(fileNumber) + '_SMR.xml')
 
     @staticmethod
     def parse(fileIn):
