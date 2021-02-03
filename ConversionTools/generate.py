@@ -1490,13 +1490,6 @@ class EuroScope:
                 lonSign = Geo.plusMinus(coord.group(6))
 
                 output = latSign + coord.group(2).lstrip("0") + coord.group(3) + coord.group(4)  + coord.group(5) + lonSign + coord.group(7) + coord.group(8) + coord.group(9)  + coord.group(10)
-                #pOut = "<Point Name='" + str(c) + "'>" + output + "</Point>"
-
-                #dfOut = {'point': pOut}
-                #df = df.append(dfOut, ignore_index=True)
-                #c += 1
-                #fileWrite.write(output + '/')
-                #print(output + '/')
                 c += output + '/'
             elif line:
                 lineOut = line.group(2)
@@ -1504,14 +1497,6 @@ class EuroScope:
                 dfOut = {'sectorline': lineOut, 'coords': c.rstrip('/')}
                 df = df.append(dfOut, ignore_index=True)
                 c = ''
-                #fileWrite.write("</Line><Line Name='"+ line.group(2) +"'>")
-
-        #print(output.rstrip("/"))
-        #finOut = ''
-        #uniquePoints = df.point.unique()
-        #for point in uniquePoints:
-        #    #finOut += point + "/"
-        #    finOut += point
 
         print(df)
         df.to_csv('Dataframes/ES-SectorLines.csv')
