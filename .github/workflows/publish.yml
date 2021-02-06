@@ -45,7 +45,7 @@ jobs:
         uses: garygrossgarten/github-action-ssh@v0.6.3
         with:
           # Command to execute on the remote server.
-          command: cd /var/www/html/vatsys && rm -rf UK/ && rm -rf ConversionTools/ && unzip profile.zip && mv profile.zip UK/profile.zip
+          command: cd /var/www/html/vatsys && rm -rf UK/ && rm -rf ConversionTools/ && unzip profile.zip
           # Hostname or IP address of the server.
           host: ${{ secrets.HOST }}
           # Username for authentication.
